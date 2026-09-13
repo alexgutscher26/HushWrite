@@ -83,9 +83,8 @@ const ECOSYSTEM_LINKS: FooterLink[] = [
     badge: "v1.2.0",
   },
   {
-    href: "https://apps.microsoft.com/search?query=HushWrite",
-    label: "Microsoft Store (Windows)",
-    external: true,
+    href: "#download",
+    label: "Windows Code-Signed (.exe & MSI)",
   },
   {
     href: "https://github.com/ggerganov/whisper.cpp",

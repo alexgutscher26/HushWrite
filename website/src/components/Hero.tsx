@@ -259,15 +259,14 @@ export function Hero() {
       {/* Two CTA Buttons */}
       <div className="relative flex flex-col sm:flex-row items-center gap-3.5 mb-14 z-10">
         <a
-          href="https://apps.microsoft.com/search?query=HushWrite"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="/downloads/HushWrite_1.2.0_x64-setup.exe"
+          download="HushWrite_1.2.0_x64-setup.exe"
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-[#141416] hover:bg-neutral-800 text-white text-sm font-semibold shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
         >
           <Download className="w-4 h-4 text-emerald-400" />
-          <span>Windows: Install from Microsoft Store</span>
+          <span>Windows: Download Free (v1.2.0)</span>
           <span className="text-xs text-neutral-400 font-normal hidden sm:inline">
-            (or .exe / MSI)
+            (Code Signed .exe)
           </span>
         </a>
         <a
@@ -275,7 +274,7 @@ export function Hero() {
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-neutral-50 border border-neutral-200/90 shadow-sm text-sm font-semibold text-neutral-800 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
         >
           <Terminal className="w-4 h-4 text-neutral-500" />
-          <span>macOS: Download Unsigned Early-Access Beta</span>
+          <span>macOS: Download Early-Access Beta</span>
         </a>
       </div>
 

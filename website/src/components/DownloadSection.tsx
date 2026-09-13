@@ -62,13 +62,13 @@ export function DownloadSection() {
   const checksums = [
     {
       file: "HushWrite_1.2.0_x64-setup.exe",
-      platform: "Windows 64-bit Installer (.exe)",
-      sha256: "df62250f4c8487aa44122f95f1cad7d73b82363fdedf58096220da3b5d21ee7b",
+      platform: "Windows 64-bit Installer (.exe) · Code Signed",
+      sha256: "086e74bf239d2a86e6d3db5bf70e478a7e7629cc3226b1e51a876dea19589429",
     },
     {
       file: "HushWrite_1.2.0_x64_en-US.msi",
-      platform: "Windows MSI Package",
-      sha256: "de4415c0daff948f8659ae04d477511016770b8d2b0a6e5e4dec7148a504a0f3",
+      platform: "Windows MSI Package · Code Signed",
+      sha256: "ae4db24f7c9609453bb580b1c7595529f50000f0e970621f0fe2b73ecce1a5ce",
     },
     {
       file: "HushWrite_1.2.0_aarch64.dmg",
@@ -106,8 +106,8 @@ export function DownloadSection() {
             Start Speaking. Stop Typing.
           </h2>
           <p className="text-neutral-600 text-sm sm:text-base leading-relaxed">
-            Free and fully functional offline. Choose your platform below or install directly from
-            the Microsoft Store for automatic background updates.
+            Free and fully functional offline. Official Microsoft Trusted Signed Windows installer (.exe)
+            and MSI package with zero friction.
           </p>
         </div>
 
@@ -122,51 +122,39 @@ export function DownloadSection() {
                   <h3 className="text-xl font-bold text-neutral-950">HushWrite for Windows</h3>
                 </div>
                 <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-bold">
-                  Recommended · Verified Stable
+                  Verified · Code Signed
                 </span>
               </div>
               <span className="text-xs font-mono text-neutral-500 block mb-2">
                 Windows 10 / 11 (64-bit)
               </span>
               <p className="text-neutral-600 text-xs sm:text-sm leading-relaxed mb-6">
-                Full hardware-accelerated local whisper engine. Zero setup required. Download our
-                standalone installer or grab it from the Microsoft Store.
+                Full hardware-accelerated local whisper engine. Digitally signed with Microsoft Trusted Signing for instant, safe installation with zero SmartScreen blocks.
               </p>
             </div>
 
             <div className="space-y-3">
-              {/* Primary CTA: MS Store */}
+              {/* Primary CTA: Setup .exe */}
               <a
-                href="https://apps.microsoft.com/search?query=HushWrite"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/downloads/HushWrite_1.2.0_x64-setup.exe"
+                download="HushWrite_1.2.0_x64-setup.exe"
+                onClick={() => handleDownloadClick("HushWrite_1.2.0_x64-setup.exe", "Windows (.exe)")}
                 className="w-full text-center text-xs sm:text-sm font-semibold text-white bg-[#141416] hover:bg-neutral-800 py-3.5 px-4 rounded-xl transition-all shadow-md hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Download className="w-4 h-4 text-emerald-400" />
-                <span>Windows: Install from Microsoft Store</span>
+                <span>Download Windows Installer (.exe)</span>
               </a>
 
-              {/* Standalone Installers */}
-              <div className="flex flex-col sm:flex-row gap-2">
-                <a
-                  href="/downloads/HushWrite_1.2.0_x64-setup.exe"
-                  download="HushWrite_1.2.0_x64-setup.exe"
-                  onClick={() => handleDownloadClick("HushWrite_1.2.0_x64-setup.exe", "Windows (.exe)")}
-                  className="flex-1 text-center text-xs font-medium text-neutral-800 hover:bg-neutral-50 bg-white border border-neutral-200/90 py-2.5 px-3 rounded-lg transition-all shadow-xs hover:scale-[1.01] flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5 text-neutral-500" />
-                  <span>Setup (.exe)</span>
-                </a>
-                <a
-                  href="/downloads/HushWrite_1.2.0_x64_en-US.msi"
-                  download="HushWrite_1.2.0_x64_en-US.msi"
-                  onClick={() => handleDownloadClick("HushWrite_1.2.0_x64_en-US.msi", "Windows MSI")}
-                  className="flex-1 text-center text-xs font-medium text-neutral-800 hover:bg-neutral-50 bg-white border border-neutral-200/90 py-2.5 px-3 rounded-lg transition-all shadow-xs hover:scale-[1.01] flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5 text-neutral-500" />
-                  <span>MSI Package</span>
-                </a>
-              </div>
+              {/* Secondary CTA: MSI Package */}
+              <a
+                href="/downloads/HushWrite_1.2.0_x64_en-US.msi"
+                download="HushWrite_1.2.0_x64_en-US.msi"
+                onClick={() => handleDownloadClick("HushWrite_1.2.0_x64_en-US.msi", "Windows MSI")}
+                className="w-full text-center text-xs font-medium text-neutral-800 hover:bg-neutral-50 bg-white border border-neutral-200/90 py-2.5 px-3 rounded-lg transition-all shadow-xs hover:scale-[1.01] flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5 text-neutral-500" />
+                <span>Download Windows MSI Package (.msi)</span>
+              </a>
             </div>
           </div>
 
@@ -191,8 +179,7 @@ export function DownloadSection() {
                 Apple Developer signing from early customer revenue.
               </p>
               <p className="text-neutral-500 text-xs leading-relaxed mb-6 italic">
-                If you prefer a frictionless installation, use the Windows Microsoft Store version
-                today or join the Mac waitlist for the signed release.
+                If you prefer a signed installation, use the Windows version today or join the Mac waitlist for the signed release.
               </p>
             </div>
 
