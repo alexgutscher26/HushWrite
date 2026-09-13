@@ -162,7 +162,7 @@ export function DownloadSection() {
                   <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                   <div className="text-xs text-neutral-700 leading-relaxed">
                     <p className="font-semibold text-neutral-900">
-                      Officially code-signed by Alex Gutscher
+                      Officially code-signed by SnackforCode Aka Alex
                     </p>
                     <p className="text-[11px] text-neutral-500 mt-0.5">
                       As a newly released version, Windows SmartScreen may show a one-time prompt while Microsoft establishes reputation for this fresh build. Click <strong className="text-neutral-800 font-medium">&quot;More info&quot;</strong> → <strong className="text-neutral-800 font-medium">&quot;Run anyway&quot;</strong> to install.
