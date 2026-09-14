@@ -15,6 +15,7 @@
     "sot:validate": "node scripts/sot.mjs --validate",
     "website:dev": "bun --cwd website dev",
     "website:build": "bun --cwd website build",
+    "version:bump": "powershell -ExecutionPolicy Bypass -File scripts/bump_version.ps1",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

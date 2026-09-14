@@ -831,7 +831,7 @@
   7. Updates `website/public/downloads/` and triggers a Vercel deployment
   8. Generates `SHA256SUMS.txt` and attaches it to the release
   9. Posts a release summary to the Discord `#announcements` channel
-- [ ] [INFRA] Version bump script — A single `scripts/bump_version.ps1` script that accepts a semver string and atomically updates `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json`, `website/src/components/Hero.tsx`, `website/src/components/DownloadSection.tsx`, `website/src/components/Footer.tsx`, and `website/src/app/api/download/route.ts` in one pass.
+- [x] [INFRA] Version bump script — A single `scripts/bump_version.ps1` script that accepts a semver string and atomically updates `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json`, `website/src/components/Hero.tsx`, `website/src/components/DownloadSection.tsx`, `website/src/components/Footer.tsx`, and `website/src/app/api/download/route.ts` in one pass.
 - [ ] [INFRA] Windows ARM64 target — Add `aarch64-pc-windows-msvc` to the CI build matrix for Snapdragon X Elite / Surface Pro devices. Validate that `whisper.cpp` compiles with NEON SIMD on ARM64 Windows.
 - [ ] [INFRA] Delta update pipeline automation — Automate `scripts/generate_delta.py` as part of the release workflow: compare against the previous release binary and generate `*.patch` files alongside the full installer. Upload patches to the GitHub Release assets.
 - [ ] [DX] Release checklist template — A GitHub Issue template `RELEASE_CHECKLIST.md` opened automatically by the CI pipeline that tracks: sign-off on changelog, smoke test on Windows 10/11, smoke test on macOS, website preview verification, and Discord announcement.
