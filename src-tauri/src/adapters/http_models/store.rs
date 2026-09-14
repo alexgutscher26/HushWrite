@@ -598,14 +598,28 @@ impl ModelStore for HttpModelStore {
             self.emit(&descriptor, received, total, rate);
         };
 
-        let received = download_resumable(
+        let received = match download_resumable(
             &self.client,
             &descriptor.url,
             &part,
             entry.size_bytes,
             &emit,
         )
-        .await?;
+        .await
+        {
+            Ok(bytes) => bytes,
+            Err(err) => {
+                // Reset download progress to 0 and notify listeners of the error state
+                self.emit(&descriptor, 0, entry.size_bytes, 0);
+                self.events.model_state_changed(
+                    descriptor.id.clone(),
+                    ModelState::Failed {
+                        message: format!("Download error: {err}"),
+                    },
+                );
+                return Err(err);
+            }
+        };
 
         if received != entry.size_bytes {
             // Not fatal on its own — the hash below is the real gate — but a
@@ -618,9 +632,30 @@ impl ModelStore for HttpModelStore {
             );
         }
 
-        let digest = hash_file(part.clone()).await?;
+        let digest = match hash_file(part.clone()).await {
+            Ok(d) => d,
+            Err(err) => {
+                self.emit(&descriptor, 0, entry.size_bytes, 0);
+                self.events.model_state_changed(
+                    descriptor.id.clone(),
+                    ModelState::Failed {
+                        message: "Failed to verify model checksum.".to_string(),
+                    },
+                );
+                return Err(err);
+            }
+        };
+
         if !digest.eq_ignore_ascii_case(entry.sha256) {
             let _ = tokio::fs::remove_file(&part).await;
+            self.emit(&descriptor, 0, entry.size_bytes, 0);
+            self.events.model_state_changed(
+                descriptor.id.clone(),
+                ModelState::Failed {
+                    message: "The downloaded model was damaged in transit. Downloading it again should fix it."
+                        .to_string(),
+                },
+            );
             return Err(AppError::new(
                 ErrorCode::ModelChecksumMismatch,
                 "The downloaded model was damaged in transit. Downloading it again should fix it.",

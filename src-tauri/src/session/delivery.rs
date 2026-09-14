@@ -126,7 +126,10 @@ async fn deliver(ctx: &SessionContext, pending: PendingDelivery) {
         assembler.finish()
     };
 
-    if raw.trim().is_empty() {
+    let has_speech =
+        !raw.trim().is_empty() && crate::adapters::whisper::hallucination::has_non_noise_words(&raw);
+
+    if !has_speech {
         ctx.ports.events.update_session_wpm(None);
         // An empty transcript has two very different causes and they must not
         // be reported the same way. Pure digital silence means the capture path
@@ -147,6 +150,10 @@ async fn deliver(ctx: &SessionContext, pending: PendingDelivery) {
                 None,
             );
             return;
+        }
+
+        if !raw.trim().is_empty() {
+            tracing::info!(raw = %raw, "dropped silent / hallucination-only session before delivery");
         }
 
         persist(

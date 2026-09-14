@@ -107,6 +107,7 @@ pub fn measure_realtime_factor(
     state: &mut WhisperState,
     n_threads: std::ffi::c_int,
 ) -> AppResult<RealtimeMeasurement> {
+    let _affinity = super::affinity::pin_to_performance_cores();
     let warmup = probe_signal(WARMUP_SECONDS);
     let warmup_params = build_full_params(
         DecodeProfile::Background,

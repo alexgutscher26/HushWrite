@@ -212,6 +212,7 @@ pub async fn wipe_all_data(state: State<'_, AppState>) -> Result<WipeResult, App
             n as u32
         };
         let settings_deleted = services::settings::delete_all_settings(ctx.db())? as u32;
+        let _ = services::drafts::delete_all_drafts(ctx.db());
 
         // Keep the audit log — it is the proof the wipe happened.
         services::audit::append(

@@ -10,6 +10,7 @@
  */
 
 pub mod dictionary;
+pub mod drafts;
 pub mod engine;
 pub mod files;
 pub mod history;

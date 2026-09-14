@@ -319,6 +319,7 @@ impl TranscriptionEngine for WhisperEngine {
         let mut lease = model.states.acquire(&model.context)?;
         let state = lease.get()?;
 
+        let _affinity = super::affinity::pin_to_performance_cores();
         state.full(params, &chunk.samples).map_err(|err| {
             AppError::new(
                 ErrorCode::TranscriptionFailed,

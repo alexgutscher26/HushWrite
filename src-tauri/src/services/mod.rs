@@ -14,6 +14,7 @@
 pub mod audit;
 pub mod delta_updates;
 pub mod dictionary;
+pub mod drafts;
 pub mod metrics;
 pub mod profiles;
 pub mod sessions;

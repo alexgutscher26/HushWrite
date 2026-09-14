@@ -12,6 +12,27 @@ export const commands = {
 	cancelRecording: () => typedError<null, AppError>(__TAURI_INVOKE("cancel_recording")),
 	resumeRecording: () => typedError<null, AppError>(__TAURI_INVOKE("resume_recording")),
 	getSessionState: () => typedError<SessionState, AppError>(__TAURI_INVOKE("get_session_state")),
+	getActiveDraft: () => typedError<{
+	id: string,
+	title: string | null,
+	content: string,
+	created_at_ms: number,
+	updated_at_ms: number,
+	is_active: boolean,
+} | null, AppError>(__TAURI_INVOKE("get_active_draft")),
+	saveDraft: (input: SaveDraftInput) => typedError<null, AppError>(__TAURI_INVOKE("save_draft", { input })),
+	appendToActiveDraft: (input: AppendDraftInput) => typedError<Draft, AppError>(__TAURI_INVOKE("append_to_active_draft", { input })),
+	setActiveDraftContent: (input: SetDraftContentInput) => typedError<{
+	id: string,
+	title: string | null,
+	content: string,
+	created_at_ms: number,
+	updated_at_ms: number,
+	is_active: boolean,
+} | null, AppError>(__TAURI_INVOKE("set_active_draft_content", { input })),
+	clearActiveDraft: () => typedError<null, AppError>(__TAURI_INVOKE("clear_active_draft")),
+	listDrafts: (input: ListDraftsInput) => typedError<Draft[], AppError>(__TAURI_INVOKE("list_drafts", { input })),
+	deleteDraft: (input: DeleteDraftInput) => typedError<null, AppError>(__TAURI_INVOKE("delete_draft", { input })),
 	listHistory: (input: ListHistoryInput) => typedError<SessionSummary[], AppError>(__TAURI_INVOKE("list_history", { input })),
 	searchHistory: (input: SearchHistoryInput) => typedError<SessionSummary[], AppError>(__TAURI_INVOKE("search_history", { input })),
 	getHistoryEntry: (input: SessionIdInput) => typedError<SessionSummary, AppError>(__TAURI_INVOKE("get_history_entry", { input })),
@@ -156,6 +177,11 @@ export type AppProfile = {
 	enabled: boolean,
 };
 
+export type AppendDraftInput = {
+	text: string,
+	title: string | null,
+};
+
 /**
  * 
  *  * SOURCE OF TRUTH KEYWORDS: AudioLevel
@@ -267,6 +293,10 @@ export type DeleteDictionaryEntryInput = {
 	id: DictionaryId,
 };
 
+export type DeleteDraftInput = {
+	id: string,
+};
+
 export type DeleteHistoryEntriesInput = {
 	ids: SessionId[],
 };
@@ -342,6 +372,15 @@ export type DownloadProgress = {
 	received_bytes: number,
 	total_bytes: number,
 	bytes_per_second: number,
+};
+
+export type Draft = {
+	id: string,
+	title: string | null,
+	content: string,
+	created_at_ms: number,
+	updated_at_ms: number,
+	is_active: boolean,
 };
 
 /**
@@ -576,6 +615,10 @@ export type LatencySummary = {
 
 export type ListDictionaryChangelogInput = {
 	limit: number | null,
+};
+
+export type ListDraftsInput = {
+	limit: number,
 };
 
 export type ListHistoryInput = {
@@ -845,6 +888,10 @@ export type ResetSettingInput = {
 	key: string,
 };
 
+export type SaveDraftInput = {
+	draft: Draft,
+};
+
 export type SaveProfileInput = {
 	profile: AppProfile,
 };
@@ -946,6 +993,10 @@ export type SessionSummary = {
 	 *  wording — see migration 002.
 	 */
 	error_message: string | null,
+};
+
+export type SetDraftContentInput = {
+	content: string,
 };
 
 export type SetSettingInput = {

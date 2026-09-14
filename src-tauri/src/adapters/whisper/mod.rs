@@ -17,6 +17,7 @@
 #[cfg(test)]
 mod live_tests;
 
+pub mod affinity;
 pub mod benchmark;
 pub mod blocklist;
 pub mod coreml;
@@ -26,11 +27,14 @@ pub mod params;
 pub mod prompt;
 pub mod state_pool;
 
+pub use affinity::pin_to_performance_cores;
 pub use benchmark::{measure_realtime_factor, RealtimeMeasurement};
 pub use blocklist::{blocklist_for, BlockedPhrase, DropRule};
 pub use coreml::coreml_encoder_path;
 pub use engine::{WhisperEngine, WHISPER_ENGINE_ID};
-pub use hallucination::{is_digital_silence, is_hallucination, rms_dbfs};
+pub use hallucination::{
+    count_non_noise_words, has_non_noise_words, is_digital_silence, is_hallucination, rms_dbfs,
+};
 pub use params::{audio_ctx_for, DecodeProfile, FULL_AUDIO_CTX};
 pub use prompt::{fit_prompt, PROMPT_TOKEN_BUDGET};
 pub use state_pool::{StateLease, StatePool};

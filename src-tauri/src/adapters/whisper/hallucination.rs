@@ -1,7 +1,7 @@
 /*!
  * SOURCE OF TRUTH KEYWORDS: is_hallucination, normalise_for_match,
  *   is_digital_silence, SILENCE_PEAK_FLOOR, LIKELY_SILENCE_NO_SPEECH_PROB,
- *   LIKELY_SILENCE_RMS_DBFS, rms_dbfs
+ *   LIKELY_SILENCE_RMS_DBFS, rms_dbfs, has_non_noise_words, count_non_noise_words
  * WHAT:  The two guards that stand between a silent buffer and the words
  *        "Thanks for watching!" appearing in the user's document.
  * WHY:   Whisper invents text from silence, and the inventions are a small,
@@ -157,6 +157,59 @@ pub fn is_hallucination(
 }
 
 /**
+ * SOURCE OF TRUTH KEYWORDS: has_non_noise_words, count_non_noise_words
+ * WHAT:  Counts or checks for the presence of valid, non-noise, non-hallucination words.
+ * WHY:   When a recording captures long silence or noise (e.g. holding the hotkey for >5s),
+ *        Whisper can emit noise tags like `[BLANK_AUDIO]`, `[MUSIC]`, `...`, or single subtitle
+ *        hallucinations. Requiring at least one non-noise word ensures silence is cleanly
+ *        treated as nothing said instead of pasting garbage into the active application.
+ * WHERE: Checked in session/delivery.rs before triggering text enhancement and clipboard injection.
+ */
+pub fn count_non_noise_words(text: &str) -> usize {
+    let normalised = normalise_for_match(text);
+    if normalised.is_empty() {
+        return 0;
+    }
+
+    // If the entire normalised string is an unconditional hallucination or single-word silence hallucination, treat as 0 words
+    if is_hallucination(text, None, 0.0, LIKELY_SILENCE_RMS_DBFS - 1.0)
+        || is_hallucination(text, Some("en"), 0.0, LIKELY_SILENCE_RMS_DBFS - 1.0)
+    {
+        return 0;
+    }
+
+    let words: Vec<&str> = normalised
+        .split_whitespace()
+        .filter(|word| word.chars().any(|c| c.is_alphanumeric()))
+        .collect();
+
+    // If there's only 1 word, verify it is not a common silence artifact
+    if words.len() == 1 {
+        let single = words[0];
+        if matches!(
+            single,
+            "you"
+                | "bye"
+                | "silence"
+                | "music"
+                | "blank"
+                | "applause"
+                | "laughter"
+                | "cough"
+                | "cheering"
+        ) {
+            return 0;
+        }
+    }
+
+    words.len()
+}
+
+pub fn has_non_noise_words(text: &str) -> bool {
+    count_non_noise_words(text) >= 1
+}
+
+/**
  * SOURCE OF TRUTH KEYWORDS: rms_dbfs
  * WHAT:  The root-mean-square level of a buffer, in dBFS.
  * WHY:   RMS rather than peak, because peak is set by a single click or a
@@ -292,6 +345,28 @@ mod tests {
             SPEAKING
         ));
         assert!(is_hallucination("感谢观看", Some("zh"), 0.0, SPEAKING));
+    }
+
+    #[test]
+    fn non_noise_words_guards_silence_and_noise_artifacts() {
+        assert!(!has_non_noise_words(""));
+        assert!(!has_non_noise_words("   "));
+        assert!(!has_non_noise_words("..."));
+        assert!(!has_non_noise_words("[BLANK_AUDIO]"));
+        assert!(!has_non_noise_words("[MUSIC]"));
+        assert!(!has_non_noise_words("(silence)"));
+        assert!(!has_non_noise_words("[cough]"));
+        assert!(!has_non_noise_words(" *music* "));
+        assert!(!has_non_noise_words("Thanks for watching!"));
+        assert!(!has_non_noise_words("Thank you."));
+        assert!(!has_non_noise_words("You."));
+        assert!(!has_non_noise_words("Bye."));
+
+        // Genuine phrases with 1 or more words
+        assert!(has_non_noise_words("Hello"));
+        assert!(has_non_noise_words("Meeting at 3pm tomorrow"));
+        assert_eq!(count_non_noise_words("Hello world"), 2);
+        assert_eq!(count_non_noise_words("[music] Actual speech here [applause]"), 3);
     }
 }
 

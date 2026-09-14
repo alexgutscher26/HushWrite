@@ -14,6 +14,8 @@ import { FastForward, Mic, Pause, Play, RotateCcw, Volume2, VolumeX, X } from "l
 import { formatCompactDuration, formatRelativeTime } from "@/lib/format";
 import { GlassPanel } from "@/components/global";
 import { commands, type SessionSummary } from "@/lib/bindings";
+import { cn } from "@/lib/utils";
+import { computeWordConfidences } from "@/lib/word-confidence";
 import { SessionFeedback } from "./SessionFeedback";
 
 export interface SessionPlaybackModalProps {
@@ -32,11 +34,12 @@ export function SessionPlaybackModal({ session, onClose }: SessionPlaybackModalP
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Parse text into individual words
+  // Parse text into individual words with confidence scoring
   const text = session.final_text ?? session.raw_text ?? "";
-  const words = useMemo(() => {
-    return text.trim().split(/\s+/).filter(Boolean);
-  }, [text]);
+  const wordItems = useMemo(() => {
+    return computeWordConfidences(text, session.raw_text, session.outcome);
+  }, [text, session.raw_text, session.outcome]);
+  const words = useMemo(() => wordItems.map((item) => item.word), [wordItems]);
 
   const totalDurationMs = Math.max(1000, session.duration_ms ?? 3000);
   const totalWords = Math.max(1, words.length);
@@ -300,28 +303,50 @@ export function SessionPlaybackModal({ session, onClose }: SessionPlaybackModalP
           </button>
         </div>
 
-        {/* Interactive Transcript Surface with Word Highlight */}
+        {/* Interactive Transcript Surface with Word Highlight & Confidence Coloring */}
         <div className="max-h-[220px] overflow-y-auto rounded-input border border-hairline bg-sunken p-4">
-          <p className="text-caption font-medium uppercase tracking-wider text-text-tertiary mb-2">
-            Transcript (click any word to jump):
-          </p>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <p className="text-caption font-medium uppercase tracking-wider text-text-tertiary">
+              Transcript (click any word to jump):
+            </p>
+            {wordItems.some((item) => item.isLowConfidence) && (
+              <span
+                className="inline-flex items-center gap-1 rounded bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-[11px] font-medium text-amber-600 dark:text-amber-400"
+                title="Words shaded in amber have <70% confidence probability and may be transcription errors."
+              >
+                <span className="size-1.5 rounded-full bg-amber-500" />
+                Low confidence (&lt;70%)
+              </span>
+            )}
+          </div>
           <div className="text-body leading-relaxed flex flex-wrap gap-x-1.5 gap-y-1">
-            {words.map((word, index) => {
+            {wordItems.map((item, index) => {
               const isActive = index === activeWordIndex;
               const isPast = index < activeWordIndex;
+              const { word, confidence, isLowConfidence } = item;
 
               return (
                 <button
                   key={`${index}-${word}`}
                   type="button"
                   onClick={() => seekToWord(index)}
-                  className={`rounded px-1 py-0.5 text-left transition-all ${
+                  title={
+                    isLowConfidence
+                      ? `"${word}" — Confidence: ${Math.round(confidence * 100)}% (Likely error/edit)`
+                      : `"${word}" — Confidence: ${Math.round(confidence * 100)}%`
+                  }
+                  className={cn(
+                    "rounded px-1 py-0.5 text-left transition-all cursor-pointer",
                     isActive
-                      ? "bg-text-primary font-semibold text-opaque-elevated shadow-xs scale-105"
-                      : isPast
-                        ? "text-text-primary hover:bg-sunken-strong"
-                        : "text-text-tertiary hover:text-text-secondary hover:bg-sunken-strong"
-                  }`}
+                      ? isLowConfidence
+                        ? "bg-amber-500 font-semibold text-stone-950 shadow-xs scale-105 ring-2 ring-amber-400/50"
+                        : "bg-text-primary font-semibold text-opaque-elevated shadow-xs scale-105"
+                      : isLowConfidence
+                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-medium hover:bg-amber-500/25"
+                        : isPast
+                          ? "text-text-primary hover:bg-sunken-strong"
+                          : "text-text-tertiary hover:text-text-secondary hover:bg-sunken-strong",
+                  )}
                 >
                   {word}
                 </button>

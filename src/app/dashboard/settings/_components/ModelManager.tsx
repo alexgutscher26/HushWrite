@@ -81,6 +81,12 @@ export function ModelManager() {
         next.delete(payload.model_id);
         return next;
       });
+      setProgress((prev) => {
+        if (!prev[payload.model_id]) return prev;
+        const next = { ...prev };
+        delete next[payload.model_id];
+        return next;
+      });
       models.reload();
     }
   });
@@ -148,6 +154,16 @@ export function ModelManager() {
             inProgress = true;
           } else {
             setDownloadError(res.error);
+            setLiveStates((current) => ({
+              ...current,
+              [modelId]: { kind: "FAILED", message: res.error.message },
+            }));
+            setProgress((prev) => {
+              if (!prev[modelId]) return prev;
+              const next = { ...prev };
+              delete next[modelId];
+              return next;
+            });
           }
         }
       } finally {
@@ -454,9 +470,16 @@ function ModelSummary({
           }
         />
       ) : (
-        <p className="text-xs tabular-nums text-stone-400 dark:text-stone-500 mt-1">
+        <p
+          className={cn(
+            "text-xs tabular-nums mt-1",
+            state.kind === "FAILED"
+              ? "text-red-500 dark:text-red-400 font-medium"
+              : "text-stone-400 dark:text-stone-500",
+          )}
+        >
           {formatBytes(descriptor.size_bytes)} · {descriptor.approx_ram_mb} MB memory ·{" "}
-          {state.kind === "FAILED" ? state.message : STATE_LABEL[state.kind]}
+          {state.kind === "FAILED" ? `Download failed: ${state.message}` : STATE_LABEL[state.kind]}
         </p>
       )}
     </div>

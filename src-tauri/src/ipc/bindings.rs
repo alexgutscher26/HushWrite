@@ -42,6 +42,14 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::session::cancel_recording,
             commands::session::resume_recording,
             commands::session::get_session_state,
+            // Drafts — persistent buffer across restarts
+            commands::drafts::get_active_draft,
+            commands::drafts::save_draft,
+            commands::drafts::append_to_active_draft,
+            commands::drafts::set_active_draft_content,
+            commands::drafts::clear_active_draft,
+            commands::drafts::list_drafts,
+            commands::drafts::delete_draft,
             // History
             commands::history::list_history,
             commands::history::search_history,

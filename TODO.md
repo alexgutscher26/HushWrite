@@ -166,13 +166,13 @@
   - Read from the user's active dictionary and format as a comma-separated string
   - Cap at 224 tokens (whisper's context limit) and prefer high-frequency dictionary terms
   - Re-generate the prompt string when the dictionary changes without reloading the model
-- [ ] [FEAT] Confidence-based word coloring — In the history detail view, shade low-confidence words (<0.7 probability) in amber so users can spot likely transcription errors at a glance.
-- [ ] [FEAT] Language-pinned decode mode — Allow users to hard-pin the decode language in settings, bypassing auto-detect. This reduces p99 decode latency by ~15ms on short utterances where language detection adds overhead.
-- [ ] [PERF] GGML memory-mapped model loading — Use mmap = true in whisper.cpp so the OS handles page-in lazily; this reduces cold-start model load from ~1.5s to ~300ms on SSDs by avoiding a full heap copy.
-- [ ] [PERF] Encoder/decoder split threading — Pin the Whisper encoder to performance cores and the decoder to efficiency cores using Windows thread affinity masks, measured against the auto-tuning benchmark.
-- [ ] [BUG] Model selector shows stale download progress after network error — The download progress bar stays at a non-zero value if the download errors out. Reset download_progress to 0 and show the error state in the model card on failure.
-- [ ] [BUG] Empty segment after long silence — When the user holds the hotkey for >5s without speaking, Whisper decodes the silence and emits an empty or hallucination-only segment that passes through to delivery. Add a minimum-words guard (>=1 non-noise word) before triggering delivery.
-- [ ] [DX] Model benchmarking CLI — A HushWrite-bench binary that accepts a WAV file and prints decode time, RTF, and WER against a reference transcript. Used by contributors to validate model changes without running the full app.
+- [x] [FEAT] Confidence-based word coloring — In the history detail view, shade low-confidence words (<0.7 probability) in amber so users can spot likely transcription errors at a glance.
+- [x] [FEAT] Language-pinned decode mode — Allow users to hard-pin the decode language in settings, bypassing auto-detect. This reduces p99 decode latency by ~15ms on short utterances where language detection adds overhead.
+- [x] [PERF] GGML memory-mapped model loading — Use mmap = true in whisper.cpp so the OS handles page-in lazily; this reduces cold-start model load from ~1.5s to ~300ms on SSDs by avoiding a full heap copy.
+- [x] [PERF] Encoder/decoder split threading — Pin the Whisper encoder to performance cores and the decoder to efficiency cores using Windows thread affinity masks, measured against the auto-tuning benchmark.
+- [x] [BUG] Model selector shows stale download progress after network error — The download progress bar stays at a non-zero value if the download errors out. Reset download_progress to 0 and show the error state in the model card on failure.
+- [x] [BUG] Empty segment after long silence — When the user holds the hotkey for >5s without speaking, Whisper decodes the silence and emits an empty or hallucination-only segment that passes through to delivery. Add a minimum-words guard (>=1 non-noise word) before triggering delivery.
+- [x] [DX] Model benchmarking CLI — A HushWrite-bench binary that accepts a WAV file and prints decode time, RTF, and WER against a reference transcript. Used by contributors to validate model changes without running the full app.
 
 ---
 
@@ -217,7 +217,7 @@
   - Show a UI note explaining that this only prevents Windows clipboard history, not third-party managers
 - [ ] [FEAT] Paste confirmation sound — A short, pleasant chime when delivery succeeds, distinct from the recording start/stop sounds. Configurable volume and on/off toggle.
 - [ ] [FEAT] Auto-retry on delivery failure — If the UIA delivery confirmation step fails, automatically retry once with a 200ms delay before surfacing the error toast.
-- [ ] [BUG] Draft mode does not persist across app restarts — The draft buffer lives only in memory. If the app crashes or is restarted, the accumulated draft is lost. Persist draft content to a dedicated `drafts` table in SQLite.
+- [x] [BUG] Draft mode does not persist across app restarts — The draft buffer lives only in memory. If the app crashes or is restarted, the accumulated draft is lost. Persist draft content to a dedicated `drafts` table in SQLite.
 - [ ] [PERF] Unicode SendInput batching — Current character-by-character SendInput fires one INPUT struct per character. Batch up to 32 characters per SendInput call to reduce syscall overhead.
 
 ---

@@ -31,7 +31,19 @@ export function ModelStep({ model, onChanged }: ModelStepProps) {
   const [stage, setStage] = useState<{ message: string; fraction: number | null } | null>(null);
 
   useTauriEvent(events.modelDownloadProgress, (payload) => {
-    if (payload.progress.model_id === model.descriptor.id) setProgress(payload.progress);
+    if (payload.progress.model_id === model.descriptor.id) {
+      if (payload.progress.received_bytes === 0 && payload.progress.bytes_per_second === 0) {
+        setProgress(null);
+      } else {
+        setProgress(payload.progress);
+      }
+    }
+  });
+
+  useTauriEvent(events.modelStateChanged, (payload) => {
+    if (payload.model_id === model.descriptor.id && payload.state.kind !== "DOWNLOADING") {
+      setProgress(null);
+    }
   });
 
   useTauriEvent(events.onboardingProgress, (payload) => {
@@ -39,12 +51,29 @@ export function ModelStep({ model, onChanged }: ModelStepProps) {
   });
 
   const start = useCallback(() => {
+    setProgress(null);
     void unwrapCommand(() => commands.downloadModel({ model_id: model.descriptor.id })).then(
       onChanged,
     );
   }, [model.descriptor.id, onChanged]);
 
   const { descriptor, state } = model;
+
+  if (state.kind === "FAILED") {
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="text-body text-danger font-medium">{state.message}</p>
+        <button
+          type="button"
+          onClick={start}
+          className="hairline flex h-8 w-fit items-center gap-2 rounded-input bg-sunken px-3 text-body text-text-primary transition-colors hover:bg-sunken-strong cursor-pointer"
+        >
+          <Download className="size-4" />
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   if (state.kind === "DOWNLOADING" || progress !== null) {
     const received =
@@ -99,14 +128,13 @@ export function ModelStep({ model, onChanged }: ModelStepProps) {
         {descriptor.description} {formatBytes(descriptor.size_bytes)} to download, about{" "}
         {descriptor.approx_ram_mb} MB of memory while running.
       </p>
-      {state.kind === "FAILED" ? <p className="text-body text-danger">{state.message}</p> : null}
       <button
         type="button"
         onClick={start}
         className="hairline flex h-8 w-fit items-center gap-2 rounded-input bg-sunken px-3 text-body text-text-primary transition-colors hover:bg-sunken-strong"
       >
         <Download className="size-4" />
-        {state.kind === "FAILED" ? "Try again" : "Download"}
+        Download
       </button>
     </div>
   );

@@ -11,6 +11,7 @@
 
 pub mod audio;
 pub mod dictionary;
+pub mod draft;
 pub mod engine;
 pub mod language;
 pub mod metrics;
@@ -24,6 +25,7 @@ pub use audio::{
     TARGET_SAMPLE_RATE,
 };
 pub use dictionary::{DictionaryChangeLogEntry, DictionaryEntry, DictionaryId, MatchKind};
+pub use draft::Draft;
 pub use engine::{
     DownloadProgress, EngineCapabilities, EngineFeature, EngineId, LanguageSupport,
     ModelDescriptor, ModelId, ModelState,
