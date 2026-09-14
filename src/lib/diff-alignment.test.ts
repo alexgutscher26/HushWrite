@@ -14,7 +14,10 @@ describe("diff-alignment", () => {
   });
 
   it("detects phrase replacement with punctuation", () => {
-    const res = detectWordReplacements("Let's deploy on cube netties.", "Let's deploy on Kubernetes.");
+    const res = detectWordReplacements(
+      "Let's deploy on cube netties.",
+      "Let's deploy on Kubernetes.",
+    );
     expect(res).toHaveLength(1);
     expect(res[0].pattern).toBe("cube netties");
     expect(res[0].replacement).toBe("Kubernetes");

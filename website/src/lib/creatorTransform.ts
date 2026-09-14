@@ -48,10 +48,13 @@ export function transformCreatorText(rawInput: string): CreatorTransformResult {
   }
 
   // 1. YouTube Video Script Macro
-  const ytMatch = text.match(/\b(?:youtube\s*script|video\s*script)(?:\s+template)?(?:\s+(?:title|on|about)\s+(.+))?$/i);
+  const ytMatch = text.match(
+    /\b(?:youtube\s*script|video\s*script)(?:\s+template)?(?:\s+(?:title|on|about)\s+(.+))?$/i,
+  );
   if (ytMatch || /\b(?:youtube\s*script|video\s*script)\b/i.test(text)) {
     matchedRules.push("YouTube Script Schema");
-    const topic = ytMatch && ytMatch[1] ? ytMatch[1].trim() : "Why Offline AI is the Future of Productivity";
+    const topic =
+      ytMatch && ytMatch[1] ? ytMatch[1].trim() : "Why Offline AI is the Future of Productivity";
     text = `### 🎬 YouTube Video Script
 **Title Idea:** ${topic}
 **Hook (0:00 - 0:30):**
@@ -75,7 +78,9 @@ export function transformCreatorText(rawInput: string): CreatorTransformResult {
   }
 
   // 2. 3-Part Content Hook Framework
-  const hookMatch = text.match(/\b(?:content\s*hook|video\s*hook|viral\s*hook)(?:\s+template)?(?:\s+(?:on|about)\s+(.+))?$/i);
+  const hookMatch = text.match(
+    /\b(?:content\s*hook|video\s*hook|viral\s*hook)(?:\s+template)?(?:\s+(?:on|about)\s+(.+))?$/i,
+  );
   if (hookMatch || /\b(?:content\s*hook|video\s*hook|viral\s*hook)\b/i.test(text)) {
     matchedRules.push("3-Part Hook Framework");
     const topic = hookMatch && hookMatch[1] ? ` (${hookMatch[1].trim()})` : "";
@@ -94,7 +99,9 @@ export function transformCreatorText(rawInput: string): CreatorTransformResult {
   }
 
   // 3. Substack / Newsletter Draft
-  const substackMatch = text.match(/\b(?:substack|newsletter)(?:\s+(?:draft|template))?(?:\s+(?:on|about)\s+(.+))?$/i);
+  const substackMatch = text.match(
+    /\b(?:substack|newsletter)(?:\s+(?:draft|template))?(?:\s+(?:on|about)\s+(.+))?$/i,
+  );
   if (substackMatch || /\b(?:substack|newsletter\s*draft)\b/i.test(text)) {
     matchedRules.push("Long-Form Newsletter Schema");
     const topic = substackMatch && substackMatch[1] ? ` - ${substackMatch[1].trim()}` : "";
@@ -121,7 +128,9 @@ export function transformCreatorText(rawInput: string): CreatorTransformResult {
   }
 
   // 4. Social Caption & Hashtags
-  const socialMatch = text.match(/\b(?:instagram|social|tiktok)\s+caption(?:\s+template)?(?:\s+(?:for|on|about)\s+(.+))?$/i);
+  const socialMatch = text.match(
+    /\b(?:instagram|social|tiktok)\s+caption(?:\s+template)?(?:\s+(?:for|on|about)\s+(.+))?$/i,
+  );
   if (socialMatch || /\b(?:social\s*caption|instagram\s*caption)\b/i.test(text)) {
     matchedRules.push("Social Caption & Hashtags");
     const topic = socialMatch && socialMatch[1] ? ` (${socialMatch[1].trim()})` : "";
@@ -144,7 +153,9 @@ export function transformCreatorText(rawInput: string): CreatorTransformResult {
   }
 
   // 5. Podcast Episode Outline & Show Notes
-  const podcastMatch = text.match(/\bpodcast\s+(?:show\s*notes|episode\s*outline|notes|outline)(?:\s+template)?(?:\s+(?:episode|with|on)\s+(.+))?$/i);
+  const podcastMatch = text.match(
+    /\bpodcast\s+(?:show\s*notes|episode\s*outline|notes|outline)(?:\s+template)?(?:\s+(?:episode|with|on)\s+(.+))?$/i,
+  );
   if (podcastMatch || /\bpodcast\s+(?:show\s*notes|episode\s*outline|notes)\b/i.test(text)) {
     matchedRules.push("Podcast Show Notes Schema");
     const extra = podcastMatch && podcastMatch[1] ? podcastMatch[1].trim() : "";
@@ -186,7 +197,9 @@ export function transformCreatorText(rawInput: string): CreatorTransformResult {
   }
 
   // 6. 60s Sponsor Read
-  const sponsorMatch = text.match(/\b(?:sponsor|ad)\s*read(?:\s+template)?(?:\s+(?:for|about)\s+(.+))?$/i);
+  const sponsorMatch = text.match(
+    /\b(?:sponsor|ad)\s*read(?:\s+template)?(?:\s+(?:for|about)\s+(.+))?$/i,
+  );
   if (sponsorMatch || /\b(?:sponsor\s*read|ad\s*read)\b/i.test(text)) {
     matchedRules.push("60s Sponsor Read Framework");
     const partner = sponsorMatch && sponsorMatch[1] ? ` (${sponsorMatch[1].trim()})` : "";
@@ -209,10 +222,15 @@ export function transformCreatorText(rawInput: string): CreatorTransformResult {
   }
 
   // 7. LinkedIn Thought Leadership Post
-  const linkedinMatch = text.match(/\blinkedin\s+(?:post|update|thought\s*leadership)(?:\s+template)?(?:\s+(?:on|about)\s+(.+))?$/i);
+  const linkedinMatch = text.match(
+    /\blinkedin\s+(?:post|update|thought\s*leadership)(?:\s+template)?(?:\s+(?:on|about)\s+(.+))?$/i,
+  );
   if (linkedinMatch || /\blinkedin\s*(?:post|update)\b/i.test(text)) {
     matchedRules.push("LinkedIn Thought Leadership Schema");
-    const hook = linkedinMatch && linkedinMatch[1] ? linkedinMatch[1].trim() : "Why we stopped streaming microphone audio to cloud servers";
+    const hook =
+      linkedinMatch && linkedinMatch[1]
+        ? linkedinMatch[1].trim()
+        : "Why we stopped streaming microphone audio to cloud servers";
     text = `### 💼 LinkedIn Post
 **Hook:** ${hook.charAt(0).toUpperCase() + hook.slice(1)}
 
@@ -237,10 +255,15 @@ Cloud voice AI tools require your data to leave your machine. When engineers and
   }
 
   // 8. X (Twitter) Thread
-  const xThreadMatch = text.match(/\b(?:x|twitter)\s+(?:thread|post)(?:\s+template)?(?:\s+(?:on|about|breakdown\s+of)\s+(.+))?$/i);
+  const xThreadMatch = text.match(
+    /\b(?:x|twitter)\s+(?:thread|post)(?:\s+template)?(?:\s+(?:on|about|breakdown\s+of)\s+(.+))?$/i,
+  );
   if (xThreadMatch || /\b(?:x\s*thread|twitter\s*thread)\b/i.test(text)) {
     matchedRules.push("X (Twitter) Thread Breakdown");
-    const topic = xThreadMatch && xThreadMatch[1] ? xThreadMatch[1].trim() : "our local DirectML Whisper benchmarks";
+    const topic =
+      xThreadMatch && xThreadMatch[1]
+        ? xThreadMatch[1].trim()
+        : "our local DirectML Whisper benchmarks";
     text = `### 🧵 X (Twitter) Thread
 **1/ 🧵 [Hook & Big Promise]:**
 We benchmarked local whisper.cpp against cloud speech APIs on ${topic}.

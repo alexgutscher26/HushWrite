@@ -133,6 +133,8 @@ pub fn update_tray_theme(app: &AppHandle) {
 
 #[cfg(target_os = "windows")]
 static THEME_LISTENER_HWND: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
+#[cfg(target_os = "windows")]
+static TASKBAR_CREATED_MSG: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
 
 #[cfg(target_os = "windows")]
 pub fn start_theme_listener(app: AppHandle) {
@@ -143,8 +145,8 @@ pub fn start_theme_listener(app: AppHandle) {
             use windows::Win32::System::LibraryLoader::GetModuleHandleW;
             use windows::Win32::UI::WindowsAndMessaging::{
                 CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, GetMessageW,
-                PostQuitMessage, RegisterClassW, TranslateMessage, MSG, WINDOW_EX_STYLE,
-                WM_CLOSE, WM_DESTROY, WM_SETTINGCHANGE, WNDCLASSW, WS_OVERLAPPED,
+                PostQuitMessage, RegisterClassW, RegisterWindowMessageW, TranslateMessage, MSG,
+                WINDOW_EX_STYLE, WM_CLOSE, WM_DESTROY, WM_SETTINGCHANGE, WNDCLASSW, WS_OVERLAPPED,
             };
 
             static APP_HANDLE_SLOT: std::sync::Mutex<Option<AppHandle>> = std::sync::Mutex::new(None);
@@ -152,12 +154,27 @@ pub fn start_theme_listener(app: AppHandle) {
                 *slot = Some(app);
             }
 
+            let taskbar_msg = RegisterWindowMessageW(windows::core::w!("TaskbarCreated"));
+            TASKBAR_CREATED_MSG.store(taskbar_msg, Ordering::SeqCst);
+
             unsafe extern "system" fn theme_wndproc(
                 hwnd: HWND,
                 msg: u32,
                 w_param: WPARAM,
                 l_param: LPARAM,
             ) -> LRESULT {
+                let taskbar_created = TASKBAR_CREATED_MSG.load(Ordering::SeqCst);
+                if taskbar_created != 0 && msg == taskbar_created {
+                    tracing::info!("Windows Explorer restart detected via TaskbarCreated; restoring tray icon");
+                    if let Ok(guard) = APP_HANDLE_SLOT.lock() {
+                        if let Some(ref handle) = *guard {
+                            let _ = install_tray(handle);
+                            update_tray_theme(handle);
+                        }
+                    }
+                    return LRESULT(0);
+                }
+
                 match msg {
                     WM_SETTINGCHANGE => {
                         let should_check = if l_param.0 != 0 {

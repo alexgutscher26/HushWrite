@@ -6,12 +6,12 @@ Welcome to the **HushWrite Community Voice Pack Directory**. Voice packs provide
 
 ## Starter Domain Packs
 
-| Pack | Category | Terms | Macros | File |
-| :--- | :--- | :--- | :--- | :--- |
-| **TypeScript & Rust Engineering** | Developer | 60+ terms | PR Checklist, Bug Report, Git Commit | [`engineering/typescript-rust-dev.json`](engineering/typescript-rust-dev.json) |
-| **Litigation & Legal Privilege** | Legal | 45+ terms | Privileged Header, Discovery Demand | [`legal/litigation-privilege.json`](legal/litigation-privilege.json) |
-| **Clinical SOAP Notes** | Healthcare | 70+ terms | SOAP Layout, Vitals Header | [`medical/clinical-soap-notes.json`](medical/clinical-soap-notes.json) |
-| **Creative Story Drafting** | Creative | 40+ terms | Scene Break, Character Arc | [`creative/story-drafting.json`](creative/story-drafting.json) |
+| Pack                              | Category   | Terms     | Macros                               | File                                                                           |
+| :-------------------------------- | :--------- | :-------- | :----------------------------------- | :----------------------------------------------------------------------------- |
+| **TypeScript & Rust Engineering** | Developer  | 60+ terms | PR Checklist, Bug Report, Git Commit | [`engineering/typescript-rust-dev.json`](engineering/typescript-rust-dev.json) |
+| **Litigation & Legal Privilege**  | Legal      | 45+ terms | Privileged Header, Discovery Demand  | [`legal/litigation-privilege.json`](legal/litigation-privilege.json)           |
+| **Clinical SOAP Notes**           | Healthcare | 70+ terms | SOAP Layout, Vitals Header           | [`medical/clinical-soap-notes.json`](medical/clinical-soap-notes.json)         |
+| **Creative Story Drafting**       | Creative   | 40+ terms | Scene Break, Character Arc           | [`creative/story-drafting.json`](creative/story-drafting.json)                 |
 
 ---
 

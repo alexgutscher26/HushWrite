@@ -13,73 +13,73 @@ THESE TERMS.
 
 1.  INSTALLATION AND USE RIGHTS.
 
-    a)  General. Subject to the terms of this agreement, you may install and
-        use any number of copies of the software to develop and test your
-        applications, and solely for use on Windows. You may copy and
-        distribute the software (i.e. make available for third parties) solely
-        for this purpose.
+    a) General. Subject to the terms of this agreement, you may install and
+    use any number of copies of the software to develop and test your
+    applications, and solely for use on Windows. You may copy and
+    distribute the software (i.e. make available for third parties) solely
+    for this purpose.
 
-    b)  Included Microsoft Applications. The software may include other
-        Microsoft applications. These license terms apply to those included
-        applications, if any, unless other license terms are provided with the
-        other Microsoft applications.
+    b) Included Microsoft Applications. The software may include other
+    Microsoft applications. These license terms apply to those included
+    applications, if any, unless other license terms are provided with the
+    other Microsoft applications.
 
-    c)  Third Party Components. The software may include third party
-        components with separate legal notices or governed by other
-        agreements, as may be described in the ThirdPartyNotices file(s)
-        accompanying the software.
+    c) Third Party Components. The software may include third party
+    components with separate legal notices or governed by other
+    agreements, as may be described in the ThirdPartyNotices file(s)
+    accompanying the software.
 
-    d)  Microsoft Services Agreement. Some features of the software provide
-        access to, or rely on, online services. The use of those services (but
-        not the software) is governed by the separate terms and privacy
-        policies in the Microsoft Services Agreement
-        https://go.microsoft.com/fwlink/?linkid=398923. Please read them. The
-        services may not be available in all regions.
+    d) Microsoft Services Agreement. Some features of the software provide
+    access to, or rely on, online services. The use of those services (but
+    not the software) is governed by the separate terms and privacy
+    policies in the Microsoft Services Agreement
+    https://go.microsoft.com/fwlink/?linkid=398923. Please read them. The
+    services may not be available in all regions.
 
 2.  DATA.
 
-    a)  Data Collection. The software may collect information about you and
-        your use of the software, and send that to Microsoft. Microsoft may
-        use this information to provide services and improve our products and
-        services. You may opt-out of many of these scenarios, but not all, as
-        described in the product documentation. There are also some features
-        in the software that may enable you to collect data from users of your
-        applications. If you use these features to enable data collection in
-        your applications, you must comply with applicable law, including
-        providing appropriate notices to users of your applications. You can
-        learn more about data collection and use in the help documentation and
-        the privacy statement at https://aka.ms/privacy. Your use of the
-        software operates as your consent to these practices.
+    a) Data Collection. The software may collect information about you and
+    your use of the software, and send that to Microsoft. Microsoft may
+    use this information to provide services and improve our products and
+    services. You may opt-out of many of these scenarios, but not all, as
+    described in the product documentation. There are also some features
+    in the software that may enable you to collect data from users of your
+    applications. If you use these features to enable data collection in
+    your applications, you must comply with applicable law, including
+    providing appropriate notices to users of your applications. You can
+    learn more about data collection and use in the help documentation and
+    the privacy statement at https://aka.ms/privacy. Your use of the
+    software operates as your consent to these practices.
 
-    b)  Processing of Personal Data. To the extent Microsoft is a processor or
-        subprocessor of personal data in connection with the software,
-        Microsoft makes the commitments in the European Union General Data
-        Protection Regulation Terms of the Online Services Terms to all
-        customers effective May 25, 2018, at
-        https://docs.microsoft.com/en-us/legal/gdpr.
+    b) Processing of Personal Data. To the extent Microsoft is a processor or
+    subprocessor of personal data in connection with the software,
+    Microsoft makes the commitments in the European Union General Data
+    Protection Regulation Terms of the Online Services Terms to all
+    customers effective May 25, 2018, at
+    https://docs.microsoft.com/en-us/legal/gdpr.
 
 3.  SCOPE OF LICENSE. The software is licensed, not sold. Microsoft reserves
     all other rights. Unless applicable law gives you more rights despite this
     limitation, you will not (and have no right to):
 
-    a)  work around any technical limitations in the software that only allow
-        you to use it in certain ways;
+    a) work around any technical limitations in the software that only allow
+    you to use it in certain ways;
 
-    b)  reverse engineer, decompile or disassemble the software, or otherwise
-        attempt to derive the source code for the software, except and to the
-        extent required by third party licensing terms governing use of
-        certain open source components that may be included in the software;
+    b) reverse engineer, decompile or disassemble the software, or otherwise
+    attempt to derive the source code for the software, except and to the
+    extent required by third party licensing terms governing use of
+    certain open source components that may be included in the software;
 
-    c)  remove, minimize, block, or modify any notices of Microsoft or its
-        suppliers in the software;
+    c) remove, minimize, block, or modify any notices of Microsoft or its
+    suppliers in the software;
 
-    d)  use the software in any way that is against the law or to create or
-        propagate malware; or
+    d) use the software in any way that is against the law or to create or
+    propagate malware; or
 
-    e)  except as expressly stated in Section 1, share, publish, distribute,
-        or lease the software, provide the software as a stand-alone offering
-        for others to use, or transfer the software or this agreement to any
-        third party.
+    e) except as expressly stated in Section 1, share, publish, distribute,
+    or lease the software, provide the software as a stand-alone offering
+    for others to use, or transfer the software or this agreement to any
+    third party.
 
 4.  EXPORT RESTRICTIONS. You must comply with all domestic and international
     export laws and regulations that apply to the software, which include
@@ -126,16 +126,16 @@ THESE TERMS.
     regions, or mandatory country law applies, then the following provisions
     apply to you:
 
-    a)  Australia. You have statutory guarantees under the Australian Consumer
-        Law and nothing in this agreement is intended to affect those rights.
+    a) Australia. You have statutory guarantees under the Australian Consumer
+    Law and nothing in this agreement is intended to affect those rights.
 
-    b)  Canada. If you acquired this software in Canada, you may stop
-        receiving updates by turning off the automatic update feature,
-        disconnecting your device from the Internet (if and when you
-        re-connect to the Internet, however, the software will resume checking
-        for and installing updates), or uninstalling the software. The product
-        documentation, if any, may also specify how to turn off updates for
-        your specific device or software.
+    b) Canada. If you acquired this software in Canada, you may stop
+    receiving updates by turning off the automatic update feature,
+    disconnecting your device from the Internet (if and when you
+    re-connect to the Internet, however, the software will resume checking
+    for and installing updates), or uninstalling the software. The product
+    documentation, if any, may also specify how to turn off updates for
+    your specific device or software.
 
     c) Germany and Austria.
 

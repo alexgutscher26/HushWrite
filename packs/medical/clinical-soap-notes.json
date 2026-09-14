@@ -10,7 +10,11 @@
     { "term": "metformin", "phonetic": "met for min", "bias_weight": 1.4 },
     { "term": "atorvastatin", "phonetic": "uh tor vuh stat in", "bias_weight": 1.4 },
     { "term": "amlodipine", "phonetic": "am loh dih peen", "bias_weight": 1.4 },
-    { "term": "hydrochlorothiazide", "phonetic": "hye droh klor oh thye uh zide", "bias_weight": 1.5 },
+    {
+      "term": "hydrochlorothiazide",
+      "phonetic": "hye droh klor oh thye uh zide",
+      "bias_weight": 1.5
+    },
     { "term": "erythema", "phonetic": "air uh thee muh", "bias_weight": 1.3 },
     { "term": "dyspnea", "phonetic": "disp nee uh", "bias_weight": 1.4 },
     { "term": "tachycardia", "phonetic": "tack ih car dee uh", "bias_weight": 1.3 },

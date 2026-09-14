@@ -32,7 +32,8 @@ const DEMO_PRESETS = [
     title: "AI IDE File Tagging",
     spoken:
       "look at tag file src slash components slash Button dot tsx and add a secondary variant prop",
-    target: "Works in Any Code Editor (Cursor, Windsurf, Claude Code, VS Code, Zed, Neovim, Terminal)",
+    target:
+      "Works in Any Code Editor (Cursor, Windsurf, Claude Code, VS Code, Zed, Neovim, Terminal)",
     badge: "Context Injection",
   },
   {
@@ -157,7 +158,7 @@ export default function DevelopersPage() {
   const [selectedDemo, setSelectedDemo] = useState(DEMO_PRESETS[0]);
   const [currentSpoken, setCurrentSpoken] = useState(DEMO_PRESETS[0].spoken);
   const [transformResult, setTransformResult] = useState<TransformResult>(() =>
-    transformDeveloperText(DEMO_PRESETS[0].spoken)
+    transformDeveloperText(DEMO_PRESETS[0].spoken),
   );
   const [displayedOutput, setDisplayedOutput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -295,14 +296,18 @@ export default function DevelopersPage() {
 
     // Web Speech Recognition
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const SpeechRecognition = typeof window !== "undefined" ? ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) : null;
+    const SpeechRecognition =
+      typeof window !== "undefined"
+        ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+        : null;
 
     if (SpeechRecognition) {
       try {
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = typeof navigator !== "undefined" ? navigator.language || "en-US" : "en-US";
+        recognition.lang =
+          typeof navigator !== "undefined" ? navigator.language || "en-US" : "en-US";
         recognition.maxAlternatives = 1;
 
         recognition.onstart = () => {
@@ -514,7 +519,8 @@ export default function DevelopersPage() {
               </div>
 
               <div className="text-xs text-neutral-500 font-mono pt-1">
-                Context: <strong className="text-neutral-700 font-semibold">{selectedDemo.target}</strong>
+                Context:{" "}
+                <strong className="text-neutral-700 font-semibold">{selectedDemo.target}</strong>
               </div>
             </div>
 
@@ -584,7 +590,8 @@ export default function DevelopersPage() {
               Built for Developers Who Live in Their Tools
             </h2>
             <p className="text-base text-neutral-600">
-              No awkward typing pauses when pairing with AI coding agents or documenting pull requests.
+              No awkward typing pauses when pairing with AI coding agents or documenting pull
+              requests.
             </p>
           </div>
 
@@ -678,9 +685,7 @@ export default function DevelopersPage() {
                     <td className="p-4 sm:p-5 text-xs font-mono font-bold text-emerald-700 bg-emerald-50/20">
                       {row.HushWrite}
                     </td>
-                    <td className="p-4 sm:p-5 text-xs font-mono text-neutral-500">
-                      {row.wispr}
-                    </td>
+                    <td className="p-4 sm:p-5 text-xs font-mono text-neutral-500">{row.wispr}</td>
                   </tr>
                 ))}
               </tbody>
@@ -701,8 +706,8 @@ export default function DevelopersPage() {
               Ready to Flow 4x Faster at Your Terminal?
             </h2>
             <p className="text-sm text-neutral-400">
-              Install HushWrite in seconds. Works completely offline with zero setup and zero account
-              creation.
+              Install HushWrite in seconds. Works completely offline with zero setup and zero
+              account creation.
             </p>
           </div>
 

@@ -66,13 +66,7 @@ import { navigateTo } from "../use-hash-route";
 import { usePlan, canUseFillerStripper, type PlanTier } from "@/lib/plan";
 
 export type SettingsTabId =
-  | "general"
-  | "recording"
-  | "overlay"
-  | "transcription"
-  | "output"
-  | "profiles"
-  | "privacy";
+  "general" | "recording" | "overlay" | "transcription" | "output" | "profiles" | "privacy";
 
 interface TabItem {
   id: SettingsTabId;
@@ -87,48 +81,55 @@ const SETTINGS_TABS: readonly TabItem[] = [
     id: "general",
     label: "General",
     icon: SlidersHorizontal,
-    description: "Interface theme, typing speed calibration, setup wizard, and configuration backups.",
+    description:
+      "Interface theme, typing speed calibration, setup wizard, and configuration backups.",
     sectionKey: "GENERAL",
   },
   {
     id: "recording",
     label: "Recording",
     icon: Mic,
-    description: "Microphone input device, dictation hotkeys, activation triggers, and permissions.",
+    description:
+      "Microphone input device, dictation hotkeys, activation triggers, and permissions.",
     sectionKey: "RECORDING",
   },
   {
     id: "overlay",
     label: "Overlay & HUD",
     icon: Layers,
-    description: "Floating indicator pill style, position, visual feedback, live HUD preview, and opacity.",
+    description:
+      "Floating indicator pill style, position, visual feedback, live HUD preview, and opacity.",
     sectionKey: "OVERLAY",
   },
   {
     id: "transcription",
     label: "Transcription & AI",
     icon: Cpu,
-    description: "Language selection, offline Whisper & AI speech models, and custom abbreviations.",
+    description:
+      "Language selection, offline Whisper & AI speech models, and custom abbreviations.",
     sectionKey: "TRANSCRIPTION",
   },
   {
     id: "output",
     label: "Output & Typing",
     icon: Keyboard,
-    description: "Simulated keystrokes vs clipboard paste, typing delays, auto-capitalization, and formatting.",
+    description:
+      "Simulated keystrokes vs clipboard paste, typing delays, auto-capitalization, and formatting.",
     sectionKey: "OUTPUT",
   },
   {
     id: "profiles",
     label: "Per-App Profiles",
     icon: Laptop,
-    description: "Contextual dictation overrides that automatically activate when specific apps are in front.",
+    description:
+      "Contextual dictation overrides that automatically activate when specific apps are in front.",
   },
   {
     id: "privacy",
     label: "Privacy & Data",
     icon: ShieldCheck,
-    description: "Air-gap isolation mode, zero cloud telemetry, local storage retention, and factory data wipe.",
+    description:
+      "Air-gap isolation mode, zero cloud telemetry, local storage retention, and factory data wipe.",
     sectionKey: "PRIVACY",
   },
 ];
@@ -404,8 +405,7 @@ export function SettingsView({ registry, section }: SettingsViewProps) {
             {SETTINGS_TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
-              const hasWarning =
-                tab.id === "recording" && recordingMissingPermissions.length > 0;
+              const hasWarning = tab.id === "recording" && recordingMissingPermissions.length > 0;
 
               return (
                 <button
@@ -598,7 +598,7 @@ function GeneralTabContent({
 
       <div className="rounded-2xl border border-stone-200/80 bg-white dark:border-stone-800/80 dark:bg-stone-900/40 p-5 shadow-xs space-y-4">
         <h3 className="text-sm font-semibold text-stone-900 dark:text-white">Appearance & Theme</h3>
-        
+
         {/* Explicit Theme Switcher */}
         <div className="flex items-center justify-between py-2 border-b border-stone-100 dark:border-stone-800/80">
           <div className="min-w-0 flex-1">
@@ -659,7 +659,8 @@ function GeneralTabContent({
               Calibrate typing speed
             </p>
             <p className="text-xs text-stone-500 dark:text-stone-400">
-              Benchmark your natural speech pace or take a typing test to measure accurate time savings.
+              Benchmark your natural speech pace or take a typing test to measure accurate time
+              savings.
             </p>
           </div>
           <button
@@ -738,7 +739,9 @@ function GeneralTabContent({
       <div className="rounded-2xl border border-stone-200/80 bg-white dark:border-stone-800/80 dark:bg-stone-900/40 p-5 shadow-xs space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-stone-900 dark:text-white">About HushWrite</h3>
+            <h3 className="text-sm font-semibold text-stone-900 dark:text-white">
+              About HushWrite
+            </h3>
             <p className="text-xs text-stone-500 dark:text-stone-400">
               High-performance, zero-cloud speech-to-text engineered in Rust and Tauri v2.
             </p>
@@ -1009,7 +1012,10 @@ function TranscriptionTabContent({
       </div>
 
       {/* Speech Models Management */}
-      <div data-section="models" className="rounded-2xl border border-stone-200/80 bg-white dark:border-stone-800/80 dark:bg-stone-900/40 p-5 shadow-xs">
+      <div
+        data-section="models"
+        className="rounded-2xl border border-stone-200/80 bg-white dark:border-stone-800/80 dark:bg-stone-900/40 p-5 shadow-xs"
+      >
         <ModelManager />
       </div>
     </div>
@@ -1044,55 +1050,55 @@ function OutputTabContent({
 
       <div className="rounded-2xl border border-stone-200/80 bg-white dark:border-stone-800/80 dark:bg-stone-900/40 p-5 shadow-xs divide-y divide-stone-100 dark:divide-stone-800/60">
         {plain.map((def) => (
-        <SettingControl
-          key={def.key}
-          className="py-3 first:pt-0 last:pb-0"
-          setting={toControlSetting(
-            def,
-            values?.[def.key],
-            dynamic,
-            engine,
-            permissions,
-            (value) => onWrite(def.key, value),
-            tier,
-          )}
-        />
-      ))}
+          <SettingControl
+            key={def.key}
+            className="py-3 first:pt-0 last:pb-0"
+            setting={toControlSetting(
+              def,
+              values?.[def.key],
+              dynamic,
+              engine,
+              permissions,
+              (value) => onWrite(def.key, value),
+              tier,
+            )}
+          />
+        ))}
 
-      {advanced.length > 0 && (
-        <div className="pt-3">
-          <button
-            type="button"
-            onClick={() => setShowAdvanced((open) => !open)}
-            aria-expanded={showAdvanced}
-            className="flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white transition-colors cursor-pointer"
-          >
-            <ChevronDown
-              className={cn("size-3.5 transition-transform", showAdvanced && "rotate-180")}
-            />
-            Advanced Formatting & Typing
-          </button>
-          {showAdvanced && (
-            <div className="mt-3 divide-y divide-stone-100 dark:divide-stone-800/60 border-t border-stone-100 dark:border-stone-800/80">
-              {advanced.map((def) => (
-                <SettingControl
-                  key={def.key}
-                  className="py-3"
-                  setting={toControlSetting(
-                    def,
-                    values?.[def.key],
-                    dynamic,
-                    engine,
-                    permissions,
-                    (value) => onWrite(def.key, value),
-                    tier,
-                  )}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+        {advanced.length > 0 && (
+          <div className="pt-3">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced((open) => !open)}
+              aria-expanded={showAdvanced}
+              className="flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white transition-colors cursor-pointer"
+            >
+              <ChevronDown
+                className={cn("size-3.5 transition-transform", showAdvanced && "rotate-180")}
+              />
+              Advanced Formatting & Typing
+            </button>
+            {showAdvanced && (
+              <div className="mt-3 divide-y divide-stone-100 dark:divide-stone-800/60 border-t border-stone-100 dark:border-stone-800/80">
+                {advanced.map((def) => (
+                  <SettingControl
+                    key={def.key}
+                    className="py-3"
+                    setting={toControlSetting(
+                      def,
+                      values?.[def.key],
+                      dynamic,
+                      engine,
+                      permissions,
+                      (value) => onWrite(def.key, value),
+                      tier,
+                    )}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1113,7 +1119,10 @@ function ProfilesTabContent({
   permissions: readonly PermissionReport[] | null;
 }) {
   return (
-    <div data-section="profiles" className="rounded-2xl border border-stone-200/80 bg-white dark:border-stone-800/80 dark:bg-stone-900/40 p-5 shadow-xs space-y-4">
+    <div
+      data-section="profiles"
+      className="rounded-2xl border border-stone-200/80 bg-white dark:border-stone-800/80 dark:bg-stone-900/40 p-5 shadow-xs space-y-4"
+    >
       <AppProfiles
         defs={allDefs}
         globals={globals}
@@ -1171,7 +1180,8 @@ function PrivacyTabContent({
           Data Management & Reset
         </h3>
         <p className="text-xs text-stone-500 dark:text-stone-400">
-          Permanently delete local speech transcripts or completely reset HushWrite to fresh defaults.
+          Permanently delete local speech transcripts or completely reset HushWrite to fresh
+          defaults.
         </p>
         <PrivacyControls />
       </div>

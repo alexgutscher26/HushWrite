@@ -170,14 +170,18 @@ export default function PrivacyPage() {
 
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-[-0.035em] text-neutral-950 mb-6 leading-[1.06]">
             Privacy by architecture.
-            <span className="block text-[#737373] font-bold mt-1 sm:mt-2">Not merely by policy.</span>
+            <span className="block text-[#737373] font-bold mt-1 sm:mt-2">
+              Not merely by policy.
+            </span>
           </h1>
 
           <p className="text-base sm:text-lg text-neutral-600 leading-relaxed font-normal">
             Cloud dictation services ask you to trust legal privacy policies while streaming your
             raw voice to remote servers. HushWrite protects your confidential thoughts with physical
             architecture:{" "}
-            <strong className="text-neutral-950 font-semibold">your voice never leaves your device.</strong>
+            <strong className="text-neutral-950 font-semibold">
+              your voice never leaves your device.
+            </strong>
           </p>
         </div>
 
@@ -210,7 +214,8 @@ export default function PrivacyPage() {
                 </div>
                 <h3 className="text-sm font-bold text-neutral-950 mb-1">1. Microphone</h3>
                 <p className="text-xs text-neutral-600 leading-normal">
-                  OS audio stream captured into temporary volatile RAM buffer (CPAL / WASAPI / CoreAudio).
+                  OS audio stream captured into temporary volatile RAM buffer (CPAL / WASAPI /
+                  CoreAudio).
                 </p>
               </div>
               <span className="text-[11px] font-mono font-medium text-emerald-700 mt-4 block">
@@ -259,7 +264,8 @@ export default function PrivacyPage() {
                 </div>
                 <h3 className="text-sm font-bold text-neutral-950 mb-1">4. Direct Insertion</h3>
                 <p className="text-xs text-neutral-600 leading-normal">
-                  Formatted text is typed directly into your focused cursor via native OS input injection.
+                  Formatted text is typed directly into your focused cursor via native OS input
+                  injection.
                 </p>
               </div>
               <span className="text-[11px] font-mono font-medium text-emerald-700 mt-4 block">
@@ -283,7 +289,9 @@ export default function PrivacyPage() {
         <div className="p-6 sm:p-8 rounded-2xl bg-white border border-neutral-200/90 shadow-sm mb-14">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
             <div>
-              <h2 className="text-xl font-bold text-neutral-950">The HushWrite Local Data Boundary</h2>
+              <h2 className="text-xl font-bold text-neutral-950">
+                The HushWrite Local Data Boundary
+              </h2>
               <p className="text-xs sm:text-sm text-neutral-600">
                 A line-by-line breakdown of every data asset and its storage guarantee.
               </p>
@@ -348,7 +356,9 @@ export default function PrivacyPage() {
                     <span className="text-xs font-mono text-neutral-400">#{idx + 1}</span>
                   </div>
                   <h3 className="text-base font-bold text-neutral-950 mb-2">{item.q}</h3>
-                  <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed font-normal">{item.a}</p>
+                  <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed font-normal">
+                    {item.a}
+                  </p>
                 </div>
               </div>
             ))}
@@ -410,10 +420,12 @@ export default function PrivacyPage() {
                 <li>Audio streams across public networks to remote GPU endpoints.</li>
                 <li>Requires account creation, authentication tokens, and user IDs.</li>
                 <li>
-                  Transcripts and voice snippets may be retained for model fine-tuning unless explicitly opted out.
+                  Transcripts and voice snippets may be retained for model fine-tuning unless
+                  explicitly opted out.
                 </li>
                 <li>
-                  Dependent on third-party uptime, internet bandwidth, and corporate cloud retention policies.
+                  Dependent on third-party uptime, internet bandwidth, and corporate cloud retention
+                  policies.
                 </li>
               </ul>
             </div>
@@ -428,7 +440,8 @@ export default function PrivacyPage() {
                 <li>Zero accounts, zero logins, zero marketing or crash telemetry.</li>
                 <li>Model weights execute directly in local memory via whisper.cpp.</li>
                 <li>
-                  Works completely offline on airplanes, air-gapped workstations, and strict enterprise networks.
+                  Works completely offline on airplanes, air-gapped workstations, and strict
+                  enterprise networks.
                 </li>
               </ul>
             </div>
@@ -444,7 +457,8 @@ export default function PrivacyPage() {
               Dictate with total confidence.
             </h2>
             <p className="text-sm text-neutral-400">
-              HushWrite is free, open source, and built for people who value privacy as an absolute guarantee.
+              HushWrite is free, open source, and built for people who value privacy as an absolute
+              guarantee.
             </p>
           </div>
 

@@ -410,8 +410,8 @@ export function TutorialStep({ hotkey, mode, onComplete, onSkip }: TutorialStepP
           <div className="flex items-center gap-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/20 border border-purple-200/60 dark:border-purple-900/40 p-3 text-xs text-purple-900 dark:text-purple-200">
             <Flame className="size-4 shrink-0 text-purple-600 dark:text-purple-400" />
             <span>
-              You speak <strong>4.6× faster</strong> than you type. HushWrite cleans up your thoughts
-              so you never have to re-edit.
+              You speak <strong>4.6× faster</strong> than you type. HushWrite cleans up your
+              thoughts so you never have to re-edit.
             </span>
           </div>
 

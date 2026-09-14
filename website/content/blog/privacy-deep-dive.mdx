@@ -72,7 +72,7 @@ One of the key technical guarantees in HushWrite is deterministic memory managem
 pub fn finalize_session(session: AudioSession) -> String {
     let text = whisper_engine.transcribe(&session.pcm_buffer)?;
     ui_automation::inject_text(&text)?;
-    
+
     // Explicit buffer zeroization and memory drop
     drop(session); // RAM is freed and overwritten immediately
     text

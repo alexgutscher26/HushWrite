@@ -156,7 +156,8 @@ export const MODELS: ModelInfo[] = [
     accuracy: 99.7,
     description:
       "Latest turbo architecture unlocking maximum precision across complex vocabulary, technical terms, and heavy accents with DirectML acceleration.",
-    recommendedFor: "Medical, legal, engineering architecture, specialized vocabulary, 99 languages",
+    recommendedFor:
+      "Medical, legal, engineering architecture, specialized vocabulary, 99 languages",
     quantization: "q5_0 Quantized",
     languages: "99 Languages",
     fileName: "ggml-large-v3-turbo-q5_0.bin",
@@ -177,7 +178,8 @@ export const MODELS: ModelInfo[] = [
     accuracy: 99.9,
     description:
       "Near-unquantized 8-bit precision for zero-compromise multilingual translation and highest fidelity across subtle accents.",
-    recommendedFor: "Highest fidelity across subtle accents, multi-speaker audio, and technical jargon",
+    recommendedFor:
+      "Highest fidelity across subtle accents, multi-speaker audio, and technical jargon",
     quantization: "q8_0 Quantized",
     languages: "99 Languages",
     fileName: "ggml-large-v3-turbo-q8_0.bin",
@@ -240,7 +242,8 @@ export const MODELS: ModelInfo[] = [
     accuracy: 98.2,
     description:
       "NVIDIA's official Parakeet TDT 0.6B v2 architecture running via ONNX Runtime & DirectML. The gold standard English fast tier for sub-50ms real-time streaming dictation.",
-    recommendedFor: "High-speed English dictation, live streaming transcription, ultra-low latency voice typing",
+    recommendedFor:
+      "High-speed English dictation, live streaming transcription, ultra-low latency voice typing",
     quantization: "ONNX Runtime / DirectML",
     languages: "English Only",
     fileName: "parakeet-tdt-0.6b-v2.onnx",
@@ -261,7 +264,8 @@ export const MODELS: ModelInfo[] = [
     accuracy: 94.8,
     description:
       "Ultra-compact 110M parameter hybrid CTC-TDT model. Blazing sub-25ms response, ideal for instantaneous hotkey voice triggers and fast coding commands.",
-    recommendedFor: "Instant hotkey voice shortcuts, low-spec CPU devices, rapid single-phrase entry",
+    recommendedFor:
+      "Instant hotkey voice shortcuts, low-spec CPU devices, rapid single-phrase entry",
     quantization: "ONNX Runtime / DirectML",
     languages: "English Only",
     fileName: "parakeet-tdt_ctc-110m.onnx",
@@ -281,7 +285,8 @@ export const MODELS: ModelInfo[] = [
     accuracy: 99.2,
     description:
       "Compact on-device LLM via llama-cpp-2 (GGUF). Provides sub-second filler cleanup, punctuation enhancement, and markdown formatting matching Whisper's 99-language coverage.",
-    recommendedFor: "Automatic speech-to-text cleanup, filler word removal, multilingual grammar formatting on CPU",
+    recommendedFor:
+      "Automatic speech-to-text cleanup, filler word removal, multilingual grammar formatting on CPU",
     quantization: "GGUF (Q4_K_M / Q5_K_M)",
     languages: "99 Languages",
     fileName: "qwen2.5-1.5b-instruct-q4_k_m.gguf",
@@ -302,7 +307,8 @@ export const MODELS: ModelInfo[] = [
     accuracy: 99.6,
     description:
       "High-reasoning small language model tailored for complex voice transformations ('Hey HushWrite, make that formal') and structured document synthesis entirely on-device.",
-    recommendedFor: "Power users wanting conversational voice rewriting, tone adjustments, and executive email drafting",
+    recommendedFor:
+      "Power users wanting conversational voice rewriting, tone adjustments, and executive email drafting",
     quantization: "GGUF (Q4_K_M / Q6_K)",
     languages: "Multilingual",
     fileName: "Phi-3.5-mini-instruct-Q4_K_M.gguf",
@@ -373,7 +379,8 @@ export function ModelSelectorGuide() {
             Select the right engine for your hardware.
           </h2>
           <p className="text-neutral-600 text-base sm:text-lg leading-relaxed">
-            HushWrite runs 100% locally on your machine. Choose between quantized Whisper GGML, ultra-fast Parakeet ONNX, and on-device GGUF LLMs for intelligent text rewriting.
+            HushWrite runs 100% locally on your machine. Choose between quantized Whisper GGML,
+            ultra-fast Parakeet ONNX, and on-device GGUF LLMs for intelligent text rewriting.
           </p>
         </div>
 
@@ -394,10 +401,13 @@ export function ModelSelectorGuide() {
                   </span>
                 </div>
                 <h3 className="text-base sm:text-lg font-bold text-white mb-1">
-                  Default: Whisper Small (q5_1) · Opt-In: Large v3 Turbo (q5_0) · Fast Tier: Parakeet ONNX
+                  Default: Whisper Small (q5_1) · Opt-In: Large v3 Turbo (q5_0) · Fast Tier:
+                  Parakeet ONNX
                 </h3>
                 <p className="text-neutral-300 text-xs sm:text-sm leading-relaxed max-w-2xl">
-                  Whisper Small (190 MB) provides the ideal balance of sub-200ms latency and high punctuation accuracy. For specialized vocabulary, toggle Large v3 Turbo (q5_0). For sub-50ms English streaming, enable the Parakeet ONNX fast tier.
+                  Whisper Small (190 MB) provides the ideal balance of sub-200ms latency and high
+                  punctuation accuracy. For specialized vocabulary, toggle Large v3 Turbo (q5_0).
+                  For sub-50ms English streaming, enable the Parakeet ONNX fast tier.
                 </p>
               </div>
             </div>
@@ -467,7 +477,9 @@ export function ModelSelectorGuide() {
                     {model.isDefault && (
                       <span
                         className={`text-[9px] font-mono px-1 rounded uppercase tracking-wider font-bold shrink-0 ${
-                          isSelected ? "bg-emerald-400/20 text-emerald-300" : "bg-emerald-100 text-emerald-800"
+                          isSelected
+                            ? "bg-emerald-400/20 text-emerald-300"
+                            : "bg-emerald-100 text-emerald-800"
                         }`}
                       >
                         Default
@@ -483,7 +495,9 @@ export function ModelSelectorGuide() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-[11px] font-mono pt-1 border-t border-dashed border-neutral-200/30">
-                  <span className={isSelected ? "text-neutral-300" : "text-neutral-600 font-medium"}>
+                  <span
+                    className={isSelected ? "text-neutral-300" : "text-neutral-600 font-medium"}
+                  >
                     {model.size}
                   </span>
                   <span className={isSelected ? "text-emerald-400 font-bold" : "text-neutral-500"}>
@@ -500,7 +514,9 @@ export function ModelSelectorGuide() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-7">
               <div className="flex items-center gap-2 mb-3 flex-wrap">
-                <h3 className="text-xl sm:text-2xl font-bold text-neutral-950">{selectedModel.name}</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-neutral-950">
+                  {selectedModel.name}
+                </h3>
                 {selectedModel.badge && (
                   <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-bold flex items-center gap-1">
                     <Sparkles className="w-3 h-3" />
@@ -520,8 +536,8 @@ export function ModelSelectorGuide() {
                     selectedModel.availability === "Available Now"
                       ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
                       : selectedModel.availability === "Engine Roadmap"
-                      ? "bg-blue-50 text-blue-700 border border-blue-200/80"
-                      : "bg-purple-50 text-purple-700 border border-purple-200/80"
+                        ? "bg-blue-50 text-blue-700 border border-blue-200/80"
+                        : "bg-purple-50 text-purple-700 border border-purple-200/80"
                   }`}
                 >
                   <CheckCircle2 className="w-3 h-3" />
@@ -539,7 +555,9 @@ export function ModelSelectorGuide() {
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                   Optimal Hardware & Use-Case:
                 </span>
-                <span className="text-neutral-600 leading-relaxed">{selectedModel.recommendedFor}</span>
+                <span className="text-neutral-600 leading-relaxed">
+                  {selectedModel.recommendedFor}
+                </span>
               </div>
 
               {/* Technical Specifications Bar */}
@@ -559,7 +577,8 @@ export function ModelSelectorGuide() {
               </div>
 
               <div className="mt-3 text-[11px] font-mono text-neutral-400">
-                Upstream Hugging Face Repository: <span className="text-neutral-700 font-semibold">{selectedModel.repo}</span>
+                Upstream Hugging Face Repository:{" "}
+                <span className="text-neutral-700 font-semibold">{selectedModel.repo}</span>
               </div>
             </div>
 
@@ -570,7 +589,9 @@ export function ModelSelectorGuide() {
                   <span>Latency</span>
                   <Zap className="w-3 h-3 text-amber-500" />
                 </div>
-                <span className="font-bold text-neutral-950 text-base">{selectedModel.latency}</span>
+                <span className="font-bold text-neutral-950 text-base">
+                  {selectedModel.latency}
+                </span>
                 <span className="text-[10px] text-neutral-400 block mt-0.5">typical inference</span>
               </div>
 
@@ -580,7 +601,9 @@ export function ModelSelectorGuide() {
                   <HardDrive className="w-3 h-3 text-blue-500" />
                 </div>
                 <span className="font-bold text-neutral-950 text-base">{selectedModel.size}</span>
-                <span className="text-[10px] text-neutral-400 block mt-0.5 truncate">{selectedModel.fileName}</span>
+                <span className="text-[10px] text-neutral-400 block mt-0.5 truncate">
+                  {selectedModel.fileName}
+                </span>
               </div>
 
               <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-200/80">
@@ -588,7 +611,9 @@ export function ModelSelectorGuide() {
                   <span>RAM Usage</span>
                   <Cpu className="w-3 h-3 text-purple-500" />
                 </div>
-                <span className="font-bold text-neutral-950 text-base">{selectedModel.ramUsage}</span>
+                <span className="font-bold text-neutral-950 text-base">
+                  {selectedModel.ramUsage}
+                </span>
                 <span className="text-[10px] text-neutral-400 block mt-0.5">active memory</span>
               </div>
 
@@ -597,8 +622,12 @@ export function ModelSelectorGuide() {
                   <span>Accuracy</span>
                   <Sparkles className="w-3 h-3 text-emerald-600" />
                 </div>
-                <span className="font-bold text-emerald-700 text-base">{selectedModel.accuracy}%</span>
-                <span className="text-[10px] text-emerald-600/80 block mt-0.5">benchmark score</span>
+                <span className="font-bold text-emerald-700 text-base">
+                  {selectedModel.accuracy}%
+                </span>
+                <span className="text-[10px] text-emerald-600/80 block mt-0.5">
+                  benchmark score
+                </span>
               </div>
             </div>
           </div>
@@ -616,7 +645,21 @@ export function ModelSelectorGuide() {
                 Why Quantization (q5_0, q8_0) Matters on Windows
               </h4>
               <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
-                Unlike macOS with its unified memory and Apple Neural Engine (ANE), Windows CPUs rely on SIMD vector units (AVX2/AVX-512) and DirectML. 5-bit (<code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">q5_0</code> / <code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">q5_1</code>) and 8-bit (<code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">q8_0</code>) quantization is your main lever to compress weights by up to 65%, avoiding memory bandwidth stalls and delivering sub-200ms latency without thermal throttling.
+                Unlike macOS with its unified memory and Apple Neural Engine (ANE), Windows CPUs
+                rely on SIMD vector units (AVX2/AVX-512) and DirectML. 5-bit (
+                <code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">
+                  q5_0
+                </code>{" "}
+                /{" "}
+                <code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">
+                  q5_1
+                </code>
+                ) and 8-bit (
+                <code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">
+                  q8_0
+                </code>
+                ) quantization is your main lever to compress weights by up to 65%, avoiding memory
+                bandwidth stalls and delivering sub-200ms latency without thermal throttling.
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-neutral-200 text-[11px] font-mono text-neutral-500 flex items-center gap-1.5">
@@ -635,7 +678,13 @@ export function ModelSelectorGuide() {
                 Parakeet ONNX Runtime: English Fast Tier
               </h4>
               <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
-                NVIDIA’s <code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">parakeet-tdt-0.6b-v2</code> is the architecture Windows dictation engines have converged on for ultra-fast streaming (sub-50ms). Running via ONNX Runtime with DirectML, it excels at English throughput. For 99-language coverage, Whisper remains the primary engine.
+                NVIDIA’s{" "}
+                <code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">
+                  parakeet-tdt-0.6b-v2
+                </code>{" "}
+                is the architecture Windows dictation engines have converged on for ultra-fast
+                streaming (sub-50ms). Running via ONNX Runtime with DirectML, it excels at English
+                throughput. For 99-language coverage, Whisper remains the primary engine.
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-neutral-200 text-[11px] font-mono text-neutral-500 flex items-center gap-1.5">
@@ -654,7 +703,24 @@ export function ModelSelectorGuide() {
                 Local LLMs for Smart Cleanup & Voice Commands
               </h4>
               <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
-                Without cloud API roundtrips, HushWrite leverages <code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">llama-cpp-2</code> in GGUF format (<code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">Qwen 2.5 1.5B</code> & <code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">Phi-3.5 Mini</code>). Quantized to <code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">Q4_K_M</code> on CPU, it executes filler removal, code formatting, and voice transformations with zero cloud egress.
+                Without cloud API roundtrips, HushWrite leverages{" "}
+                <code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">
+                  llama-cpp-2
+                </code>{" "}
+                in GGUF format (
+                <code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">
+                  Qwen 2.5 1.5B
+                </code>{" "}
+                &{" "}
+                <code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">
+                  Phi-3.5 Mini
+                </code>
+                ). Quantized to{" "}
+                <code className="text-neutral-900 bg-neutral-200/60 px-1 py-0.5 rounded text-[11px]">
+                  Q4_K_M
+                </code>{" "}
+                on CPU, it executes filler removal, code formatting, and voice transformations with
+                zero cloud egress.
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-neutral-200 text-[11px] font-mono text-neutral-500 flex items-center gap-1.5">

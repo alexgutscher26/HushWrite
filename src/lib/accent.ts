@@ -5,14 +5,7 @@
  */
 
 export type AccentColorId =
-  | "monochrome"
-  | "amber"
-  | "purple"
-  | "cyan"
-  | "emerald"
-  | "rose"
-  | "sunset"
-  | "aurora";
+  "monochrome" | "amber" | "purple" | "cyan" | "emerald" | "rose" | "sunset" | "aurora";
 
 export interface AccentConfig {
   id: AccentColorId;
@@ -134,11 +127,7 @@ export function getAccentConfig(id?: string | null): AccentConfig {
 }
 
 export type OverlayStyleId =
-  | "floating_pill"
-  | "notch"
-  | "notch_slim_band"
-  | "notch_drop_pill"
-  | "none";
+  "floating_pill" | "notch" | "notch_slim_band" | "notch_drop_pill" | "none";
 
 export interface OverlayStyleDef {
   id: OverlayStyleId;
@@ -152,13 +141,15 @@ export const OVERLAY_STYLES: OverlayStyleDef[] = [
     id: "floating_pill",
     label: "Floating Pill",
     tag: "Classic",
-    description: "Floating translucent pill with live waveform, transcript & status. Positionable at 9 anchors.",
+    description:
+      "Floating translucent pill with live waveform, transcript & status. Positionable at 9 anchors.",
   },
   {
     id: "notch",
     label: "Top Notch",
     tag: "Dynamic Island",
-    description: "Seamless dynamic island hugging the top screen bezel with integrated audio feedback.",
+    description:
+      "Seamless dynamic island hugging the top screen bezel with integrated audio feedback.",
   },
   {
     id: "notch_slim_band",

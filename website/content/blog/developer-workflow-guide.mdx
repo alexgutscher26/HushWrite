@@ -53,11 +53,13 @@ Instead of writing one-line PR summaries, dictate a comprehensive breakdown of a
 
 ```markdown
 ### Summary of Changes
+
 - Refactored sqlite connection pool to use WAL mode for concurrent reader throughput.
 - Added deterministic LRU cache for Whisper model weights in VRAM.
 - Hardened Win32 SendInput dispatch queue against elevated UIPI window focus loss.
 
 ### Verification Checklist
+
 - [x] Ran \`cargo test --workspace\` with 100% pass rate.
 - [x] Verified zero memory leaks over 500 consecutive dictation cycles.
 ```
@@ -66,7 +68,7 @@ Instead of writing one-line PR summaries, dictate a comprehensive breakdown of a
 
 When interacting with AI coding assistants, the bottleneck is often prompt length. Short prompts lead to hallucinations, while long, detailed context produces high-quality code. Dictating detailed prompts allows you to express nuanced architecture constraints effortlessly:
 
-> *"Refactor this React hook to use an immutable state reducer. Ensure that whenever the connection drops, we trigger exponential backoff retry with jitter, up to a maximum of 5 attempts before notifying the user with a toast."*
+> _"Refactor this React hook to use an immutable state reducer. Ensure that whenever the connection drops, we trigger exponential backoff retry with jitter, up to a maximum of 5 attempts before notifying the user with a toast."_
 
 ---
 
@@ -74,13 +76,13 @@ When interacting with AI coding assistants, the bottleneck is often prompt lengt
 
 Generic voice recognition tools frequently butcher programming libraries and variable names:
 
-| Spoken Phrase | Generic Dictation Output | HushWrite with Phonetic Biasing |
-|:---|:---|:---|
-| *"tee are pee see"* | "T R P C" | `tRPC` |
-| *"tailwind see ess ess"* | "tail wind C S S" | `TailwindCSS` |
-| *"koo-ber-net-eez"* | "coober netties" | `Kubernetes` |
-| *"you eye automation"* | "you eye automation" | `UIAutomation` |
-| *"camel case handle auth"*| "camel case handle auth" | `handleAuthToken` |
+| Spoken Phrase              | Generic Dictation Output | HushWrite with Phonetic Biasing |
+| :------------------------- | :----------------------- | :------------------------------ |
+| _"tee are pee see"_        | "T R P C"                | `tRPC`                          |
+| _"tailwind see ess ess"_   | "tail wind C S S"        | `TailwindCSS`                   |
+| _"koo-ber-net-eez"_        | "coober netties"         | `Kubernetes`                    |
+| _"you eye automation"_     | "you eye automation"     | `UIAutomation`                  |
+| _"camel case handle auth"_ | "camel case handle auth" | `handleAuthToken`               |
 
 To add project-specific terms, open **Settings > Dictionary** in HushWrite or commit a `.hushwrite/dictionary.json` file into your repository root.
 

@@ -119,7 +119,8 @@ export function InviteStep({
             <div className="flex flex-col">
               <span className="text-label text-text-primary font-medium">Custom Vocabulary</span>
               <span className="text-caption text-text-secondary">
-                Teach HushWrite custom acronyms, technical terms, and names in your Dictionary anytime.
+                Teach HushWrite custom acronyms, technical terms, and names in your Dictionary
+                anytime.
               </span>
             </div>
           </div>

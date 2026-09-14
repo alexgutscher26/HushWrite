@@ -51,14 +51,14 @@ Total Latency: 120ms – 180ms (Deterministic)
 
 Real-Time Factor (RTF) measures the ratio of processing time to the duration of the audio clip. An RTF of `0.10x` means a 10-second voice dictation takes exactly 1.0 second to transcribe.
 
-| Hardware Platform | Backend Provider | Model Size | Quantization | RTF (Lower is Better) | Tail Latency (3s Clip) |
-|:---|:---|:---|:---|:---|:---|
-| **NVIDIA RTX 4080 (16GB)** | DirectML / CUDA | Small | Q5_1 | **0.038x** | **114 ms** |
-| **Apple M3 Max (36GB)** | Apple Metal | Small | Q5_1 | **0.042x** | **126 ms** |
-| **NVIDIA RTX 4060 Laptop** | DirectML | Small | Q5_1 | **0.058x** | **174 ms** |
-| **AMD Radeon 780M (iGPU)** | DirectML | Base | Q5_1 | **0.071x** | **213 ms** |
-| **Intel Core Ultra 7 155H** | OpenVINO / DirectML | Base | Q5_1 | **0.082x** | **246 ms** |
-| **Cloud SaaS (Wispr/Otter)** | Remote Cloud API | Proprietary | Server Float16 | **N/A (Network Bound)** | **520–980 ms** |
+| Hardware Platform            | Backend Provider    | Model Size  | Quantization   | RTF (Lower is Better)   | Tail Latency (3s Clip) |
+| :--------------------------- | :------------------ | :---------- | :------------- | :---------------------- | :--------------------- |
+| **NVIDIA RTX 4080 (16GB)**   | DirectML / CUDA     | Small       | Q5_1           | **0.038x**              | **114 ms**             |
+| **Apple M3 Max (36GB)**      | Apple Metal         | Small       | Q5_1           | **0.042x**              | **126 ms**             |
+| **NVIDIA RTX 4060 Laptop**   | DirectML            | Small       | Q5_1           | **0.058x**              | **174 ms**             |
+| **AMD Radeon 780M (iGPU)**   | DirectML            | Base        | Q5_1           | **0.071x**              | **213 ms**             |
+| **Intel Core Ultra 7 155H**  | OpenVINO / DirectML | Base        | Q5_1           | **0.082x**              | **246 ms**             |
+| **Cloud SaaS (Wispr/Otter)** | Remote Cloud API    | Proprietary | Server Float16 | **N/A (Network Bound)** | **520–980 ms**         |
 
 ---
 

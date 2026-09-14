@@ -4,7 +4,7 @@ This guide will walk through what is needed in order to sign files with Trusted 
 
 ## Prerequisites
 
-- Vetting completed with Trusted Signing Team.  If you have not yet completed this step, [sign up for an appointment](https://outlook.office365.com/owa/calendar/AzureCodeSigningPrivatePreviewIdenityVerification@microsoft.onmicrosoft.com/bookings/).
+- Vetting completed with Trusted Signing Team. If you have not yet completed this step, [sign up for an appointment](https://outlook.office365.com/owa/calendar/AzureCodeSigningPrivatePreviewIdenityVerification@microsoft.onmicrosoft.com/bookings/).
 - Trusted Signing Resources created and Roles configured to allow permissions to sign. See the Trusted Signing Quick Start Guide for details.
 - This archive extracted to an accessible location.
 
@@ -14,7 +14,7 @@ This guide will walk through what is needed in order to sign files with Trusted 
 
 Trusted Signing requires the use of SignTool.exe in order to sign files on Windows. Specifically, the version of SignTool.exe from the Windows SDK 10.0.22621.0 or higher. You can install the full Windows SDK via the Visual Studio Installer or download and install it separately following the instructions [here](https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/).
 
-Alternatively, you can download just the SDK Build Tools as a NuGet package [here](https://www.nuget.org/packages/Microsoft.Windows.SDK.BuildTools/10.0.22621.3233).  Note that a 10.0.22621.0 SDK Build Tools NuGet package is not available and you will need to download the latest 10.0.22621 package. Follow the instructions to download and install the NuGet package as appropriate.
+Alternatively, you can download just the SDK Build Tools as a NuGet package [here](https://www.nuget.org/packages/Microsoft.Windows.SDK.BuildTools/10.0.22621.3233). Note that a 10.0.22621.0 SDK Build Tools NuGet package is not available and you will need to download the latest 10.0.22621 package. Follow the instructions to download and install the NuGet package as appropriate.
 
 Additionally, you can use the latest nuget.exe to download and extract the latest SDK Build Tools NuGet package as follows:
 
@@ -51,7 +51,7 @@ Create a new JSON file (e.g., named `metadata.json`) containing the values for y
 
 ## Invoke SignTool.exe to sign a file
 
-After the above setup is complete, you are ready to sign a file with Trusted Signing.  Take note of where your SDK Build Tools and extracted Azure.CodeSigning.Dlib are located as well as the metadata.json file created in the previous step and replace the below path placeholders as appropriate.
+After the above setup is complete, you are ready to sign a file with Trusted Signing. Take note of where your SDK Build Tools and extracted Azure.CodeSigning.Dlib are located as well as the metadata.json file created in the previous step and replace the below path placeholders as appropriate.
 
 Note: As both x86 and x64 versions of SignTool.exe are provided as part of the Windows SDK, ensure you reference the corresponding version of Azure.CodeSigning.Dlib.dll. The example below is for the x64 version of SignTool.exe.
 
@@ -76,6 +76,6 @@ Authentication with AAD is handled by the underlying Azure SDK Identity componen
 
 For example, if you are currently logged into Azure CLI or Azure PowerShell, your credentials will be automatically picked up when you invoke Signtool.exe from the shell.
 
-If invoking SignTool.exe non-interactively, e.g., as part of a CI/CD pipeline, environment variables can set with the appropriate Client Credentials.  See [EnvironmentCredential](https://docs.microsoft.com/en-us/dotnet/api/azure.identity.environmentcredential?view=azure-dotnet) for details on specific environment variables that can be set.
+If invoking SignTool.exe non-interactively, e.g., as part of a CI/CD pipeline, environment variables can set with the appropriate Client Credentials. See [EnvironmentCredential](https://docs.microsoft.com/en-us/dotnet/api/azure.identity.environmentcredential?view=azure-dotnet) for details on specific environment variables that can be set.
 
 If invoking SignTool.exe from Azure services supporting managed identities (e.g., Azure VMs, Azure App Service, Azure Functions and Azure Cloud Shell), those credentials will automatically picked up.

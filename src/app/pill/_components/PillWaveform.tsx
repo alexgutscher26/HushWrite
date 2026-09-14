@@ -63,7 +63,8 @@ export function PillWaveform({
             style={{
               height: `${h}px`,
               backgroundColor: accent.primary,
-              boxShadow: accentId && accentId !== "monochrome" ? `0 0 8px ${accent.glow}` : undefined,
+              boxShadow:
+                accentId && accentId !== "monochrome" ? `0 0 8px ${accent.glow}` : undefined,
             }}
           />
         );

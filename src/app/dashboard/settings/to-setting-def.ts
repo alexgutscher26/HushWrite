@@ -118,8 +118,8 @@ export function toControlSetting(
   const description = isFillerGated
     ? `${def.description} (Pro capability: automatically strips verbal hesitations and filler words).`
     : isEscalateGated
-    ? `${def.description} (Pro tier: unlocks large-v3-turbo and medium-q5_0 for high-capacity escalation).`
-    : [def.description, ...notes].join(" ");
+      ? `${def.description} (Pro tier: unlocks large-v3-turbo and medium-q5_0 for high-capacity escalation).`
+      : [def.description, ...notes].join(" ");
 
   const base = {
     id: def.key,

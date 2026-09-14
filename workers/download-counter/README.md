@@ -9,17 +9,21 @@ download count in **Cloudflare KV** and exposes it over HTTP. The Next.js
 ## One-time setup
 
 ### 1. Install Wrangler
+
 ```bash
 npm install -g wrangler
 wrangler login
 ```
 
 ### 2. Create the KV namespace
+
 ```bash
 cd workers/download-counter
 wrangler kv namespace create "DOWNLOAD_COUNTER"
 ```
+
 Copy the `id` printed in the output and paste it into `wrangler.toml`:
+
 ```toml
 [[kv_namespaces]]
 binding = "DOWNLOAD_COUNTER"
@@ -27,15 +31,19 @@ id = "abc123..."   # ← replace this
 ```
 
 ### 3. Seed the counter (start at a number matching your real downloads)
+
 ```bash
 wrangler kv key put --namespace-id=<YOUR_ID> --remote "total_downloads" "1842"
 ```
 
 ### 4. Deploy
+
 ```bash
 wrangler deploy
 ```
+
 The Worker URL will be printed, e.g.:
+
 ```
 https://hushwrite-download-counter.<your-account>.workers.dev
 ```
@@ -58,10 +66,10 @@ fallback value (`STATIC_FALLBACK` in `route.ts`) silently.
 
 ## Endpoints
 
-| Method | Path         | Description                                   |
-|--------|--------------|-----------------------------------------------|
-| `GET`  | `/`          | Returns `{ "count": 1842 }`                   |
-| `POST` | `/increment` | Increments count by 1, returns new count      |
+| Method | Path         | Description                              |
+| ------ | ------------ | ---------------------------------------- |
+| `GET`  | `/`          | Returns `{ "count": 1842 }`              |
+| `POST` | `/increment` | Increments count by 1, returns new count |
 
 ---
 
@@ -81,5 +89,7 @@ per second, counter drift may occur.
 - **Version:** `84c77b60-aba8-486b-b572-b4f6dafe95d8`
 
 Set this in Vercel env vars:
+
 ```n DOWNLOAD_COUNTER_URL=https://hushwrite-download-counter.workinbox69.workers.dev
+
 ```

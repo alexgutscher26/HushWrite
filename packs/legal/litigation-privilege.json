@@ -12,7 +12,11 @@
     { "term": "prima facie", "phonetic": "pry muh fay sha", "bias_weight": 1.4 },
     { "term": "inter alia", "phonetic": "in ter ah lee uh", "bias_weight": 1.3 },
     { "term": "affidavit", "phonetic": "aff uh day vit", "bias_weight": 1.2 },
-    { "term": "subpoena duces tecum", "phonetic": "suh pee nuh doo sez tay kum", "bias_weight": 1.5 },
+    {
+      "term": "subpoena duces tecum",
+      "phonetic": "suh pee nuh doo sez tay kum",
+      "bias_weight": 1.5
+    },
     { "term": "deposition", "phonetic": "deh puh zish un", "bias_weight": 1.2 },
     { "term": "indemnification", "phonetic": "in dem nuh fih kay shun", "bias_weight": 1.3 },
     { "term": "force majeure", "phonetic": "force mah jure", "bias_weight": 1.4 }

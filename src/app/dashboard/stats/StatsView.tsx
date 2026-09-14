@@ -220,7 +220,6 @@ export function StatsView({ metrics, hotkey, mode }: StatsViewProps) {
       )}
 
       <div data-scroll-area className="flex h-full min-h-0 flex-col overflow-y-auto px-8 py-6">
-
         {/* ── Two Column Grid ────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-6 items-start">
           {/* ── Left Column: Banner + Feed ─────────────────────────────────── */}

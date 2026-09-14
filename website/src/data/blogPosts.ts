@@ -131,7 +131,8 @@ Data security should not require expensive enterprise add-on contracts or 50-pag
   },
   {
     slug: "local-voice-dictation-notion-slack-gmail-windows",
-    title: "Local Voice Dictation for Notion, Slack, and Gmail on Windows: Latency and Privacy Benchmark",
+    title:
+      "Local Voice Dictation for Notion, Slack, and Gmail on Windows: Latency and Privacy Benchmark",
     description:
       "We benchmarked on-device Whisper dictation inside Notion Desktop, Slack Electron, and Chrome/Gmail on Windows 11. Measured latency, injection reliability, and zero cloud leaks.",
     date: "2026-09-07",
@@ -2302,7 +2303,8 @@ Privacy should not be an expensive enterprise add-on or a checkbox in a 40-page 
   },
   {
     slug: "how-to-dictate-linkedin-posts-x-threads-voice",
-    title: "How to Dictate Viral X Threads and LinkedIn Posts with Local Voice AI: Speed, Formatting & Privacy",
+    title:
+      "How to Dictate Viral X Threads and LinkedIn Posts with Local Voice AI: Speed, Formatting & Privacy",
     description:
       "Learn how technical founders and creators dictate multi-part X threads and LinkedIn thought leadership posts at 160 WPM using on-device Whisper, spoken macros, and zero cloud uploads.",
     date: "2026-09-07",
@@ -2469,4 +2471,3 @@ Cloud dictation services (such as Wispr Flow) stream your raw microphone audio t
 `,
   },
 ];
-

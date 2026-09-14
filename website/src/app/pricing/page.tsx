@@ -299,7 +299,8 @@ function PricingContent() {
                   $10 Off Founding Beta + Developer Prompt Pack Included
                 </h2>
                 <p className="text-xs text-emerald-800/90 mt-0.5">
-                  Your invite bonus is active. Select Founding Beta ($39 one-time) below to check out.
+                  Your invite bonus is active. Select Founding Beta ($39 one-time) below to check
+                  out.
                 </p>
               </div>
             </div>
@@ -504,7 +505,8 @@ function PricingContent() {
               </h2>
               <p className="mt-2 text-sm text-neutral-600 max-w-xl">
                 We support researchers, students, and open-source creators who push the boundaries
-                of knowledge and open software. Enjoy a flat 50% discount on Founding Beta or Pro Annual.
+                of knowledge and open software. Enjoy a flat 50% discount on Founding Beta or Pro
+                Annual.
               </p>
             </div>
 

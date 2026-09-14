@@ -8,16 +8,16 @@ HushWrite is engineered with a strict local-first, zero-cloud architecture. Audi
 
 The following ledger details how every class of data is processed, stored, and retained:
 
-| Data Category | Storage Location | Network Transmission | Retention and Lifecycle |
-| :--- | :--- | :--- | :--- |
-| **Microphone Audio** | Ephemeral System RAM | Zero bytes transmitted | Cleared from volatile RAM immediately upon transcription completion or cancellation |
-| **Transcripts and Generated Text** | Local SQLite (`sessions.db`) or RAM-only | Zero bytes transmitted | Configurable retention (disabled/incognito, 7 days, 30 days, or manual deletion) |
-| **Custom Vocabulary & Dictionary** | Local SQLite (`dictionary` table) | Zero bytes transmitted | Fully editable and erasable on demand by the user |
-| **Window Context (App Title/ID)** | Ephemeral memory buffer | Zero bytes transmitted | Evaluated in-memory for per-app formatting rules and immediately discarded |
-| **User Identity & Account Data** | None | Zero bytes transmitted | No accounts, logins, emails, or identity registration required |
-| **Telemetry & Crash Analytics** | None | Zero bytes transmitted | No analytics beacons, trackers, or crash reporting SDKs exist in the binary |
-| **AI Model Weights** | Local disk storage (`~/.HushWrite/models`) | One-time initial download | Downloaded once from verified upstream mirrors (Hugging Face / GitHub); operated offline thereafter |
-| **Software Update Verification** | None | Read-only HTTPS query | Optional read-only check against GitHub Releases API; can be disabled entirely in Settings |
+| Data Category                      | Storage Location                           | Network Transmission      | Retention and Lifecycle                                                                             |
+| :--------------------------------- | :----------------------------------------- | :------------------------ | :-------------------------------------------------------------------------------------------------- |
+| **Microphone Audio**               | Ephemeral System RAM                       | Zero bytes transmitted    | Cleared from volatile RAM immediately upon transcription completion or cancellation                 |
+| **Transcripts and Generated Text** | Local SQLite (`sessions.db`) or RAM-only   | Zero bytes transmitted    | Configurable retention (disabled/incognito, 7 days, 30 days, or manual deletion)                    |
+| **Custom Vocabulary & Dictionary** | Local SQLite (`dictionary` table)          | Zero bytes transmitted    | Fully editable and erasable on demand by the user                                                   |
+| **Window Context (App Title/ID)**  | Ephemeral memory buffer                    | Zero bytes transmitted    | Evaluated in-memory for per-app formatting rules and immediately discarded                          |
+| **User Identity & Account Data**   | None                                       | Zero bytes transmitted    | No accounts, logins, emails, or identity registration required                                      |
+| **Telemetry & Crash Analytics**    | None                                       | Zero bytes transmitted    | No analytics beacons, trackers, or crash reporting SDKs exist in the binary                         |
+| **AI Model Weights**               | Local disk storage (`~/.HushWrite/models`) | One-time initial download | Downloaded once from verified upstream mirrors (Hugging Face / GitHub); operated offline thereafter |
+| **Software Update Verification**   | None                                       | Read-only HTTPS query     | Optional read-only check against GitHub Releases API; can be disabled entirely in Settings          |
 
 ---
 
@@ -75,11 +75,13 @@ Because HushWrite does not collect, process, or transmit personal data to extern
 HushWrite's privacy boundary can be audited independently using standard packet capture and network monitoring tools:
 
 ### macOS Network Verification (Little Snitch / LuLu)
+
 1. Launch an application firewall (such as LuLu or Little Snitch).
 2. Open HushWrite and perform continuous dictation sessions across multiple target applications.
 3. Observe process activity: zero network connection attempts are initiated during audio capture, inference, or text injection.
 
 ### Windows Network Verification (Packet Monitor / Wireshark)
+
 1. Open PowerShell with Administrator privileges and start a packet trace:
    ```powershell
    pktmon filter add -n HushWrite
@@ -94,5 +96,6 @@ HushWrite's privacy boundary can be audited independently using standard packet 
 4. Verify in Wireshark that no outbound TCP/UDP packets were dispatched by the `HushWrite.exe` process.
 
 ### Linux Network Verification (NetHogs / tcpdump)
+
 1. Run `sudo nethogs` and filter by the application process ID.
 2. Verify that network transmission metrics remain at `0.000 KB/s SENT` and `0.000 KB/s RECV` throughout active transcription.

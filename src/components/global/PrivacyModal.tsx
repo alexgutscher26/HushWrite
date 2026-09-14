@@ -106,8 +106,8 @@ export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
           <div className="rounded-input bg-sunken/60 p-3 text-caption text-text-secondary leading-relaxed border border-[var(--border-hairline)]">
-            HushWrite is engineered as a zero-cloud utility. Your speech is processed locally on your
-            machine and never leaves your computer.
+            HushWrite is engineered as a zero-cloud utility. Your speech is processed locally on
+            your machine and never leaves your computer.
           </div>
 
           <div className="space-y-3">

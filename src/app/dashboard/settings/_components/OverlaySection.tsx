@@ -23,29 +23,28 @@ interface OverlaySectionProps {
 }
 
 export function OverlaySection({ values, onWrite }: OverlaySectionProps) {
-  const currentStyle = (values?.["ui.overlay_style"]?.type === "CHOICE"
-    ? values["ui.overlay_style"].value
-    : "floating_pill") as OverlayStyleId;
+  const currentStyle = (
+    values?.["ui.overlay_style"]?.type === "CHOICE"
+      ? values["ui.overlay_style"].value
+      : "floating_pill"
+  ) as OverlayStyleId;
 
-  const currentAccent = (values?.["ui.accent_color"]?.type === "CHOICE"
-    ? values["ui.accent_color"].value
-    : "monochrome") as AccentColorId;
+  const currentAccent = (
+    values?.["ui.accent_color"]?.type === "CHOICE" ? values["ui.accent_color"].value : "monochrome"
+  ) as AccentColorId;
 
-  const currentAnchor = (values?.["ui.pill_anchor"]?.type === "CHOICE"
-    ? values["ui.pill_anchor"].value
-    : "bottom_center") as PillAnchorId;
+  const currentAnchor = (
+    values?.["ui.pill_anchor"]?.type === "CHOICE" ? values["ui.pill_anchor"].value : "bottom_center"
+  ) as PillAnchorId;
 
   const showTray =
-    values?.["ui.show_tray_icon"]?.type !== "BOOL" ||
-    values["ui.show_tray_icon"].value !== false;
+    values?.["ui.show_tray_icon"]?.type !== "BOOL" || values["ui.show_tray_icon"].value !== false;
 
   const confettiEnabled =
-    values?.["ui.confetti_effect"]?.type !== "BOOL" ||
-    values["ui.confetti_effect"].value !== false;
+    values?.["ui.confetti_effect"]?.type !== "BOOL" || values["ui.confetti_effect"].value !== false;
 
   const isCompact =
-    values?.["ui.pill_compact"]?.type === "BOOL" &&
-    values["ui.pill_compact"].value === true;
+    values?.["ui.pill_compact"]?.type === "BOOL" && values["ui.pill_compact"].value === true;
 
   const opacityValue =
     values?.["ui.pill_opacity"]?.type === "NUMBER" && values["ui.pill_opacity"].value !== null
@@ -64,8 +63,13 @@ export function OverlaySection({ values, onWrite }: OverlaySectionProps) {
             <span className="text-xs font-medium text-stone-300">Live Indicator Preview</span>
           </div>
           <div className="flex items-center gap-3 text-[11px] text-stone-400">
-            <span>Style: <strong className="text-white capitalize">{currentStyle.replace(/_/g, " ")}</strong></span>
-            <span>Accent: <strong className="text-white capitalize">{accent.label}</strong></span>
+            <span>
+              Style:{" "}
+              <strong className="text-white capitalize">{currentStyle.replace(/_/g, " ")}</strong>
+            </span>
+            <span>
+              Accent: <strong className="text-white capitalize">{accent.label}</strong>
+            </span>
           </div>
         </div>
 
@@ -85,7 +89,10 @@ export function OverlaySection({ values, onWrite }: OverlaySectionProps) {
               </div>
               <p className="text-xs font-medium text-stone-300">Stealth Mode Active</p>
               <p className="text-[11px] text-stone-500">
-                Overlay is hidden. {showTray ? "Menu bar icon is visible." : "100% invisible recording (audio cues only)."}
+                Overlay is hidden.{" "}
+                {showTray
+                  ? "Menu bar icon is visible."
+                  : "100% invisible recording (audio cues only)."}
               </p>
             </div>
           ) : currentStyle === "notch_slim_band" ? (
@@ -250,9 +257,7 @@ export function OverlaySection({ values, onWrite }: OverlaySectionProps) {
       <div>
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="size-4 text-amber-500" />
-          <h3 className="text-sm font-semibold text-stone-900 dark:text-white">
-            Accent Colour
-          </h3>
+          <h3 className="text-sm font-semibold text-stone-900 dark:text-white">Accent Colour</h3>
         </div>
         <p className="text-xs text-stone-500 dark:text-stone-400 mb-3">
           Customise the glowing aura, dynamic waveform visualizer, and border tones.
@@ -325,9 +330,7 @@ export function OverlaySection({ values, onWrite }: OverlaySectionProps) {
                   <button
                     key={anchor.id}
                     type="button"
-                    onClick={() =>
-                      onWrite("ui.pill_anchor", { type: "CHOICE", value: anchor.id })
-                    }
+                    onClick={() => onWrite("ui.pill_anchor", { type: "CHOICE", value: anchor.id })}
                     className={cn(
                       "flex flex-col items-center justify-center h-11 rounded-lg border text-[10px] font-medium transition-all cursor-pointer",
                       isSelected
@@ -354,16 +357,15 @@ export function OverlaySection({ values, onWrite }: OverlaySectionProps) {
               <Sparkles className="size-3.5 text-amber-500" />
             </p>
             <p className="text-xs text-stone-500 dark:text-stone-400">
-              Burst celebratory particle confetti when transcription successfully finishes and pastes.
+              Burst celebratory particle confetti when transcription successfully finishes and
+              pastes.
             </p>
           </div>
           <button
             type="button"
             role="switch"
             aria-checked={confettiEnabled}
-            onClick={() =>
-              onWrite("ui.confetti_effect", { type: "BOOL", value: !confettiEnabled })
-            }
+            onClick={() => onWrite("ui.confetti_effect", { type: "BOOL", value: !confettiEnabled })}
             className={cn(
               "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
               confettiEnabled ? "bg-stone-900 dark:bg-white" : "bg-stone-300 dark:bg-stone-700",

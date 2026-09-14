@@ -47,7 +47,10 @@ function parseMdxFile(content: string, slug: string): BlogPost | null {
     if (!trimmed || trimmed.startsWith("#")) continue;
 
     if (trimmed.startsWith("- ") && inList && currentKey) {
-      const val = trimmed.slice(2).trim().replace(/^["']|["']$/g, "");
+      const val = trimmed
+        .slice(2)
+        .trim()
+        .replace(/^["']|["']$/g, "");
       if (!Array.isArray(metadata[currentKey])) {
         metadata[currentKey] = [];
       }
@@ -143,7 +146,7 @@ export function getAllBlogPosts(): BlogPost[] {
 
   // Sort posts by date descending
   return Array.from(postsMap.values()).sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 }
 

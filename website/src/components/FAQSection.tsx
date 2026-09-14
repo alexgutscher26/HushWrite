@@ -93,7 +93,8 @@ export function FAQSection() {
             Frequently asked questions.
           </h2>
           <p className="text-neutral-600 text-base sm:text-lg leading-relaxed">
-            Everything you need to know about HushWrite performance, privacy, and local architecture.
+            Everything you need to know about HushWrite performance, privacy, and local
+            architecture.
           </p>
         </div>
 

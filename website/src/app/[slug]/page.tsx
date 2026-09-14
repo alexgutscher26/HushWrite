@@ -150,7 +150,9 @@ export default async function HighIntentSeoPage({ params }: Props) {
               <span className="text-xl sm:text-2xl font-bold text-neutral-950 font-mono block mb-1">
                 {stat.value}
               </span>
-              <span className="text-[11px] text-neutral-500 block leading-tight">{stat.detail}</span>
+              <span className="text-[11px] text-neutral-500 block leading-tight">
+                {stat.detail}
+              </span>
             </div>
           ))}
         </div>
@@ -179,7 +181,9 @@ export default async function HighIntentSeoPage({ params }: Props) {
               <span className="text-xs font-mono text-emerald-700 uppercase tracking-wider font-semibold block mb-2">
                 The Local-First Solution
               </span>
-              <h3 className="text-base font-bold text-neutral-950 mb-2">Physical Hardware Sovereignty</h3>
+              <h3 className="text-base font-bold text-neutral-950 mb-2">
+                Physical Hardware Sovereignty
+              </h3>
               <p className="text-xs sm:text-sm text-neutral-700 leading-relaxed font-sans">
                 {page.architecturalSolution}
               </p>
@@ -239,7 +243,9 @@ export default async function HighIntentSeoPage({ params }: Props) {
           <span className="text-xs font-mono uppercase tracking-wider text-emerald-600 font-semibold block mb-1">
             Pricing Narrative
           </span>
-          <h2 className="text-xl font-bold text-neutral-950 mb-2">{page.pricingNarrative.headline}</h2>
+          <h2 className="text-xl font-bold text-neutral-950 mb-2">
+            {page.pricingNarrative.headline}
+          </h2>
           <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed font-sans">
             {page.pricingNarrative.detail}
           </p>
@@ -251,7 +257,9 @@ export default async function HighIntentSeoPage({ params }: Props) {
             <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block mb-1">
               Real Workflow Outcome ({page.socialProofClip.platform})
             </span>
-            <p className="text-sm font-semibold text-neutral-900 italic">{page.socialProofClip.quote}</p>
+            <p className="text-sm font-semibold text-neutral-900 italic">
+              {page.socialProofClip.quote}
+            </p>
           </div>
           <span className="text-[11px] font-mono px-3 py-1.5 rounded-xl bg-neutral-100 text-neutral-700 border border-neutral-200 shrink-0">
             {page.socialProofClip.context}
@@ -274,7 +282,10 @@ export default async function HighIntentSeoPage({ params }: Props) {
           <h2 className="text-2xl font-bold text-neutral-950 mb-6">Frequently Asked Questions</h2>
           <div className="space-y-3">
             {page.faqs.map((faq, idx) => (
-              <div key={idx} className="p-5 rounded-2xl bg-white border border-neutral-200/90 shadow-xs hover:border-neutral-300 transition-all">
+              <div
+                key={idx}
+                className="p-5 rounded-2xl bg-white border border-neutral-200/90 shadow-xs hover:border-neutral-300 transition-all"
+              >
                 <h3 className="text-sm font-bold text-neutral-950 mb-2">{faq.q}</h3>
                 <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">{faq.a}</p>
               </div>

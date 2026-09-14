@@ -408,7 +408,8 @@ export function BillingView() {
         )}
         {keyError && (
           <p className="text-caption font-mono text-danger mt-2">
-            ✕ Invalid key format. Enter a valid HushWrite Founding Beta, Pro, Team, Student, or Switcher key.
+            ✕ Invalid key format. Enter a valid HushWrite Founding Beta, Pro, Team, Student, or
+            Switcher key.
           </p>
         )}
 
@@ -420,7 +421,9 @@ export function BillingView() {
                 <span className="text-caption font-mono font-semibold text-text-primary">
                   {licenseKey}
                 </span>
-                {licenseKey.startsWith("LIFETIME-") || licenseKey.startsWith("FOUNDING-") || subscriptionStatus === "lifetime" ? (
+                {licenseKey.startsWith("LIFETIME-") ||
+                licenseKey.startsWith("FOUNDING-") ||
+                subscriptionStatus === "lifetime" ? (
                   <span className="rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-2 py-0.2 text-[10px] font-mono font-semibold flex items-center gap-1">
                     <Sparkles className="size-2.5" />
                     <span>Perpetual · Never Expires</span>

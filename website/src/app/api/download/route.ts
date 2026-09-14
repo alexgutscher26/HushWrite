@@ -26,13 +26,10 @@ export async function GET(request: NextRequest) {
   void targetPlatform; // may be used for platform-specific routing in the future
 
   // Default to serving the Windows x64 NSIS setup executable
-  return NextResponse.redirect(
-    new URL("/downloads/HushWrite_1.2.1_x64-setup.exe", origin),
-    {
-      status: 302,
-      headers: {
-        "Content-Disposition": 'attachment; filename="HushWrite_1.2.1_x64-setup.exe"',
-      },
-    }
-  );
+  return NextResponse.redirect(new URL("/downloads/HushWrite_1.2.1_x64-setup.exe", origin), {
+    status: 302,
+    headers: {
+      "Content-Disposition": 'attachment; filename="HushWrite_1.2.1_x64-setup.exe"',
+    },
+  });
 }

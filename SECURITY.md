@@ -10,10 +10,10 @@ HushWrite is designed from the ground up as a zero-cloud, local-first applicatio
 
 Security updates and patches are actively maintained for the following versions:
 
-| Version | Supported          | Status             |
-| :------ | :----------------- | :----------------- |
-| 0.1.x   | Yes                | Current Release    |
-| < 0.1.0 | No                 | Unsupported        |
+| Version | Supported | Status          |
+| :------ | :-------- | :-------------- |
+| 0.1.x   | Yes       | Current Release |
+| < 0.1.0 | No        | Unsupported     |
 
 Users are encouraged to run the latest released version to ensure they receive all security and stability updates.
 
@@ -24,6 +24,7 @@ Users are encouraged to run the latest released version to ensure they receive a
 HushWrite implements defense-in-depth principles across every layer of the application:
 
 ### 1. Zero Network Egress
+
 - **Audio and Text Isolation**: Microphone streams and generated transcripts never leave volatile system memory (RAM) and are never transmitted over the network.
 - **Controlled Egress**: The application initiates outbound network requests exclusively for:
   1. One-time model weight downloads from verified upstream sources (Hugging Face / GitHub).
@@ -31,17 +32,20 @@ HushWrite implements defense-in-depth principles across every layer of the appli
 - **Air-Gap Capability**: HushWrite operates with 100% feature parity on air-gapped systems or when blocked by host firewalls.
 
 ### 2. Memory Hygiene and Audio Lifecycles
+
 - Audio samples are buffered in volatile single-producer single-consumer (SPSC) ring buffers during recording.
 - Audio buffers are cleared immediately upon completion or cancellation of transcription.
 - Audio data is never written to disk or swap files under standard operating conditions.
 
 ### 3. IPC Boundary and Command Safety
+
 - All communication between the webview frontend and the native Rust backend routes through a centralized Command Factory (`src-tauri/src/ipc/factory.rs`).
 - Strict schema validation (Specta type generation, Zod schemas) is enforced at the IPC boundary.
 - Permissions, reentrancy guards, and error sanitization occur before any backend handler executes.
 - Direct invocation of unvalidated commands is structurally prevented.
 
 ### 4. Binary and Updater Integrity
+
 - Release binaries and update manifests (`latest.json`) are cryptographically signed using Minisign.
 - The corresponding public key is baked into `tauri.conf.json`. The Tauri updater will reject any payload that does not verify against this key.
 - Build dependencies are audited against security advisories via automated CI checks (`cargo-deny`, `pnpm audit`).
@@ -62,6 +66,7 @@ Please do **not** file public GitHub issues for security vulnerabilities. Instea
 ### What to Include
 
 To help us evaluate and address the issue promptly, please include:
+
 - A clear description of the vulnerability and its potential impact.
 - Step-by-step instructions or proof-of-concept (PoC) code to reproduce the issue.
 - Affected platforms, operating systems, and HushWrite versions.

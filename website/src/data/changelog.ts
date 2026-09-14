@@ -26,7 +26,8 @@ export const RELEASES: ReleaseNote[] = [
     date: "September 14, 2026",
     isLatest: true,
     tagUrl: "https://github.com/alexgutscher26/HushWrite/releases/tag/v1.2.1",
-    downloadUrl: "https://github.com/alexgutscher26/HushWrite/releases/download/v1.2.1/HushWrite-Setup-1.2.1.exe",
+    downloadUrl:
+      "https://github.com/alexgutscher26/HushWrite/releases/download/v1.2.1/HushWrite-Setup-1.2.1.exe",
     summary:
       "Intelligent inline edit learning with 1-click 'Always Correct' prompts, new AI/ML/GPU and developer domain packs, and dual-layer Whisper initial_prompt biasing with deterministic SQLite replacements.",
     items: [
@@ -55,7 +56,8 @@ export const RELEASES: ReleaseNote[] = [
     title: "Stripe Managed Payments & Production Hardening",
     date: "September 12, 2026",
     tagUrl: "https://github.com/alexgutscher26/HushWrite/releases/tag/v1.0.2",
-    downloadUrl: "https://github.com/alexgutscher26/HushWrite/releases/download/v1.0.2/HushWrite-Setup-1.0.2.exe",
+    downloadUrl:
+      "https://github.com/alexgutscher26/HushWrite/releases/download/v1.0.2/HushWrite-Setup-1.0.2.exe",
     sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     summary:
       "Upgrade to Stripe API 2025-03-31.basil for Managed Payments compliance, dynamic digital software tax codes, and zero-warning backend Rust Clippy and database iterator optimization.",
@@ -84,7 +86,8 @@ export const RELEASES: ReleaseNote[] = [
     title: "Public Launch · 100% On-Device Whisper & Hardware Acceleration",
     date: "August 31, 2026",
     tagUrl: "https://github.com/alexgutscher26/HushWrite/releases/tag/v0.1.0",
-    downloadUrl: "https://github.com/alexgutscher26/HushWrite/releases/download/v0.1.0/HushWrite-Setup-0.1.0.exe",
+    downloadUrl:
+      "https://github.com/alexgutscher26/HushWrite/releases/download/v0.1.0/HushWrite-Setup-0.1.0.exe",
     sha256: "a68f0b741517316a81ad4a6f44ec82245dbfcadfb9cae4751f813a37b1263884",
     summary:
       "The initial public release of HushWrite! Real-time, 100% on-device speech-to-text powered by whisper.cpp, DirectML and Apple Metal GPU acceleration, global push-to-talk hotkeys, and app-aware formatting.",

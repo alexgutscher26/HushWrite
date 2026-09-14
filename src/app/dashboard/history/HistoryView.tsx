@@ -263,7 +263,9 @@ export function HistoryView({ hotkey, mode }: HistoryViewProps) {
               <button
                 type="button"
                 onClick={toggleSelectAll}
-                title={allSelected ? "Deselect all entries" : "Select all visible entries in history"}
+                title={
+                  allSelected ? "Deselect all entries" : "Select all visible entries in history"
+                }
                 className={cn(BUTTON_CLASS, "cursor-pointer")}
               >
                 {allSelected ? "Deselect all" : "Select all"}

@@ -58,13 +58,17 @@ export function Pill() {
     settings.data?.["ui.pill_compact"]?.type === "BOOL" &&
     settings.data["ui.pill_compact"].value === true;
 
-  const overlayStyle = (settings.data?.["ui.overlay_style"]?.type === "CHOICE"
-    ? settings.data["ui.overlay_style"].value
-    : "floating_pill") as OverlayStyleId;
+  const overlayStyle = (
+    settings.data?.["ui.overlay_style"]?.type === "CHOICE"
+      ? settings.data["ui.overlay_style"].value
+      : "floating_pill"
+  ) as OverlayStyleId;
 
-  const accentColor = (settings.data?.["ui.accent_color"]?.type === "CHOICE"
-    ? settings.data["ui.accent_color"].value
-    : "monochrome") as AccentColorId;
+  const accentColor = (
+    settings.data?.["ui.accent_color"]?.type === "CHOICE"
+      ? settings.data["ui.accent_color"].value
+      : "monochrome"
+  ) as AccentColorId;
 
   const confettiEnabled =
     settings.data?.["ui.confetti_effect"]?.type !== "BOOL" ||

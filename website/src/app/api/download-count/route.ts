@@ -32,17 +32,14 @@ async function fetchRealGitHubDownloads(): Promise<number> {
   }
 
   try {
-    const res = await fetch(
-      "https://api.github.com/repos/alexgutscher26/HushWrite/releases",
-      {
-        headers: {
-          "User-Agent": "HushWrite-Website-Counter",
-          Accept: "application/vnd.github.v3+json",
-        },
-        next: { revalidate: 60 },
-        signal: AbortSignal.timeout(4_000),
-      }
-    );
+    const res = await fetch("https://api.github.com/repos/alexgutscher26/HushWrite/releases", {
+      headers: {
+        "User-Agent": "HushWrite-Website-Counter",
+        Accept: "application/vnd.github.v3+json",
+      },
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(4_000),
+    });
 
     if (res.ok) {
       const releases = (await res.json()) as GitHubRelease[];
@@ -77,13 +74,10 @@ export async function GET() {
         headers: {
           "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
         },
-      }
+      },
     );
   } catch {
-    return NextResponse.json(
-      { count: cachedCount ?? 0 },
-      { status: 200 }
-    );
+    return NextResponse.json({ count: cachedCount ?? 0 }, { status: 200 });
   }
 }
 

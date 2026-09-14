@@ -91,7 +91,8 @@ export const SEO_PAGES: Record<string, SeoPageData> = {
       },
     ],
     pricingNarrative: {
-      headline: "Local and Lifetime: Why pay a recurring cloud tax for computation your PC does faster?",
+      headline:
+        "Local and Lifetime: Why pay a recurring cloud tax for computation your PC does faster?",
       detail:
         "Wispr Flow's paid plan is widely reported around $15/month ($144–$180/year) to offset remote GPU cluster costs, while Mac alternatives like Superwhisper promote lifetime tiers ($199–$249) but lack Windows support. HushWrite matches your search intent directly: 100% local, high-speed voice dictation on Windows with zero subscription lock-in.",
     },
@@ -1411,7 +1412,8 @@ export const SEO_PAGES: Record<string, SeoPageData> = {
 
   "vs-talon-voice": {
     slug: "vs-talon-voice",
-    metaTitle: "HushWrite vs Talon Voice · Instant AI Voice Dictation vs Complex Hands-Free Scripting",
+    metaTitle:
+      "HushWrite vs Talon Voice · Instant AI Voice Dictation vs Complex Hands-Free Scripting",
     metaDescription:
       "Compare HushWrite and Talon Voice. HushWrite provides instant, zero-configuration AI push-to-talk dictation, while Talon Voice is a specialized hands-free coding and scripting framework.",
     badge: "Ease of Use",
@@ -1569,7 +1571,11 @@ export const SEO_PAGES: Record<string, SeoPageData> = {
     architecturalSolution:
       "HushWrite is purpose-built from the ground up for speech-to-text dictation. Powered by whisper.cpp, it delivers superior transcription accuracy locally without requiring a text-to-speech subscription.",
     keyStats: [
-      { label: "Core Specialization", value: "Speech-to-Text", detail: "Dedicated dictation engine" },
+      {
+        label: "Core Specialization",
+        value: "Speech-to-Text",
+        detail: "Dedicated dictation engine",
+      },
       { label: "Annual Cost", value: "$0 / Lifetime", detail: "No $139/year subscription" },
       { label: "Privacy Model", value: "100% Local", detail: "Zero cloud audio streaming" },
       { label: "Desktop Cursor Hook", value: "Native", detail: "Types into any open window" },
@@ -1859,7 +1865,11 @@ export const SEO_PAGES: Record<string, SeoPageData> = {
     keyStats: [
       { label: "App Integration", value: "System-Wide", detail: "Types into any desktop software" },
       { label: "Cloud Egress", value: "0 Bytes", detail: "100% local GPU execution" },
-      { label: "Interface Model", value: "Native Utility", detail: "No separate web editor needed" },
+      {
+        label: "Interface Model",
+        value: "Native Utility",
+        detail: "No separate web editor needed",
+      },
       { label: "Subscription", value: "$0 / Lifetime", detail: "No $10/mo recurring fee" },
     ],
     comparisonTable: [
@@ -1987,7 +1997,8 @@ export const SEO_PAGES: Record<string, SeoPageData> = {
 
   "vs-nuance-dragon-professional": {
     slug: "vs-nuance-dragon-professional",
-    metaTitle: "HushWrite vs Nuance Dragon Professional · Free GPU Whisper vs $699 Legacy Bloatware",
+    metaTitle:
+      "HushWrite vs Nuance Dragon Professional · Free GPU Whisper vs $699 Legacy Bloatware",
     metaDescription:
       "Compare HushWrite and Nuance Dragon Professional. Free, lightweight, hardware-accelerated Whisper dictation vs $699 legacy enterprise software with hours of voice training.",
     badge: "Enterprise Alternative",
@@ -2146,7 +2157,11 @@ export const SEO_PAGES: Record<string, SeoPageData> = {
       "HushWrite runs Whisper locally on your GPU using DirectML. It features robust Win32 input injection that works in elevated command prompts, games, and IDEs with 0 bytes sent to Microsoft.",
     keyStats: [
       { label: "Microsoft Telemetry", value: "0 Bytes", detail: "Zero cloud data transmission" },
-      { label: "Elevated App Support", value: "Full UIPI Support", detail: "Works in Admin windows" },
+      {
+        label: "Elevated App Support",
+        value: "Full UIPI Support",
+        detail: "Works in Admin windows",
+      },
       { label: "Hotkey Customization", value: "Any Shortcut", detail: "Push-to-talk & mouse keys" },
       { label: "Offline Capability", value: "100%", detail: "Works with network disconnected" },
     ],
@@ -2275,7 +2290,8 @@ export const SEO_PAGES: Record<string, SeoPageData> = {
 
   "vs-tactiq": {
     slug: "vs-tactiq",
-    metaTitle: "HushWrite vs Tactiq · Real-Time Universal Desktop Input vs Chrome Meeting Extension",
+    metaTitle:
+      "HushWrite vs Tactiq · Real-Time Universal Desktop Input vs Chrome Meeting Extension",
     metaDescription:
       "Compare HushWrite and Tactiq. System-wide push-to-talk voice typing across all desktop software with 100% local privacy vs Tactiq's Chrome meeting extension.",
     badge: "Desktop Dictation vs Meeting Notes",
@@ -2347,7 +2363,8 @@ export const SEO_PAGES: Record<string, SeoPageData> = {
 
   "vs-elevenlabs-reader": {
     slug: "vs-elevenlabs-reader",
-    metaTitle: "HushWrite vs ElevenLabs · Ultra-Fast Local Dictation Input vs Cloud Voice Synthesis",
+    metaTitle:
+      "HushWrite vs ElevenLabs · Ultra-Fast Local Dictation Input vs Cloud Voice Synthesis",
     metaDescription:
       "Compare HushWrite and ElevenLabs. High-speed, 100% on-device speech-to-text dictation into desktop apps vs ElevenLabs' cloud text-to-speech voice generation.",
     badge: "Input vs Output",
@@ -2417,4 +2434,3 @@ export const SEO_PAGES: Record<string, SeoPageData> = {
     ],
   },
 };
-

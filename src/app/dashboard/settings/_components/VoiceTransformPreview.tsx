@@ -17,7 +17,8 @@ import { cn } from "@/lib/utils";
 const SAMPLE_TRANSFORMS = [
   {
     label: "Formal Executive",
-    input: "We gotta ship the release by Friday or the client is gonna be mad hey HushWrite make that formal",
+    input:
+      "We gotta ship the release by Friday or the client is gonna be mad hey HushWrite make that formal",
   },
   {
     label: "Bulleted List",
@@ -25,7 +26,8 @@ const SAMPLE_TRANSFORMS = [
   },
   {
     label: "Concise Summary",
-    input: "In order to ensure that we are ready at this point in time, we should sync make this concise",
+    input:
+      "In order to ensure that we are ready at this point in time, we should sync make this concise",
   },
   {
     label: "Filler Removal",

@@ -234,14 +234,18 @@ export function InteractivePlayground() {
 
     // Setup Speech Recognition
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const SpeechRecognition = typeof window !== "undefined" ? ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) : null;
+    const SpeechRecognition =
+      typeof window !== "undefined"
+        ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+        : null;
 
     if (SpeechRecognition) {
       try {
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = typeof navigator !== "undefined" ? (navigator.language || "en-US") : "en-US";
+        recognition.lang =
+          typeof navigator !== "undefined" ? navigator.language || "en-US" : "en-US";
         recognition.maxAlternatives = 1;
 
         recognition.onstart = () => {
@@ -275,7 +279,9 @@ export function InteractivePlayground() {
             return;
           }
           if (event.error === "not-allowed" || event.error === "service-not-allowed") {
-            setLiveTranscript("Microphone permission was denied. Please allow microphone access in your browser.");
+            setLiveTranscript(
+              "Microphone permission was denied. Please allow microphone access in your browser.",
+            );
             return;
           }
         };
@@ -296,7 +302,9 @@ export function InteractivePlayground() {
         console.error("Speech recognition start failed:", err);
       }
     } else {
-      setLiveTranscript("Microphone active. (Note: Browser Web Speech API is supported in Chrome, Edge, and Safari; HushWrite desktop app runs 100% offline with whisper.cpp on all platforms).");
+      setLiveTranscript(
+        "Microphone active. (Note: Browser Web Speech API is supported in Chrome, Edge, and Safari; HushWrite desktop app runs 100% offline with whisper.cpp on all platforms).",
+      );
     }
   };
 

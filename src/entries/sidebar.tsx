@@ -56,16 +56,10 @@ function SidebarEntry() {
     void emitTo(DASHBOARD_LABEL, NAV_SELECTED, { route: next });
   };
 
-  return (
-    <SidebarWindow
-      activeRoute={route}
-      onSelect={handleSelect}
-    />
-  );
+  return <SidebarWindow activeRoute={route} onSelect={handleSelect} />;
 }
 
 const container = document.getElementById("root");
 if (!container) throw new Error("sidebar.html is missing its #root element.");
 
 createRoot(container).render(<SidebarEntry />);
-

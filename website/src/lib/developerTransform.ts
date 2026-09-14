@@ -40,7 +40,8 @@ const TECH_ENTITIES: [RegExp, string][] = [
   [/\btrpc\b/gi, "tRPC"],
 ];
 
-const KNOWN_EXTENSIONS = "(?:tsx|ts|jsx|js|rs|py|json|css|scss|html|md|toml|yaml|yml|go|cpp|c|h|hpp|sql|vue|svelte|astro|sh|env|lock)";
+const KNOWN_EXTENSIONS =
+  "(?:tsx|ts|jsx|js|rs|py|json|css|scss|html|md|toml|yaml|yml|go|cpp|c|h|hpp|sql|vue|svelte|astro|sh|env|lock)";
 
 function toCamelCase(words: string[]): string {
   if (words.length === 0) return "";
@@ -54,9 +55,7 @@ function toCamelCase(words: string[]): string {
 }
 
 function toPascalCase(words: string[]): string {
-  return words
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join("");
+  return words.map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join("");
 }
 
 function toSnakeCase(words: string[]): string {
@@ -176,7 +175,7 @@ export function transformDeveloperText(rawInput: string): TransformResult {
   // Handles: "tag <file>", "tag file <file>", "look at tag <file>", "tag folder <folder>", etc.
   const tagFileWithExtRegex = new RegExp(
     `\\b(look\\s+at\\s+)?(?:tag|at|mention|context)(?:\\s+(?:files?|folders?|dirs?|directory))?(?:\\s*[:.])?\\s*([a-zA-Z0-9_./\\\\\\s-]+?\\.${KNOWN_EXTENSIONS})(?:[,;])?`,
-    "gi"
+    "gi",
   );
 
   if (tagFileWithExtRegex.test(text)) {
@@ -188,7 +187,8 @@ export function transformDeveloperText(rawInput: string): TransformResult {
     });
   } else {
     // Explicit folder / directory tagging: e.g. "tag folder src slash components" or "tag dir src/components"
-    const tagFolderRegex = /\b(look\s+at\s+)?(?:tag|at|mention|context)\s+(?:folders?|dirs?|directory)(?:\s*[:.])?\s*([a-zA-Z0-9_./\\\s-]+?)(?=\s+(?:and|with|then|to|in|for)\b|[,;.]|$)/gi;
+    const tagFolderRegex =
+      /\b(look\s+at\s+)?(?:tag|at|mention|context)\s+(?:folders?|dirs?|directory)(?:\s*[:.])?\s*([a-zA-Z0-9_./\\\s-]+?)(?=\s+(?:and|with|then|to|in|for)\b|[,;.]|$)/gi;
     if (tagFolderRegex.test(text)) {
       matchedRules.push("Context-Aware @folder Tagging");
       text = text.replace(tagFolderRegex, (match, lookAtPrefix, rawPath) => {
@@ -202,32 +202,38 @@ export function transformDeveloperText(rawInput: string): TransformResult {
   // 4. Code Casing Directives (camelCase, snake_case, PascalCase, SCREAMING_SNAKE_CASE, kebab-case, `backticks`)
   const caseStyles: { regex: RegExp; style: string; fn: (words: string[]) => string }[] = [
     {
-      regex: /\b(?:screaming\s+snake\s+case|constant\s+case)\s+([a-zA-Z0-9_\s]+?)(?=\s+(?:for|in|with|at|to|from|then|into|on|as|and)\b|[,;.]|$)/gi,
+      regex:
+        /\b(?:screaming\s+snake\s+case|constant\s+case)\s+([a-zA-Z0-9_\s]+?)(?=\s+(?:for|in|with|at|to|from|then|into|on|as|and)\b|[,;.]|$)/gi,
       style: "SCREAMING_SNAKE_CASE",
       fn: toScreamingSnakeCase,
     },
     {
-      regex: /\bcamel\s+case\s+([a-zA-Z0-9_\s]+?)(?=\s+(?:for|in|with|at|to|from|then|into|on|as|and)\b|[,;.]|$)/gi,
+      regex:
+        /\bcamel\s+case\s+([a-zA-Z0-9_\s]+?)(?=\s+(?:for|in|with|at|to|from|then|into|on|as|and)\b|[,;.]|$)/gi,
       style: "camelCase Directive",
       fn: toCamelCase,
     },
     {
-      regex: /\bpascal\s+case\s+([a-zA-Z0-9_\s]+?)(?=\s+(?:for|in|with|at|to|from|then|into|on|as|and)\b|[,;.]|$)/gi,
+      regex:
+        /\bpascal\s+case\s+([a-zA-Z0-9_\s]+?)(?=\s+(?:for|in|with|at|to|from|then|into|on|as|and)\b|[,;.]|$)/gi,
       style: "PascalCase Directive",
       fn: toPascalCase,
     },
     {
-      regex: /\bsnake\s+case\s+([a-zA-Z0-9_\s]+?)(?=\s+(?:for|in|with|at|to|from|then|into|on|as|and)\b|[,;.]|$)/gi,
+      regex:
+        /\bsnake\s+case\s+([a-zA-Z0-9_\s]+?)(?=\s+(?:for|in|with|at|to|from|then|into|on|as|and)\b|[,;.]|$)/gi,
       style: "snake_case Directive",
       fn: toSnakeCase,
     },
     {
-      regex: /\b(?:kebab\s+case|dash\s+case)\s+([a-zA-Z0-9_\s]+?)(?=\s+(?:for|in|with|at|to|from|then|into|on|as|and)\b|[,;.]|$)/gi,
+      regex:
+        /\b(?:kebab\s+case|dash\s+case)\s+([a-zA-Z0-9_\s]+?)(?=\s+(?:for|in|with|at|to|from|then|into|on|as|and)\b|[,;.]|$)/gi,
       style: "kebab-case Directive",
       fn: toKebabCase,
     },
     {
-      regex: /\b(?:in\s+backticks|inline\s+code|backticks)\s+([a-zA-Z0-9_.\-\s]+?)(?=\s+(?:for|in|with|at|to|from|then|into|on|as|and)\b|[,;.]|$)/gi,
+      regex:
+        /\b(?:in\s+backticks|inline\s+code|backticks)\s+([a-zA-Z0-9_.\-\s]+?)(?=\s+(?:for|in|with|at|to|from|then|into|on|as|and)\b|[,;.]|$)/gi,
       style: "Inline `code` Directive",
       fn: (w) => `\`${w.join(" ")}\``,
     },
@@ -237,7 +243,10 @@ export function transformDeveloperText(rawInput: string): TransformResult {
     if (regex.test(text)) {
       matchedRules.push(style);
       text = text.replace(regex, (_, wordsRaw) => {
-        const words = wordsRaw.trim().split(/[\s_.-]+/).filter(Boolean);
+        const words = wordsRaw
+          .trim()
+          .split(/[\s_.-]+/)
+          .filter(Boolean);
         return fn(words);
       });
     }
@@ -286,8 +295,14 @@ export function transformDeveloperText(rawInput: string): TransformResult {
     !text.startsWith("//") &&
     !text.startsWith("###")
   ) {
-    if (!matchedRules.includes("camelCase Directive") && !matchedRules.includes("snake_case Directive")) {
-      text = text.charAt(0).toLowerCase() === "look at @" ? text : text.charAt(0).toUpperCase() + text.slice(1);
+    if (
+      !matchedRules.includes("camelCase Directive") &&
+      !matchedRules.includes("snake_case Directive")
+    ) {
+      text =
+        text.charAt(0).toLowerCase() === "look at @"
+          ? text
+          : text.charAt(0).toUpperCase() + text.slice(1);
     }
   }
 

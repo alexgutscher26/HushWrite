@@ -3,12 +3,14 @@
 <!-- Provide a clear and concise description of what this PR accomplishes. -->
 
 ### Related Issue / Roadmap Item
+
 - Closes #<!-- issue number -->
 - Roadmap Item: `<!-- e.g. [FEAT] [ASR] Parakeet ONNX Fast Tier -->`
 
 ---
 
 ## Type of Change
+
 - [ ] 🚀 New Feature (`[FEAT]`)
 - [ ] 🐛 Bug Fix (`[FIX]`)
 - [ ] ⚡ Performance Optimization (`[PERF]`)
@@ -22,11 +24,13 @@
 ## Testing & Verification
 
 ### Automated Checks
+
 - [ ] `cargo test --manifest-path src-tauri/Cargo.toml` passed with 0 failures.
 - [ ] `cargo test --manifest-path src-tauri/Cargo.toml bindings_are_up_to_date` passed (Tauri Specta bindings are synchronized).
 - [ ] `bun run build` (or `npm run build`) passed with 0 TypeScript/Vite errors.
 
 ### Manual QA & Verification Steps
+
 1. <!-- Step 1 -->
 2. <!-- Step 2 -->
 3. <!-- Step 3 -->
@@ -34,9 +38,11 @@
 ---
 
 ## UI Changes (Screenshots / Recordings)
+
 <!-- If this PR alters or adds UI components in the dashboard or floating pill overlay, attach screenshots or screen recordings below. -->
-| Before | After |
-| :--- | :--- |
+
+| Before              | After        |
+| :------------------ | :----------- |
 | _Screenshot / None_ | _Screenshot_ |
 
 ---

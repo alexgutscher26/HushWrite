@@ -235,6 +235,14 @@ impl AudioSource for CpalAudioSource {
         let drain = std::thread::Builder::new()
             .name("HushWrite-audio-drain".into())
             .spawn(move || {
+                #[cfg(target_os = "windows")]
+                unsafe {
+                    use windows::Win32::System::Threading::{
+                        GetCurrentThread, SetThreadPriority, THREAD_PRIORITY_TIME_CRITICAL,
+                    };
+                    let _ = SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+                }
+
                 let mut resampler = match Resampler16k::new(native_rate, channels) {
                     Ok(resampler) => resampler,
                     Err(err) => {

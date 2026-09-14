@@ -177,7 +177,7 @@ export default function CreatorsPage() {
   const [selectedDemo, setSelectedDemo] = useState(CREATOR_DEMOS[0]);
   const [currentSpoken, setCurrentSpoken] = useState(CREATOR_DEMOS[0].spoken);
   const [transformResult, setTransformResult] = useState<CreatorTransformResult>(() =>
-    transformCreatorText(CREATOR_DEMOS[0].spoken)
+    transformCreatorText(CREATOR_DEMOS[0].spoken),
   );
   const [displayedOutput, setDisplayedOutput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -315,14 +315,18 @@ export default function CreatorsPage() {
 
     // Web Speech Recognition
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const SpeechRecognition = typeof window !== "undefined" ? ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) : null;
+    const SpeechRecognition =
+      typeof window !== "undefined"
+        ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+        : null;
 
     if (SpeechRecognition) {
       try {
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = typeof navigator !== "undefined" ? navigator.language || "en-US" : "en-US";
+        recognition.lang =
+          typeof navigator !== "undefined" ? navigator.language || "en-US" : "en-US";
         recognition.maxAlternatives = 1;
 
         recognition.onstart = () => {
@@ -402,8 +406,8 @@ export default function CreatorsPage() {
           </h1>
 
           <p className="text-base sm:text-lg text-neutral-600 max-w-2xl mx-auto leading-relaxed font-normal">
-            HushWrite gives creators hours back every week by replacing typing, editing, and creative
-            friction with your natural voice. Dictate viral threads on{" "}
+            HushWrite gives creators hours back every week by replacing typing, editing, and
+            creative friction with your natural voice. Dictate viral threads on{" "}
             <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-neutral-100 border border-neutral-200 text-xs font-mono text-neutral-800">
               X (Twitter)
             </span>
@@ -448,7 +452,8 @@ export default function CreatorsPage() {
                 </span>
               </h2>
               <p className="text-xs sm:text-sm text-neutral-600 mt-1">
-                Click presets or use your microphone to test real-time creator schemas and voice templates.
+                Click presets or use your microphone to test real-time creator schemas and voice
+                templates.
               </p>
             </div>
 
@@ -532,7 +537,8 @@ export default function CreatorsPage() {
               </div>
 
               <div className="text-xs text-neutral-500 font-mono pt-1">
-                Primary Apps: <strong className="text-neutral-700 font-semibold">{selectedDemo.target}</strong>
+                Primary Apps:{" "}
+                <strong className="text-neutral-700 font-semibold">{selectedDemo.target}</strong>
               </div>
             </div>
 
@@ -643,9 +649,11 @@ export default function CreatorsPage() {
 
           <p className="text-sm sm:text-base text-neutral-700 leading-relaxed max-w-3xl">
             Cloud dictation services upload your voice, audio recordings, and confidential draft
-            text to external servers where they can be retained or used for third-party AI
-            training. <strong className="text-neutral-950 font-semibold">HushWrite never touches the Internet.</strong> Your
-            video ideas, client NDAs, sponsor pricing negotiations, and private creative drafts
+            text to external servers where they can be retained or used for third-party AI training.{" "}
+            <strong className="text-neutral-950 font-semibold">
+              HushWrite never touches the Internet.
+            </strong>{" "}
+            Your video ideas, client NDAs, sponsor pricing negotiations, and private creative drafts
             exist solely in your computer's memory.
           </p>
 
@@ -697,9 +705,7 @@ export default function CreatorsPage() {
                     <td className="p-4 sm:p-5 text-xs font-mono font-bold text-emerald-700 bg-emerald-50/20">
                       {row.HushWrite}
                     </td>
-                    <td className="p-4 sm:p-5 text-xs font-mono text-neutral-500">
-                      {row.wispr}
-                    </td>
+                    <td className="p-4 sm:p-5 text-xs font-mono text-neutral-500">{row.wispr}</td>
                   </tr>
                 ))}
               </tbody>
@@ -720,7 +726,8 @@ export default function CreatorsPage() {
               Start Creating at the Speed of Speech
             </h2>
             <p className="text-sm text-neutral-400">
-              Join thousands of writers, YouTubers, and podcasters drafting 4x faster with HushWrite.
+              Join thousands of writers, YouTubers, and podcasters drafting 4x faster with
+              HushWrite.
             </p>
           </div>
 

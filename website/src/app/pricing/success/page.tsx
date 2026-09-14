@@ -86,11 +86,16 @@ function SuccessContent() {
       }
 
       try {
-        const res = await fetch(`/api/checkout/session?session_id=${encodeURIComponent(sessionId)}`);
+        const res = await fetch(
+          `/api/checkout/session?session_id=${encodeURIComponent(sessionId)}`,
+        );
         if (res.ok) {
           const data = await res.json();
           if (isMounted) {
-            const key = data.licenseKey || keyParam || generateLicenseKey(data.tier || planParam, discountCode);
+            const key =
+              data.licenseKey ||
+              keyParam ||
+              generateLicenseKey(data.tier || planParam, discountCode);
             setSessionData({
               loading: false,
               licenseKey: key,
@@ -99,7 +104,7 @@ function SuccessContent() {
               amountTotal: data.amountTotal ?? (planParam === "pro_lifetime" ? 4900 : 4900),
               currency: data.currency || "usd",
               tier: (data.tier as PlanTierKey) || planParam,
-              isSubscription: data.isSubscription ?? (planParam === "pro_annual"),
+              isSubscription: data.isSubscription ?? planParam === "pro_annual",
               paymentStatus: data.paymentStatus || "paid",
             });
           }
@@ -189,7 +194,8 @@ function SuccessContent() {
           <div className="pt-4 flex items-center gap-2 text-xs text-neutral-600">
             <Mail className="size-3.5 text-neutral-400" />
             <span>
-              Receipt sent to: <strong className="text-neutral-900 font-medium">{sessionData.customerEmail}</strong>
+              Receipt sent to:{" "}
+              <strong className="text-neutral-900 font-medium">{sessionData.customerEmail}</strong>
             </span>
           </div>
         )}

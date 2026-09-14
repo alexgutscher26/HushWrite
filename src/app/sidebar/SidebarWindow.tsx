@@ -55,21 +55,24 @@ export function SidebarWindow({ activeRoute, onSelect }: SidebarWindowProps) {
     {
       id: "dictation",
       label: "Dictation",
-      tooltip: "Dictation & Transcriptions — View live dictations, waveform HUD, and recent transcript history",
+      tooltip:
+        "Dictation & Transcriptions — View live dictations, waveform HUD, and recent transcript history",
       icon: Mic,
       route: "dictation",
     },
     {
       id: "insights",
       label: "Insights",
-      tooltip: "Voice Analytics & Insights — Track speaking rate (WPM), total voice time, and transcription accuracy",
+      tooltip:
+        "Voice Analytics & Insights — Track speaking rate (WPM), total voice time, and transcription accuracy",
       icon: Gauge,
       route: "insights",
     },
     {
       id: "dictionary",
       label: "Dictionary",
-      tooltip: "Custom Vocabulary & Domain Packs — Teach HushWrite technical terms, acronyms, and project identifiers",
+      tooltip:
+        "Custom Vocabulary & Domain Packs — Teach HushWrite technical terms, acronyms, and project identifiers",
       icon: BookOpen,
       route: "dictionary",
     },
@@ -79,14 +82,16 @@ export function SidebarWindow({ activeRoute, onSelect }: SidebarWindowProps) {
     {
       id: "billing",
       label: "Plan & Billing",
-      tooltip: "Plan & Billing — Manage your HushWrite subscription tier, Pro license key, and renewal details",
+      tooltip:
+        "Plan & Billing — Manage your HushWrite subscription tier, Pro license key, and renewal details",
       icon: CreditCard,
       route: "billing",
     },
     {
       id: "invite",
       label: "Invite & Earn Pro",
-      tooltip: "Invite & Earn Pro — Share your referral link with colleagues to unlock free Pro months and packs",
+      tooltip:
+        "Invite & Earn Pro — Share your referral link with colleagues to unlock free Pro months and packs",
       icon: Gift,
       route: "invite",
       isSpecial: true,
@@ -94,14 +99,16 @@ export function SidebarWindow({ activeRoute, onSelect }: SidebarWindowProps) {
     {
       id: "settings",
       label: "Settings",
-      tooltip: "Preferences & Engine Settings — Configure hotkeys, audio devices, local Whisper models, and overlay HUD",
+      tooltip:
+        "Preferences & Engine Settings — Configure hotkeys, audio devices, local Whisper models, and overlay HUD",
       icon: Settings,
       route: "settings",
     },
     {
       id: "help",
       label: "Help & Shortcuts",
-      tooltip: "Help, Documentation & Shortcuts — View keyboard combinations, diagnostics, and cheatsheets",
+      tooltip:
+        "Help, Documentation & Shortcuts — View keyboard combinations, diagnostics, and cheatsheets",
       icon: HelpCircle,
       route: "help",
     },
@@ -187,4 +194,3 @@ export function SidebarWindow({ activeRoute, onSelect }: SidebarWindowProps) {
     </div>
   );
 }
-

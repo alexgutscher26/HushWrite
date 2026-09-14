@@ -79,9 +79,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* Preconnect to the download counter Worker so the first fetch is faster */}
-        <link rel="preconnect" href="https://hushwrite-download-counter.workinbox69.workers.dev" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://hushwrite-download-counter.workinbox69.workers.dev"
+          crossOrigin="anonymous"
+        />
         {/* dns-prefetch fallback for browsers that don't support preconnect */}
-        <link rel="dns-prefetch" href="https://hushwrite-download-counter.workinbox69.workers.dev" />
+        <link
+          rel="dns-prefetch"
+          href="https://hushwrite-download-counter.workinbox69.workers.dev"
+        />
       </head>
       <body className="min-h-screen bg-[#000000] font-sans text-white antialiased selection:bg-white/20 selection:text-white">
         <a

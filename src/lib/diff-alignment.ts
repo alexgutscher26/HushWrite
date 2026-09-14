@@ -33,7 +33,7 @@ export function tokenizeWords(text: string): string[] {
  */
 export function detectWordReplacements(
   originalText: string,
-  editedText: string
+  editedText: string,
 ): WordReplacementCandidate[] {
   if (!originalText || !editedText || originalText.trim() === editedText.trim()) {
     return [];
@@ -82,7 +82,11 @@ export function detectWordReplacements(
   const cleanPattern = rawPattern.replace(/^["'([{<]+|["')\]}>,.:;!?]+$/g, "").trim();
   const cleanReplacement = rawReplacement.replace(/^["'([{<]+|["')\]}>,.:;!?]+$/g, "").trim();
 
-  if (!cleanPattern || !cleanReplacement || cleanPattern.toLowerCase() === cleanReplacement.toLowerCase()) {
+  if (
+    !cleanPattern ||
+    !cleanReplacement ||
+    cleanPattern.toLowerCase() === cleanReplacement.toLowerCase()
+  ) {
     return [];
   }
 

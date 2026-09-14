@@ -77,9 +77,7 @@ export function DownloadCounter({ className = "" }: { className?: string }) {
       className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-neutral-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.06)] text-xs font-mono select-none ${className}`}
     >
       <Download className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-      <span className="font-semibold text-neutral-900 tabular-nums">
-        {formatCount(displayed)}
-      </span>
+      <span className="font-semibold text-neutral-900 tabular-nums">{formatCount(displayed)}</span>
       <span className="text-neutral-500">
         {displayed === 1 ? "free download" : "free downloads"}
       </span>

@@ -107,9 +107,9 @@
   - Forward to the same session actor event as keyboard push-to-talk
 - [x] [WIN] [FEAT] Dark mode tray icon variants — Ship two tray icon assets (light and dark) and switch based on SystemUsesLightTheme registry key.
   - Poll the registry on WM_SETTINGCHANGE with lParam == L"ImmersiveColorSet" to detect theme switches at runtime without restarting
-- [ ] [WIN] [PERF] Low-latency audio path via WASAPI event-driven mode — Switch from the current callback-polling model to IAudioClient::SetEventHandle + a dedicated high-priority thread (SetThreadPriority(THREAD_PRIORITY_TIME_CRITICAL)) to reduce jitter below 2ms.
-- [ ] [WIN] [UX] Per-monitor DPI awareness v2 — Declare PerMonitorV2 in the app manifest so the pill and dashboard scale correctly when dragged across mixed-DPI displays (e.g. laptop 200% + external 100%).
-- [ ] [WIN] [BUG] Tray icon disappears after Explorer crash — Register a TaskbarCreated message handler (RegisterWindowMessage(L"TaskbarCreated")) and re-add the tray icon when Explorer restarts.
+- [x] [WIN] [PERF] Low-latency audio path via WASAPI event-driven mode — Switch from the current callback-polling model to IAudioClient::SetEventHandle + a dedicated high-priority thread (SetThreadPriority(THREAD_PRIORITY_TIME_CRITICAL)) to reduce jitter below 2ms.
+- [x] [WIN] [UX] Per-monitor DPI awareness v2 — Declare PerMonitorV2 in the app manifest so the pill and dashboard scale correctly when dragged across mixed-DPI displays (e.g. laptop 200% + external 100%).
+- [x] [WIN] [BUG] Tray icon disappears after Explorer crash — Register a TaskbarCreated message handler (RegisterWindowMessage(L"TaskbarCreated")) and re-add the tray icon when Explorer restarts.
 - [ ] [WIN] [SEC] Memory-safe clipboard clear on lock — On WM_WTSSESSION_CHANGE with WTS_SESSION_LOCK, zero out the clipboard if it contains a HushWrite-set value using EmptyClipboard() followed by CloseClipboard().
 - [ ] [WIN] [INFRA] ARM64 Windows build — Add an aarch64-pc-windows-msvc target to the release CI matrix for Snapdragon X Elite / Surface Pro devices.
   - Validate whisper.cpp compiles with MSVC on ARM64 (requires CMake flag -DWHISPER_BLAS=OFF and possible NEON SIMD adjustments)

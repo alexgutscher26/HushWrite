@@ -34,7 +34,10 @@ const COMPARISONS_LINKS: FooterLink[] = [
     href: "/blog/HushWrite-vs-wispr-flow-vs-superwhisper-2026-latency-accuracy-comparison",
     label: "Methodology Benchmark",
   },
-  { href: "/blog/best-private-dictation-software-for-developers", label: "Best Dictation for Devs" },
+  {
+    href: "/blog/best-private-dictation-software-for-developers",
+    label: "Best Dictation for Devs",
+  },
   { href: "/offline-voice-to-text-for-windows", label: "Offline Windows Dictation" },
   { href: "/#comparison", label: "Cloud vs Local Matrix" },
 ];
@@ -219,7 +222,12 @@ export function Footer() {
       <div className="absolute inset-0 pointer-events-none opacity-45 overflow-hidden [mask-image:radial-gradient(ellipse_75%_85%_at_50%_100%,#000_20%,rgba(0,0,0,0.4)_55%,transparent_85%)]">
         <svg className="w-full h-full text-neutral-300" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="footer-pixel-matrix-grid" width="16" height="16" patternUnits="userSpaceOnUse">
+            <pattern
+              id="footer-pixel-matrix-grid"
+              width="16"
+              height="16"
+              patternUnits="userSpaceOnUse"
+            >
               <rect
                 x="2"
                 y="2"
@@ -245,7 +253,9 @@ export function Footer() {
                 <Mark size="sm" animated />
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-base text-neutral-950 tracking-tight">HushWrite</span>
+                <span className="font-bold text-base text-neutral-950 tracking-tight">
+                  HushWrite
+                </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-mono font-medium">
                   v1.2.1
                 </span>
@@ -254,8 +264,8 @@ export function Footer() {
 
             <p className="text-sm text-neutral-600 leading-relaxed max-w-sm">
               Local speech-to-text for Windows (with Mac Early Access for technical testers). Free
-              forever, open source, and your audio never leaves your device. Built with Rust, Tauri 2,
-              and whisper.cpp.
+              forever, open source, and your audio never leaves your device. Built with Rust, Tauri
+              2, and whisper.cpp.
             </p>
 
             <ul className="flex flex-wrap items-center gap-2">
@@ -331,7 +341,8 @@ export function Footer() {
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-neutral-500">
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <p>
-              © {new Date().getFullYear()} HushWrite. Zero telemetry, 100% on-device data sovereignty.
+              © {new Date().getFullYear()} HushWrite. Zero telemetry, 100% on-device data
+              sovereignty.
             </p>
             <a
               href="https://HushWrite.app"

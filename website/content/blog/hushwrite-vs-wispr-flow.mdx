@@ -37,16 +37,16 @@ However, Wispr Flow is built on a **cloud-first architecture**: your audio is st
 
 ### Technical & Architectural Comparison
 
-| Architectural Parameter | Wispr Flow | HushWrite (Local-First) |
-|:---|:---|:---|
-| **Audio Processing Model** | Remote Cloud GPU Clusters | **100% On-Device (DirectML / Metal)** |
-| **Outbound Data Egress** | Continuous audio stream over HTTPS/WSS | **0.00 KB (Air-Gapped)** |
-| **Tail Latency ($p95$)** | 450–900 ms (Network dependent) | **130–180 ms (Hardware direct)** |
-| **Offline Capability** | Inoperable without internet | **100% Operational in Airplane Mode** |
-| **Windows Support** | Web / Electron client | **Native Rust Win32 DirectML Engine** |
-| **Free Tier Limitation** | Capped at 2,000 words / week | **Unlimited dictation forever (Open Source)** |
-| **Pricing Model** | ~$15.00 / month ($180.00 / year) | **Free MIT Core / Lifetime Upgrade** |
-| **Source Code Auditing** | Closed-source commercial binary | **100% Open Source on GitHub** |
+| Architectural Parameter    | Wispr Flow                             | HushWrite (Local-First)                       |
+| :------------------------- | :------------------------------------- | :-------------------------------------------- |
+| **Audio Processing Model** | Remote Cloud GPU Clusters              | **100% On-Device (DirectML / Metal)**         |
+| **Outbound Data Egress**   | Continuous audio stream over HTTPS/WSS | **0.00 KB (Air-Gapped)**                      |
+| **Tail Latency ($p95$)**   | 450–900 ms (Network dependent)         | **130–180 ms (Hardware direct)**              |
+| **Offline Capability**     | Inoperable without internet            | **100% Operational in Airplane Mode**         |
+| **Windows Support**        | Web / Electron client                  | **Native Rust Win32 DirectML Engine**         |
+| **Free Tier Limitation**   | Capped at 2,000 words / week           | **Unlimited dictation forever (Open Source)** |
+| **Pricing Model**          | ~$15.00 / month ($180.00 / year)       | **Free MIT Core / Lifetime Upgrade**          |
+| **Source Code Auditing**   | Closed-source commercial binary        | **100% Open Source on GitHub**                |
 
 ---
 

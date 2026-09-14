@@ -359,7 +359,9 @@ export default async function BlogPostPage({ params }: Props) {
             {post.title}
           </h1>
 
-          <p className="text-base sm:text-lg text-neutral-600 leading-relaxed">{post.description}</p>
+          <p className="text-base sm:text-lg text-neutral-600 leading-relaxed">
+            {post.description}
+          </p>
 
           {/* Author Badge */}
           <div className="flex items-center gap-3 mt-6 pt-6 border-t border-neutral-200">
@@ -427,8 +429,8 @@ export default async function BlogPostPage({ params }: Props) {
             Experience 100% On-Device Voice Typing
           </h2>
           <p className="text-xs sm:text-sm text-neutral-400 max-w-md mx-auto mb-6 leading-relaxed">
-            HushWrite runs locally on your Mac or Windows PC. No cloud transcription, no audio uploads,
-            zero subscriptions.
+            HushWrite runs locally on your Mac or Windows PC. No cloud transcription, no audio
+            uploads, zero subscriptions.
           </p>
           <a
             href="/#download"

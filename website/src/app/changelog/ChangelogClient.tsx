@@ -107,7 +107,8 @@ export function ChangelogClient() {
               <span>Release Integrity</span>
             </div>
             <p className="text-[11px] leading-relaxed text-neutral-500">
-              All HushWrite builds are code-signed and published with reproducible SHA-256 checksums to GitHub Releases.
+              All HushWrite builds are code-signed and published with reproducible SHA-256 checksums
+              to GitHub Releases.
             </p>
             <a
               href="https://github.com/alexgutscher26/HushWrite/releases"
@@ -154,7 +155,7 @@ export function ChangelogClient() {
                         copyToClipboard(
                           `${window.location.origin}/changelog#${release.anchor}`,
                           "anchor",
-                          release.anchor
+                          release.anchor,
                         )
                       }
                       title="Copy link to this release"
@@ -205,7 +206,7 @@ export function ChangelogClient() {
                     <div className="flex items-center gap-2">
                       <span
                         className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md border font-mono ${getCategoryBadgeClass(
-                          item.category
+                          item.category,
                         )}`}
                       >
                         {getCategoryIcon(item.category)}
@@ -241,9 +242,7 @@ export function ChangelogClient() {
               <div className="pt-6 border-t border-neutral-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 {release.sha256 && (
                   <div className="flex items-center gap-2 max-w-full overflow-hidden">
-                    <span className="text-[11px] font-mono text-neutral-400 shrink-0">
-                      SHA256:
-                    </span>
+                    <span className="text-[11px] font-mono text-neutral-400 shrink-0">SHA256:</span>
                     <code className="text-[11px] font-mono bg-neutral-100 px-2 py-1 rounded text-neutral-600 truncate max-w-[200px] sm:max-w-[320px]">
                       {release.sha256}
                     </code>

@@ -16,7 +16,8 @@ import { unwrapCommand } from "@/lib/ipc";
 import { detectWordReplacements } from "@/lib/diff-alignment";
 
 export type FeedbackRating = "positive" | "negative" | null;
-export type FeedbackReason = "misheard_words" | "missing_punctuation" | "noise_artifact" | "formatting";
+export type FeedbackReason =
+  "misheard_words" | "missing_punctuation" | "noise_artifact" | "formatting";
 
 export interface SessionFeedbackData {
   rating: FeedbackRating;
@@ -51,7 +52,9 @@ export interface SessionFeedbackProps {
 }
 
 export function SessionFeedback({ session, className, onFeedbackChange }: SessionFeedbackProps) {
-  const [feedback, setFeedback] = useState<SessionFeedbackData | null>(() => getStoredFeedback(session.id));
+  const [feedback, setFeedback] = useState<SessionFeedbackData | null>(() =>
+    getStoredFeedback(session.id),
+  );
   const [showReasonPicker, setShowReasonPicker] = useState(false);
   const [customPattern, setCustomPattern] = useState("");
   const [customReplacement, setCustomReplacement] = useState("");
@@ -90,7 +93,7 @@ export function SessionFeedback({ session, className, onFeedbackChange }: Sessio
         }
       }
     },
-    [feedback, session.id, onFeedbackChange]
+    [feedback, session.id, onFeedbackChange],
   );
 
   const handleSelectReason = useCallback(
@@ -104,7 +107,7 @@ export function SessionFeedback({ session, className, onFeedbackChange }: Sessio
       saveStoredFeedback(session.id, updated);
       setShowReasonPicker(false);
     },
-    [session.id]
+    [session.id],
   );
 
   const handleAddCustomWord = useCallback(
@@ -164,7 +167,7 @@ export function SessionFeedback({ session, className, onFeedbackChange }: Sessio
           "rounded p-1 transition-colors cursor-pointer",
           feedback?.rating === "positive"
             ? "text-success bg-success/15"
-            : "text-text-tertiary hover:text-text-secondary hover:bg-sunken"
+            : "text-text-tertiary hover:text-text-secondary hover:bg-sunken",
         )}
       >
         <ThumbsUp className="size-3.5" />
@@ -182,7 +185,7 @@ export function SessionFeedback({ session, className, onFeedbackChange }: Sessio
           "rounded p-1 transition-colors cursor-pointer",
           feedback?.rating === "negative"
             ? "text-warning bg-warning/15"
-            : "text-text-tertiary hover:text-text-secondary hover:bg-sunken"
+            : "text-text-tertiary hover:text-text-secondary hover:bg-sunken",
         )}
       >
         <ThumbsDown className="size-3.5" />
@@ -195,7 +198,9 @@ export function SessionFeedback({ session, className, onFeedbackChange }: Sessio
           className="absolute right-0 top-full z-50 mt-1.5 w-72 rounded-card border border-hairline bg-surface p-2.5 shadow-popover backdrop-blur-md text-text-primary"
         >
           <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-hairline">
-            <span className="text-[11px] font-semibold text-text-primary">Teach Murmur & Score</span>
+            <span className="text-[11px] font-semibold text-text-primary">
+              Teach Murmur & Score
+            </span>
             <button
               type="button"
               onClick={() => setShowReasonPicker(false)}
@@ -211,7 +216,9 @@ export function SessionFeedback({ session, className, onFeedbackChange }: Sessio
               onClick={() => handleSelectReason("misheard_words")}
               className={cn(
                 "rounded px-2 py-1 text-left text-xs transition-colors hover:bg-sunken",
-                feedback?.reason === "misheard_words" ? "font-semibold text-accent" : "text-text-secondary"
+                feedback?.reason === "misheard_words"
+                  ? "font-semibold text-accent"
+                  : "text-text-secondary",
               )}
             >
               Misheard domain / technical words
@@ -221,7 +228,9 @@ export function SessionFeedback({ session, className, onFeedbackChange }: Sessio
               onClick={() => handleSelectReason("missing_punctuation")}
               className={cn(
                 "rounded px-2 py-1 text-left text-xs transition-colors hover:bg-sunken",
-                feedback?.reason === "missing_punctuation" ? "font-semibold text-accent" : "text-text-secondary"
+                feedback?.reason === "missing_punctuation"
+                  ? "font-semibold text-accent"
+                  : "text-text-secondary",
               )}
             >
               Missing or unnatural punctuation
@@ -231,7 +240,9 @@ export function SessionFeedback({ session, className, onFeedbackChange }: Sessio
               onClick={() => handleSelectReason("noise_artifact")}
               className={cn(
                 "rounded px-2 py-1 text-left text-xs transition-colors hover:bg-sunken",
-                feedback?.reason === "noise_artifact" ? "font-semibold text-accent" : "text-text-secondary"
+                feedback?.reason === "noise_artifact"
+                  ? "font-semibold text-accent"
+                  : "text-text-secondary",
               )}
             >
               Hallucinated noise / echo
@@ -241,7 +252,9 @@ export function SessionFeedback({ session, className, onFeedbackChange }: Sessio
               onClick={() => handleSelectReason("formatting")}
               className={cn(
                 "rounded px-2 py-1 text-left text-xs transition-colors hover:bg-sunken",
-                feedback?.reason === "formatting" ? "font-semibold text-accent" : "text-text-secondary"
+                feedback?.reason === "formatting"
+                  ? "font-semibold text-accent"
+                  : "text-text-secondary",
               )}
             >
               Paragraphing / capitalization issue
@@ -262,10 +275,12 @@ export function SessionFeedback({ session, className, onFeedbackChange }: Sessio
                   className="w-full flex items-center justify-between gap-1.5 px-2 py-1 mb-1 rounded bg-accent/10 border border-accent/20 hover:bg-accent/20 text-xs text-left text-text-primary transition-colors"
                 >
                   <span className="truncate">
-                    <span className="line-through text-text-tertiary mr-1">{c.pattern}</span>
-                    ➔ <strong className="text-accent">{c.replacement}</strong>
+                    <span className="line-through text-text-tertiary mr-1">{c.pattern}</span>➔{" "}
+                    <strong className="text-accent">{c.replacement}</strong>
                   </span>
-                  <span className="shrink-0 text-[10px] font-medium text-accent">Always Correct</span>
+                  <span className="shrink-0 text-[10px] font-medium text-accent">
+                    Always Correct
+                  </span>
                 </button>
               ))}
             </div>

@@ -88,8 +88,7 @@ export const DOMAIN_PACKS: readonly DomainPack[] = [
     name: "AI, ML & GPU",
     badge: "Developer",
     badgeType: "developer",
-    description:
-      "PyTorch, CUDA, WhisperX, LLM, RAG, Ollama, Hugging Face, embeddings, inference.",
+    description: "PyTorch, CUDA, WhisperX, LLM, RAG, Ollama, Hugging Face, embeddings, inference.",
     entries: [
       { pattern: "pie torch", replacement: "PyTorch" },
       { pattern: "see you dee ay", replacement: "CUDA" },

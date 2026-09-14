@@ -74,8 +74,8 @@ export default function ChangelogPage() {
           </h1>
 
           <p className="text-base sm:text-lg text-neutral-600 leading-relaxed font-normal mb-8">
-            Every update, performance optimization, model quantization improvement, and fix
-            shipped to HushWrite. Subscribe to releases on GitHub or download the latest desktop binary.
+            Every update, performance optimization, model quantization improvement, and fix shipped
+            to HushWrite. Subscribe to releases on GitHub or download the latest desktop binary.
           </p>
 
           <div className="flex items-center justify-center gap-3">

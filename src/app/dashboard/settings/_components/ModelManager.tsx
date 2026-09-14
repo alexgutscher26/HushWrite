@@ -47,7 +47,9 @@ export function ModelManager() {
   const [progress, setProgress] = useState<Readonly<Record<string, DownloadProgress>>>({});
   const [liveStates, setLiveStates] = useState<Readonly<Record<string, ModelState>>>({});
   const [downloadingIds, setDownloadingIds] = useState<ReadonlySet<string>>(new Set());
-  const [categoryFilter, setCategoryFilter] = useState<"all" | "speech" | "parakeet" | "llm">("all");
+  const [categoryFilter, setCategoryFilter] = useState<"all" | "speech" | "parakeet" | "llm">(
+    "all",
+  );
   const [proModalOpen, setProModalOpen] = useState(false);
   const [gatedModelName, setGatedModelName] = useState("Whisper Large v3 Turbo");
   const [downloadError, setDownloadError] = useState<AppError | null>(null);
@@ -284,14 +286,14 @@ export function ModelManager() {
             state: liveStates[report.descriptor.id] ?? report.state,
           };
           const isParakeet = model.descriptor.id.includes("parakeet");
-          const isLlm =
-            model.descriptor.id.includes("qwen") || model.descriptor.id.includes("phi");
+          const isLlm = model.descriptor.id.includes("qwen") || model.descriptor.id.includes("phi");
           const isProModel =
             model.descriptor.id.includes("turbo") ||
             model.descriptor.id.includes("large") ||
             model.descriptor.id.includes("medium") ||
             model.descriptor.id.includes("q6_k");
-          const isCompressed = model.descriptor.id.includes("q3_") || model.descriptor.id.includes("q4_k_m");
+          const isCompressed =
+            model.descriptor.id.includes("q3_") || model.descriptor.id.includes("q4_k_m");
           const isUnlocked = canUseTurboModel(tier);
           const isLocked = isProModel && !isUnlocked;
           const isActive = isLlm
@@ -502,7 +504,11 @@ function ModelAction({
           disabled={isAnyDownloading}
           onClick={() => onDownload(descriptor.id)}
           className="hairline flex shrink-0 items-center gap-1.5 rounded-input bg-sunken px-2.5 py-1 text-xs font-semibold text-text-primary transition-colors hover:bg-sunken-strong disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          title={isAnyDownloading ? "Another model download is currently in progress" : `Resume downloading ${descriptor.display_name}`}
+          title={
+            isAnyDownloading
+              ? "Another model download is currently in progress"
+              : `Resume downloading ${descriptor.display_name}`
+          }
         >
           <Download className="size-3.5" />
           Resume
@@ -513,7 +519,11 @@ function ModelAction({
           aria-label={`Delete partial download for ${descriptor.display_name}`}
           onClick={() => onDelete(descriptor.id)}
           className="shrink-0 rounded-input p-1 text-text-secondary transition-colors hover:bg-sunken hover:text-danger disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          title={isAnyDownloading ? "Another download is in progress" : `Delete partial download for ${descriptor.display_name} to free disk space`}
+          title={
+            isAnyDownloading
+              ? "Another download is in progress"
+              : `Delete partial download for ${descriptor.display_name} to free disk space`
+          }
         >
           <Trash2 className="size-4" />
         </button>
@@ -620,7 +630,11 @@ function ModelAction({
           disabled={isAnyDownloading}
           onClick={() => onDownload(descriptor.id)}
           className="hairline flex shrink-0 items-center gap-2 rounded-input bg-sunken px-3 py-1 text-body text-text-primary transition-colors hover:bg-sunken-strong disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          title={isAnyDownloading ? "Another download is in progress" : `Retry downloading ${descriptor.display_name} (${formatBytes(descriptor.size_bytes)})`}
+          title={
+            isAnyDownloading
+              ? "Another download is in progress"
+              : `Retry downloading ${descriptor.display_name} (${formatBytes(descriptor.size_bytes)})`
+          }
         >
           <Download className="size-4" />
           Try again
@@ -644,7 +658,11 @@ function ModelAction({
       disabled={isAnyDownloading}
       onClick={() => onDownload(descriptor.id)}
       className="hairline flex shrink-0 items-center gap-2 rounded-input bg-sunken px-3 py-1 text-body text-text-primary transition-colors hover:bg-sunken-strong disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-      title={isAnyDownloading ? "Another download is in progress" : `Download ${descriptor.display_name} (${formatBytes(descriptor.size_bytes)}, approx ${descriptor.approx_ram_mb} MB RAM)`}
+      title={
+        isAnyDownloading
+          ? "Another download is in progress"
+          : `Download ${descriptor.display_name} (${formatBytes(descriptor.size_bytes)}, approx ${descriptor.approx_ram_mb} MB RAM)`
+      }
     >
       <Download className="size-4" />
       Download

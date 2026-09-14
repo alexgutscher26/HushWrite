@@ -51,14 +51,16 @@ export function OverlayStep({ onDone }: OverlayStepProps) {
       {/* ── Top interactive preview ─────────────────────────────────── */}
       <div className="relative h-28 w-full rounded-2xl border border-stone-200/80 bg-stone-950 overflow-hidden flex items-center justify-center p-3 dark:border-stone-800">
         <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:14px_14px]" />
-        
+
         {/* Top notch frame representation */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-3 bg-black/90 rounded-b-xl border-b border-x border-white/15" />
 
         {selectedStyle === "none" ? (
           <div className="flex items-center gap-2 text-stone-400">
             <EyeOff className="size-4" />
-            <span className="text-xs font-medium text-stone-300">Stealth (Zero on-screen indicator)</span>
+            <span className="text-xs font-medium text-stone-300">
+              Stealth (Zero on-screen indicator)
+            </span>
           </div>
         ) : selectedStyle === "notch_slim_band" ? (
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-1.5 rounded-b-md bg-stone-900 border-b border-x border-white/20 flex items-center justify-center px-1">

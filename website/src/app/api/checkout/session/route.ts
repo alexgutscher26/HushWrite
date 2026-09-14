@@ -53,7 +53,8 @@ export async function GET(req: NextRequest) {
 
     const tier = (session.metadata?.tier as PlanTierKey) || "pro_lifetime";
     const licenseKey = session.metadata?.licenseKey || "";
-    const discountCode = session.metadata?.discountCode !== "NONE" ? session.metadata?.discountCode : null;
+    const discountCode =
+      session.metadata?.discountCode !== "NONE" ? session.metadata?.discountCode : null;
 
     const customerEmail =
       session.customer_details?.email ||

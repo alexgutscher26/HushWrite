@@ -37,7 +37,8 @@ export function getStripeClient(): Stripe | null {
 
   if (!stripeInstance) {
     stripeInstance = new Stripe(secretKey, {
-      apiVersion: (process.env.STRIPE_API_VERSION || "2025-03-31.basil") as unknown as Stripe.LatestApiVersion,
+      apiVersion: (process.env.STRIPE_API_VERSION ||
+        "2025-03-31.basil") as unknown as Stripe.LatestApiVersion,
       typescript: true,
       appInfo: {
         name: "HushWrite",
