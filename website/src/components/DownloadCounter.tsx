@@ -28,22 +28,28 @@ export function DownloadCounter({ className = "" }: { className?: string }) {
   useEffect(() => {
     let cancelled = false;
 
-    fetch(ENDPOINT)
-      .then((r) => {
-        if (!r.ok) throw new Error(`${r.status}`);
-        return r.json() as Promise<{ count: number }>;
-      })
-      .then(({ count }) => {
-        if (!cancelled && typeof count === "number" && count >= 0) {
-          setCount(count);
-        }
-      })
-      .catch(() => {
-        // Unreachable — render nothing
-      });
+    const loadCount = () => {
+      fetch(ENDPOINT)
+        .then((r) => {
+          if (!r.ok) throw new Error(`${r.status}`);
+          return r.json() as Promise<{ count: number }>;
+        })
+        .then(({ count }) => {
+          if (!cancelled && typeof count === "number" && count >= 0) {
+            setCount(count);
+          }
+        })
+        .catch(() => {
+          // Unreachable — render nothing
+        });
+    };
+
+    loadCount();
+    const interval = setInterval(loadCount, 30_000);
 
     return () => {
       cancelled = true;
+      clearInterval(interval);
     };
   }, []);
 

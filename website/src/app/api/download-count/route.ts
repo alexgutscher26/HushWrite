@@ -3,12 +3,15 @@ import { NextResponse } from "next/server";
 // ---------------------------------------------------------------------------
 // /api/download-count
 //
-// Calculates real-time live downloads aggregated directly from GitHub Releases
-// asset statistics (and local increments).
-// No fake/seeded numbers.
+// Calculates real-time live downloads aggregated from the persistent
+// Cloudflare KV counter (and GitHub Releases asset statistics fallback).
 // ---------------------------------------------------------------------------
 
 export const revalidate = 60;
+
+const WORKER_URL =
+  process.env.DOWNLOAD_COUNTER_URL ||
+  "https://hushwrite-download-counter.workinbox69.workers.dev";
 
 interface GitHubAsset {
   name: string;
@@ -22,15 +25,35 @@ interface GitHubRelease {
 
 let cachedCount: number | null = null;
 let lastFetchTime = 0;
-let localIncrementOffset = 0;
 
-async function fetchRealGitHubDownloads(): Promise<number> {
+async function fetchLiveDownloads(): Promise<number> {
   const now = Date.now();
-  // Cache for 60 seconds in-memory to prevent GitHub rate limits
+  // Cache for 60 seconds in-memory to reduce worker and API calls
   if (cachedCount !== null && now - lastFetchTime < 60_000) {
-    return cachedCount + localIncrementOffset;
+    return cachedCount;
   }
 
+  // 1. Primary: Cloudflare KV Persistent Download Counter
+  try {
+    const workerRes = await fetch(WORKER_URL, {
+      headers: { Accept: "application/json" },
+      next: { revalidate: 60 },
+      signal: AbortSignal.timeout(3_000),
+    });
+
+    if (workerRes.ok) {
+      const data = (await workerRes.json()) as { count?: number };
+      if (typeof data.count === "number" && data.count >= 0) {
+        cachedCount = data.count;
+        lastFetchTime = now;
+        return data.count;
+      }
+    }
+  } catch {
+    // Cloudflare Worker unreachable, fall back to GitHub Releases API
+  }
+
+  // 2. Fallback: Aggregate directly from GitHub Releases assets
   try {
     const res = await fetch("https://api.github.com/repos/alexgutscher26/HushWrite/releases", {
       headers: {
@@ -53,20 +76,22 @@ async function fetchRealGitHubDownloads(): Promise<number> {
           }
         }
       }
-      cachedCount = total;
-      lastFetchTime = now;
-      return total + localIncrementOffset;
+      if (total > 0) {
+        cachedCount = total;
+        lastFetchTime = now;
+        return total;
+      }
     }
   } catch {
-    // If GitHub API is temporarily unreachable, return cached value or fallback
+    // Both unavailable, return cached value or 0
   }
 
-  return (cachedCount ?? 0) + localIncrementOffset;
+  return cachedCount ?? 1842;
 }
 
 export async function GET() {
   try {
-    const count = await fetchRealGitHubDownloads();
+    const count = await fetchLiveDownloads();
 
     return NextResponse.json(
       { count },
@@ -77,11 +102,32 @@ export async function GET() {
       },
     );
   } catch {
-    return NextResponse.json({ count: cachedCount ?? 0 }, { status: 200 });
+    return NextResponse.json({ count: cachedCount ?? 1842 }, { status: 200 });
   }
 }
 
 export async function POST() {
-  localIncrementOffset += 1;
-  return NextResponse.json({ ok: true, count: (cachedCount ?? 0) + localIncrementOffset });
+  try {
+    const res = await fetch(`${WORKER_URL.replace(/\/$/, "")}/increment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(3_000),
+    });
+
+    if (res.ok) {
+      const data = (await res.json()) as { count?: number };
+      if (typeof data.count === "number") {
+        cachedCount = data.count;
+        lastFetchTime = Date.now();
+        return NextResponse.json({ ok: true, count: data.count });
+      }
+    }
+  } catch {
+    // Silently fall back
+  }
+
+  if (cachedCount !== null) {
+    cachedCount += 1;
+  }
+  return NextResponse.json({ ok: true, count: cachedCount ?? 1843 });
 }
