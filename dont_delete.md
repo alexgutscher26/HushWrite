@@ -21,3 +21,10 @@ $env:AZURE_TENANT_ID = "744bdc23-0b2e-4bfd-811e-c142a64b68fd"
   /dlib ".\dlib\bin\x64\Azure.CodeSigning.Dlib.dll" `
   /dmdf ".\metadata.json" `
   "website\public\downloads\HushWrite_1.2.1_x64_en-US.msi"
+
+
+# Preview changes without modifying files:
+bun run version:bump 1.2.2 -DryRun
+
+# Execute atomic version bump across codebase:
+bun run version:bump 1.2.2
