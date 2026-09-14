@@ -175,6 +175,17 @@ pub fn start_theme_listener(app: AppHandle) {
                     return LRESULT(0);
                 }
 
+                // WM_WTSSESSION_CHANGE = 0x02B1, WTS_SESSION_LOCK = 0x7
+                if msg == 0x02B1 && w_param.0 == 0x7 {
+                    tracing::info!("Windows session locked; clearing sensitive dictation clipboard data");
+                    use windows::Win32::System::DataExchange::{CloseClipboard, EmptyClipboard, OpenClipboard};
+                    if OpenClipboard(hwnd).is_ok() {
+                        let _ = EmptyClipboard();
+                        let _ = CloseClipboard();
+                    }
+                    return LRESULT(0);
+                }
+
                 match msg {
                     WM_SETTINGCHANGE => {
                         let should_check = if l_param.0 != 0 {
@@ -254,6 +265,17 @@ pub fn start_theme_listener(app: AppHandle) {
             };
 
             THEME_LISTENER_HWND.store(hwnd.0 as isize, Ordering::SeqCst);
+
+            // Register for Windows workstation lock/unlock notifications (wtsapi32.dll)
+            use windows::Win32::System::LibraryLoader::{GetProcAddress, LoadLibraryW};
+            if let Ok(wts_lib) = LoadLibraryW(windows::core::w!("wtsapi32.dll")) {
+                type WTSRegisterFn = unsafe extern "system" fn(HWND, u32) -> windows::Win32::Foundation::BOOL;
+                if let Some(register_proc) = GetProcAddress(wts_lib, windows::core::s!("WTSRegisterSessionNotification")) {
+                    let register_fn: WTSRegisterFn = std::mem::transmute(register_proc);
+                    // 0 = NOTIFY_FOR_THIS_SESSION
+                    let _ = register_fn(hwnd, 0);
+                }
+            }
 
             let mut msg = MSG::default();
             while GetMessageW(&mut msg, None, 0, 0).into() {
