@@ -40,6 +40,32 @@ interface ReleaseEntry {
 
 const RELEASES: ReleaseEntry[] = [
   {
+    version: "v1.2.1",
+    date: "September 14, 2026",
+    badge: "Latest",
+    title: "HushWrite 1.2.1 — Smart Inline Learning & Developer Accuracy",
+    highlights: [
+      {
+        icon: <Sparkles className="size-4 text-text-primary" />,
+        title: "Inline Edit Learning & Quick-Correct Flow",
+        description:
+          "Automatically detects when you correct misheard words and shows a floating prompt to permanently add rules into your local dictionary with 1 click.",
+      },
+      {
+        icon: <Layers className="size-4 text-text-primary" />,
+        title: "AI, ML & Developer Domain Packs",
+        description:
+          "Pre-mapped phonetic replacements for PyTorch, CUDA, WhisperX, LLM, RAG, Ollama, Kubernetes, docker-compose, and VS Code.",
+      },
+      {
+        icon: <Zap className="size-4 text-text-primary" />,
+        title: "Dual-Layer Prompt Biasing & SQLite Rules",
+        description:
+          "Dictionary terms are passed directly into Whisper's decoding prompt tokens and enforced with deterministic whole-word post-processing.",
+      },
+    ],
+  },
+  {
     version: "v1.0.0",
     date: "September 2026",
     badge: "Stable Release",

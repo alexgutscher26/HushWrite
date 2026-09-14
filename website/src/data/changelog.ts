@@ -20,11 +20,40 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: "1.2.1",
+    anchor: "1-2-1",
+    title: "Smart Inline Edit Learning & Developer Domain Packs",
+    date: "September 14, 2026",
+    isLatest: true,
+    tagUrl: "https://github.com/alexgutscher26/HushWrite/releases/tag/v1.2.1",
+    downloadUrl: "https://github.com/alexgutscher26/HushWrite/releases/download/v1.2.1/HushWrite-Setup-1.2.1.exe",
+    summary:
+      "Intelligent inline edit learning with 1-click 'Always Correct' prompts, new AI/ML/GPU and developer domain packs, and dual-layer Whisper initial_prompt biasing with deterministic SQLite replacements.",
+    items: [
+      {
+        category: "Added",
+        title: "Inline Edit Learning & Quick-Correct Prompts",
+        details: [
+          "Local diff & word alignment engine detecting misheard-to-corrected word pairs automatically.",
+          "Floating 'Always Correct' toast prompt capturing custom terminology in 1 click.",
+          "Dual-layer vocabulary biasing: updates Whisper's initial decoding prompt tokens while enforcing whole-word replacement rules in SQLite.",
+        ],
+      },
+      {
+        category: "Added",
+        title: "Expanded Developer & AI Domain Packs",
+        details: [
+          "New AI, ML & GPU Pack with pre-mapped phonetics for PyTorch, CUDA, WhisperX, LLM, RAG, Ollama, and Hugging Face.",
+          "Expanded Backend, Systems & Web packs with rules for Kubernetes, HushWrite, docker-compose, VS Code, and TanStack.",
+        ],
+      },
+    ],
+  },
+  {
     version: "1.0.2",
     anchor: "1-0-2",
     title: "Stripe Managed Payments & Production Hardening",
     date: "September 12, 2026",
-    isLatest: true,
     tagUrl: "https://github.com/alexgutscher26/HushWrite/releases/tag/v1.0.2",
     downloadUrl: "https://github.com/alexgutscher26/HushWrite/releases/download/v1.0.2/HushWrite-Setup-1.0.2.exe",
     sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.1] - 2026-09-14
+
+### Added
+
+- **Inline Edit Learning & Quick-Correct Flow**:
+  - **Local Diff & Word Alignment Engine**: Computes word-level alignment between delivered dictation and corrected text, extracting minimal `(misheard pattern ➔ corrected replacement)` pairs.
+  - **Floating Quick-Correct Prompt**: Interactive toast banner offering a 1-click **"Always Correct"** action when a correction is detected.
+  - **Dual-Layer Vocabulary Biasing**: Confirmed edits automatically update Whisper's initial decoding prompt tokens while simultaneously enforcing whole-word post-processing replacements in SQLite.
+  - **Session History Quick Learning**: Enhanced session feedback popover with auto-detected correction chips for one-tap dictionary additions.
+- **Expanded Developer & AI Domain Packs**:
+  - **New AI, ML & GPU Pack**: Built-in phonetic mappings for `PyTorch`, `CUDA`, `WhisperX`, `LLM`, `RAG`, `Ollama`, `Hugging Face`, and `LangChain`.
+  - **Enhanced Systems & Web Packs**: Added common mishearings for `Kubernetes`, `HushWrite`, `docker-compose`, `VS Code`, `TanStack`, and `OAuth`.
+
+### Changed & Fixed
+
+- Fixed TypeScript tsconfig module resolution settings for modern bundler workflows.
+- Improved error handling in custom vocabulary database transactions.
+
 ## [1.0.2] - 2026-09-12
 
 ### Changed & Fixed

@@ -29,3 +29,4 @@ export * from "./ShortcutsModal";
 export * from "./ChangelogModal";
 export * from "./PrivacyModal";
 export * from "./ProFeatureModal";
+export * from "./QuickCorrectToast";
