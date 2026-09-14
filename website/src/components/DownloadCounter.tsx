@@ -15,9 +15,6 @@ import { Download } from "lucide-react";
 const ENDPOINT = "/api/download-count";
 
 function formatCount(n: number): string {
-  if (n >= 1_000) {
-    return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "k+";
-  }
   return n.toLocaleString();
 }
 
