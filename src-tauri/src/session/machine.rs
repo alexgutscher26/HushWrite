@@ -242,6 +242,10 @@ impl SessionMachine {
                     ],
                 )
             }
+            (SessionState::Arming, SessionEvent::StartRequested) => (
+                SessionState::Arming,
+                vec![],
+            ),
             (SessionState::Arming, SessionEvent::ArmingComplete) => (
                 SessionState::Recording { elapsed_ms: 0 },
                 vec![Effect::EmitState],
@@ -264,6 +268,14 @@ impl SessionMachine {
                     ],
                 )
             }
+            (SessionState::Idle, SessionEvent::ArmingComplete) => (
+                SessionState::Idle,
+                vec![Effect::StopCapture],
+            ),
+            (SessionState::Idle, SessionEvent::ArmingFailed(_)) => (
+                SessionState::Idle,
+                vec![],
+            ),
 
             // ── Recording ────────────────────────────────────────────────
             (SessionState::Recording { .. }, SessionEvent::Tick { elapsed_ms, .. }) => (
@@ -1035,5 +1047,39 @@ mod tests {
         m.handle(SessionEvent::StopRequested).expect("stop");
         m.handle(SessionEvent::StartRequested)
             .expect("stopping can never cost the next recording");
+    }
+
+    #[test]
+    fn rapid_start_during_arming_is_deduplicated_without_error() {
+        let mut m = machine();
+        let t1 = m.handle(SessionEvent::StartRequested).expect("first start");
+        assert!(matches!(t1.to, SessionState::Arming));
+        assert!(t1.effects.contains(&Effect::StartCapture));
+
+        // Rapid second press while still in arming state
+        let t2 = m.handle(SessionEvent::StartRequested).expect("second start");
+        assert!(matches!(t2.to, SessionState::Arming));
+        assert!(t2.effects.is_empty(), "duplicate start during arming must not trigger new effects");
+
+        // Arming completes normally
+        let t3 = m.handle(SessionEvent::ArmingComplete).expect("arming completes");
+        assert!(matches!(t3.to, SessionState::Recording { elapsed_ms: 0 }));
+    }
+
+    #[test]
+    fn orphaned_arming_events_in_idle_are_handled_safely() {
+        let mut m = machine();
+        // Spurious or late ArmingComplete reaching Idle emits StopCapture to ensure mic is closed
+        let t = m.handle(SessionEvent::ArmingComplete).expect("arming complete in idle");
+        assert!(matches!(t.to, SessionState::Idle));
+        assert!(t.effects.contains(&Effect::StopCapture));
+
+        // Spurious ArmingFailed in Idle is a safe no-op
+        let t_err = m.handle(SessionEvent::ArmingFailed(AppError::new(
+            ErrorCode::AudioDeviceUnavailable,
+            "device busy",
+        ))).expect("arming failed in idle");
+        assert!(matches!(t_err.to, SessionState::Idle));
+        assert!(t_err.effects.is_empty());
     }
 }

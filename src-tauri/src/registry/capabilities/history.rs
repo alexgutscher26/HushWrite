@@ -61,6 +61,13 @@ pub fn history_capability() -> Capability {
                 SettingSection::Privacy,
                 false,
             ),
+            toggle(
+                keys::SAVE_AUDIO_RECORDINGS,
+                "Save audio recordings for quality review",
+                "Store 16kHz mono audio recordings locally on device to review dictation audio in History. Deleted automatically when sessions are deleted or purged.",
+                SettingSection::Privacy,
+                false,
+            ),
         ],
     }
 }

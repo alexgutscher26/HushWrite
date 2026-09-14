@@ -26,6 +26,7 @@ use crate::types::DeliveryKind;
 pub struct FrontmostApp {
     pub bundle_id: String,
     pub name: String,
+    pub selected_text: Option<String>,
 }
 
 #[derive(Debug, Clone)]

@@ -74,6 +74,8 @@ pub enum ChunkKind {
 pub struct AudioLevel {
     pub rms: f32,
     pub peak: f32,
+    pub noise_floor: Option<f32>,
+    pub gate_threshold: Option<f32>,
 }
 
 /**
@@ -107,4 +109,61 @@ pub struct DeviceInfo {
     pub is_default: bool,
     pub sample_rate: u32,
     pub channels: u16,
+}
+
+/**
+ * SOURCE OF TRUTH KEYWORDS: encode_wav_16k_mono_pcm
+ * WHAT:  Encodes 16kHz mono f32 samples as standard 16-bit PCM WAV bytes.
+ * WHY:   Creates a universally playable standard WAV file with zero external
+ *        codec dependencies for local audio playback and review.
+ */
+pub fn encode_wav_16k_mono_pcm(samples: &[f32]) -> Vec<u8> {
+    let num_samples = samples.len() as u32;
+    let byte_rate = TARGET_SAMPLE_RATE * (TARGET_CHANNELS as u32) * 2; // 32,000 bytes/sec
+    let block_align = TARGET_CHANNELS * 2; // 2 bytes
+    let bits_per_sample = 16u16;
+    let data_len = num_samples * 2;
+    let total_len = 36 + data_len;
+
+    let mut out = Vec::with_capacity(44 + data_len as usize);
+    // RIFF header
+    out.extend_from_slice(b"RIFF");
+    out.extend_from_slice(&total_len.to_le_bytes());
+    out.extend_from_slice(b"WAVE");
+    // fmt subchunk
+    out.extend_from_slice(b"fmt ");
+    out.extend_from_slice(&16u32.to_le_bytes());
+    out.extend_from_slice(&1u16.to_le_bytes()); // PCM format
+    out.extend_from_slice(&TARGET_CHANNELS.to_le_bytes()); // 1 channel
+    out.extend_from_slice(&TARGET_SAMPLE_RATE.to_le_bytes()); // 16,000 Hz
+    out.extend_from_slice(&byte_rate.to_le_bytes());
+    out.extend_from_slice(&block_align.to_le_bytes());
+    out.extend_from_slice(&bits_per_sample.to_le_bytes());
+    // data subchunk
+    out.extend_from_slice(b"data");
+    out.extend_from_slice(&data_len.to_le_bytes());
+
+    for &sample in samples {
+        let clamped = sample.clamp(-1.0, 1.0);
+        let sample_i16 = (clamped * 32767.0) as i16;
+        out.extend_from_slice(&sample_i16.to_le_bytes());
+    }
+
+    out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn encodes_valid_wav_header() {
+        let samples = vec![0.0_f32; 1600]; // 0.1s
+        let wav = encode_wav_16k_mono_pcm(&samples);
+        assert_eq!(&wav[0..4], b"RIFF");
+        assert_eq!(&wav[8..12], b"WAVE");
+        assert_eq!(&wav[12..16], b"fmt ");
+        assert_eq!(&wav[36..40], b"data");
+        assert_eq!(wav.len(), 44 + 1600 * 2);
+    }
 }

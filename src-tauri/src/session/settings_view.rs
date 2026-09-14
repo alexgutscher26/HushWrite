@@ -66,6 +66,10 @@ pub struct SessionSettings {
     pub voice_transforms_enabled: bool,
     pub custom_system_prompt: String,
     pub voice_transform_trigger: String,
+    pub max_recording_seconds: u64,
+    pub noise_gate_enabled: bool,
+    pub noise_gate_multiplier: f64,
+    pub save_audio_recordings: bool,
 }
 
 impl SessionSettings {
@@ -178,6 +182,12 @@ impl SessionSettings {
             custom_system_prompt: read_string(stored, keys::CUSTOM_SYSTEM_PROMPT).unwrap_or_default(),
             voice_transform_trigger: read_string(stored, keys::VOICE_TRANSFORM_TRIGGER)
                 .unwrap_or_else(|| "Hey HushWrite".to_string()),
+            max_recording_seconds: read_number(stored, keys::MAX_RECORDING_SECONDS)
+                .unwrap_or(120.0) as u64,
+            noise_gate_enabled: read_bool(stored, keys::NOISE_GATE_ENABLED).unwrap_or(true),
+            noise_gate_multiplier: read_number(stored, keys::NOISE_GATE_MULTIPLIER)
+                .unwrap_or(1.5),
+            save_audio_recordings: read_bool(stored, keys::SAVE_AUDIO_RECORDINGS).unwrap_or(false),
         }
     }
 }

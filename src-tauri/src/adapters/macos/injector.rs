@@ -312,7 +312,11 @@ fn frontmost_application() -> Option<FrontmostApp> {
         .localizedName()
         .map(|n| n.to_string())
         .unwrap_or_else(|| bundle_id.clone());
-    Some(FrontmostApp { bundle_id, name })
+    Some(FrontmostApp {
+        bundle_id,
+        name,
+        selected_text: None,
+    })
 }
 
 #[link(name = "Carbon", kind = "framework")]

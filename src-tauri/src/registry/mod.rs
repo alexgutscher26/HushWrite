@@ -203,6 +203,7 @@ mod tests {
             keys::CODE_MODE,
             keys::CODE_CASING_STYLE,
             keys::RETENTION_DAYS,
+            keys::SAVE_AUDIO_RECORDINGS,
             keys::LAUNCH_AT_LOGIN,
             keys::BASELINE_WPM,
             keys::PILL_OPACITY,

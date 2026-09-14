@@ -24,6 +24,11 @@
  * WHERE: Fed by pipeline/capture.rs; emits chunks to pipeline/worker.rs.
  */
 
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::mpsc::{self, Sender};
+use std::sync::Arc;
+use std::thread::{self, JoinHandle};
+
 use crate::pipeline::vad::SpeechDetector;
 use crate::types::{AudioChunk, ChunkKind, TARGET_SAMPLE_RATE};
 
@@ -45,6 +50,132 @@ fn samples_to_ms(samples: usize) -> u64 {
     (samples as u64 * 1000) / TARGET_SAMPLE_RATE as u64
 }
 
+enum VadCommand {
+    Push(Vec<f32>),
+    ResetChunk,
+    Sync(Sender<()>),
+    Stop,
+}
+
+struct VadSharedState {
+    silence_ms: AtomicU64,
+    speech_ms: AtomicU64,
+    carries_speech: AtomicBool,
+}
+
+/**
+ * SOURCE OF TRUTH KEYWORDS: ParallelVad
+ * WHAT:  Runs Voice Activity Detection on a dedicated worker thread so DSP
+ *        computation never blocks audio capture callbacks or chunk accumulation.
+ * WHY:   Evaluating speech detection on the accumulation thread can add micro-stutters
+ *        and latency to the real-time audio pipeline. ParallelVad pushes sample buffers
+ *        asynchronously and exposes lock-free atomic queries for silence and speech state.
+ * WHERE: Owned by Chunker.
+ */
+pub struct ParallelVad {
+    tx: Sender<VadCommand>,
+    shared: Arc<VadSharedState>,
+    worker: Option<JoinHandle<()>>,
+}
+
+impl ParallelVad {
+    pub fn new() -> Self {
+        let (tx, rx) = mpsc::channel();
+        let shared = Arc::new(VadSharedState {
+            silence_ms: AtomicU64::new(0),
+            speech_ms: AtomicU64::new(0),
+            carries_speech: AtomicBool::new(false),
+        });
+
+        let shared_clone = Arc::clone(&shared);
+        let worker = thread::Builder::new()
+            .name("HushWrite-vad-worker".into())
+            .spawn(move || {
+                let mut detector = SpeechDetector::new();
+                while let Ok(cmd) = rx.recv() {
+                    match cmd {
+                        VadCommand::Push(samples) => {
+                            detector.push(&samples);
+                            shared_clone
+                                .silence_ms
+                                .store(detector.silence_ms(), Ordering::Release);
+                            shared_clone
+                                .speech_ms
+                                .store(detector.speech_ms(), Ordering::Release);
+                            shared_clone
+                                .carries_speech
+                                .store(detector.carries_speech(), Ordering::Release);
+                        }
+                        VadCommand::ResetChunk => {
+                            detector.reset_chunk();
+                            shared_clone.silence_ms.store(0, Ordering::Release);
+                            shared_clone.speech_ms.store(0, Ordering::Release);
+                            shared_clone.carries_speech.store(false, Ordering::Release);
+                        }
+                        VadCommand::Sync(ack) => {
+                            let _ = ack.send(());
+                        }
+                        VadCommand::Stop => {
+                            break;
+                        }
+                    }
+                }
+            })
+            .ok();
+
+        Self {
+            tx,
+            shared,
+            worker,
+        }
+    }
+
+    pub fn push(&self, samples: &[f32]) {
+        let _ = self.tx.send(VadCommand::Push(samples.to_vec()));
+    }
+
+    pub fn silence_ms(&self) -> u64 {
+        self.shared.silence_ms.load(Ordering::Acquire)
+    }
+
+    pub fn speech_ms(&self) -> u64 {
+        self.shared.speech_ms.load(Ordering::Acquire)
+    }
+
+    pub fn carries_speech(&self) -> bool {
+        self.shared.carries_speech.load(Ordering::Acquire)
+    }
+
+    pub fn reset_chunk(&self) {
+        self.shared.silence_ms.store(0, Ordering::Release);
+        self.shared.speech_ms.store(0, Ordering::Release);
+        self.shared.carries_speech.store(false, Ordering::Release);
+        let _ = self.tx.send(VadCommand::ResetChunk);
+    }
+
+    pub fn sync(&self) {
+        let (ack_tx, ack_rx) = mpsc::channel();
+        if self.tx.send(VadCommand::Sync(ack_tx)).is_ok() {
+            let _ = ack_rx.recv();
+        }
+    }
+}
+
+impl Drop for ParallelVad {
+    fn drop(&mut self) {
+        let _ = self.tx.send(VadCommand::Stop);
+        if let Some(worker) = self.worker.take() {
+            let _ = worker.join();
+        }
+    }
+}
+
+impl Default for ParallelVad {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /**
  * SOURCE OF TRUTH KEYWORDS: Chunker
  * WHAT:  The rolling buffer and the boundary decision.
@@ -52,7 +183,7 @@ fn samples_to_ms(samples: usize) -> u64 {
  */
 pub struct Chunker {
     buffer: Vec<f32>,
-    detector: SpeechDetector,
+    vad: ParallelVad,
     /// Absolute position of buffer[0] within the session, in samples.
     chunk_start_samples: usize,
     /// Total samples seen this session, for absolute timing.
@@ -71,7 +202,7 @@ impl Chunker {
     pub fn new() -> Self {
         Self {
             buffer: Vec::with_capacity(ms_to_samples(MAX_CHUNK_MS)),
-            detector: SpeechDetector::new(),
+            vad: ParallelVad::new(),
             chunk_start_samples: 0,
             total_samples: 0,
             peak_amplitude: 0.0,
@@ -98,12 +229,19 @@ impl Chunker {
                 self.peak_amplitude = magnitude;
             }
         }
-        self.detector.push(samples);
+        self.vad.push(samples);
 
         let buffered_ms = samples_to_ms(self.buffer.len());
+        if buffered_ms < MIN_CHUNK_MS {
+            return None;
+        }
+
+        // Buffer has reached minimum chunk length: sync the background VAD worker
+        // so silence boundary decision is exact against the latest audio frames.
+        self.vad.sync();
 
         let at_silence_boundary =
-            buffered_ms >= MIN_CHUNK_MS && self.detector.silence_ms() >= BOUNDARY_SILENCE_MS;
+            buffered_ms >= MIN_CHUNK_MS && self.vad.silence_ms() >= BOUNDARY_SILENCE_MS;
         let at_hard_limit = buffered_ms >= MAX_CHUNK_MS;
 
         if !at_silence_boundary && !at_hard_limit {
@@ -124,6 +262,7 @@ impl Chunker {
      * WHERE: Called once per session, on the transition into Finalizing.
      */
     pub fn close_tail(&mut self) -> Option<AudioChunk> {
+        self.vad.sync();
         self.close(ChunkKind::Tail)
     }
 
@@ -143,10 +282,10 @@ impl Chunker {
         // threshold while being perfectly audible, and trimming to the VAD's
         // idea of where speech starts is how you deliver a sentence with its
         // first word clipped off.
-        if !self.detector.carries_speech() {
+        if !self.vad.carries_speech() {
             tracing::debug!(
                 duration_ms = samples_to_ms(self.buffer.len()),
-                speech_ms = self.detector.speech_ms(),
+                speech_ms = self.vad.speech_ms(),
                 "dropping a chunk that carries too little speech to decode"
             );
             self.discard_to_overlap(kind);
@@ -175,7 +314,7 @@ impl Chunker {
      *        decode.
      */
     fn discard_to_overlap(&mut self, kind: ChunkKind) {
-        self.detector.reset_chunk();
+        self.vad.reset_chunk();
 
         if matches!(kind, ChunkKind::Tail) {
             self.chunk_start_samples += self.buffer.len();
@@ -226,7 +365,7 @@ impl Chunker {
     /// Drops everything. Used when a session is destroyed by Escape.
     pub fn clear(&mut self) {
         self.buffer.clear();
-        self.detector.reset_chunk();
+        self.vad.reset_chunk();
         self.chunk_start_samples = 0;
         self.total_samples = 0;
         self.peak_amplitude = 0.0;
@@ -460,5 +599,20 @@ mod tests {
         assert_eq!(MAX_CHUNK_MS, 10_000);
         let (min, max) = (MIN_CHUNK_MS, MAX_CHUNK_MS);
         assert!(min < max, "the chunk window must not be inverted");
+    }
+
+    #[test]
+    fn parallel_vad_worker_syncs_and_resets() {
+        let vad = ParallelVad::new();
+        let samples = quiet(500);
+        vad.push(&samples);
+        vad.sync();
+        assert!(vad.silence_ms() >= 400);
+
+        vad.reset_chunk();
+        vad.sync();
+        assert_eq!(vad.silence_ms(), 0);
+        assert_eq!(vad.speech_ms(), 0);
+        assert!(!vad.carries_speech());
     }
 }

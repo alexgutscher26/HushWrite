@@ -30,7 +30,11 @@ dist-ssr
 .HushWrite-updater.key*
 
 # Rust build output. 24GB of it, and every byte is reproducible from source.
+target/
+**/target/
 src-tauri/target/
+src-tauri/target*/
+**/target*/
 
 # Whisper models are hundreds of megabytes and are downloaded on first run,
 # never committed. See adapters/http_models.

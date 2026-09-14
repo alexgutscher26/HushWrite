@@ -1,0 +1,6 @@
+c5f888eef0abd34b1d9876c098f93c30f4368aeb3f6fade8c5d19d5ff00137dc  HushWrite_1.2.2_x64-setup.exe
+603af4d55b3d2f2aec8cfddc471df271d7ca96c70ad4e2e189563ff358d95d95  HushWrite_1.2.2_x64_en-US.msi
+b8aac971af9831617c9590041d07f5814d488f1101e85528ece3d7a44760eb10  HushWrite_1.2.1_x64-setup.exe
+06ca145b287822f88ce949dd0f4cde392a3a9d0e90edd0addc483bb4c85af542  HushWrite_1.2.1_x64_en-US.msi
+086e74bf239d2a86e6d3db5bf70e478a7e7629cc3226b1e51a876dea19589429  HushWrite_1.2.0_x64-setup.exe
+ae4db24f7c9609453bb580b1c7595529f50000f0e970621f0fe2b73ecce1a5ce  HushWrite_1.2.0_x64_en-US.msi

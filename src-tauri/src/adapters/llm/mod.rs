@@ -8,9 +8,11 @@
  */
 
 pub mod enhancer;
+pub mod glossary;
 pub mod hardware;
 pub mod transforms;
 
 pub use enhancer::LlmTextEnhancer;
+pub use glossary::GlossaryProtector;
 pub use hardware::{HardwareDetector, HardwareProfile, LlmTaskKind, QuantizationTier};
 pub use transforms::{ModelPromptFormat, ParsedVoiceTransform, VoiceTransformIntent, VoiceTransformParser};

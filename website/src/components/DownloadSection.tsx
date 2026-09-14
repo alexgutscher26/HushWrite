@@ -61,22 +61,22 @@ export function DownloadSection() {
 
   const checksums = [
     {
-      file: "HushWrite_1.2.1_x64-setup.exe",
+      file: "HushWrite_1.2.2_x64-setup.exe",
       platform: "Windows 64-bit Installer (.exe) · Code Signed",
-      sha256: "50d8c5b27ebc4dc48bdb20a80bba43395ce988f68a915603dab8b0a9bb25edb9",
+      sha256: "c5f888eef0abd34b1d9876c098f93c30f4368aeb3f6fade8c5d19d5ff00137dc",
     },
     {
-      file: "HushWrite_1.2.1_x64_en-US.msi",
+      file: "HushWrite_1.2.2_x64_en-US.msi",
       platform: "Windows MSI Package · Code Signed",
-      sha256: "ccdb820a922100c93f61b3753dec75de059a0a50bdb00bcafcdeb465ade54ca4",
+      sha256: "603af4d55b3d2f2aec8cfddc471df271d7ca96c70ad4e2e189563ff358d95d95",
     },
     {
-      file: "HushWrite_1.2.1_aarch64.dmg",
+      file: "HushWrite_1.2.2_aarch64.dmg",
       platform: "macOS Apple Silicon (M1/M2/M3/M4)",
       sha256: "95d8c8e26b8e9fe8f5c2a6eb089cb1857d2053d70fe339c635391494016f60d5",
     },
     {
-      file: "HushWrite_1.2.1_x64.dmg",
+      file: "HushWrite_1.2.2_x64.dmg",
       platform: "macOS Intel 64-bit",
       sha256: "95d8c8e26b8e9fe8f5c2a6eb089cb1857d2053d70fe339c635391494016f60d5",
     },
@@ -99,7 +99,7 @@ export function DownloadSection() {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-neutral-200/90 shadow-[0_1px_3px_rgba(0,0,0,0.06)] mb-4 transition-transform hover:scale-[1.02] cursor-default">
             <Download className="w-3.5 h-3.5 text-emerald-500" />
             <span className="text-xs font-mono font-medium text-neutral-800">
-              Download HushWrite v1.2.1
+              Download HushWrite v1.2.2
             </span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-neutral-950 mb-4">
@@ -137,10 +137,10 @@ export function DownloadSection() {
             <div className="space-y-3">
               {/* Primary CTA: Setup .exe */}
               <a
-                href="/downloads/HushWrite_1.2.1_x64-setup.exe"
-                download="HushWrite_1.2.1_x64-setup.exe"
+                href="/downloads/HushWrite_1.2.2_x64-setup.exe"
+                download="HushWrite_1.2.2_x64-setup.exe"
                 onClick={() =>
-                  handleDownloadClick("HushWrite_1.2.1_x64-setup.exe", "Windows (.exe)")
+                  handleDownloadClick("HushWrite_1.2.2_x64-setup.exe", "Windows (.exe)")
                 }
                 className="w-full text-center text-xs sm:text-sm font-semibold text-white bg-[#141416] hover:bg-neutral-800 py-3.5 px-4 rounded-xl transition-all shadow-md hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
               >
@@ -150,9 +150,9 @@ export function DownloadSection() {
 
               {/* Secondary CTA: MSI Package */}
               <a
-                href="/downloads/HushWrite_1.2.1_x64_en-US.msi"
-                download="HushWrite_1.2.1_x64_en-US.msi"
-                onClick={() => handleDownloadClick("HushWrite_1.2.1_x64_en-US.msi", "Windows MSI")}
+                href="/downloads/HushWrite_1.2.2_x64_en-US.msi"
+                download="HushWrite_1.2.2_x64_en-US.msi"
+                onClick={() => handleDownloadClick("HushWrite_1.2.2_x64_en-US.msi", "Windows MSI")}
                 className="w-full text-center text-xs font-medium text-neutral-800 hover:bg-neutral-50 bg-white border border-neutral-200/90 py-2.5 px-3 rounded-lg transition-all shadow-xs hover:scale-[1.01] flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5 text-neutral-500" />
@@ -215,10 +215,10 @@ export function DownloadSection() {
               {/* Separated macOS Buttons */}
               <div className="flex flex-col gap-2.5">
                 <a
-                  href="/downloads/HushWrite_1.2.1_aarch64.dmg"
-                  download="HushWrite_1.2.1_aarch64.dmg"
+                  href="/downloads/HushWrite_1.2.2_aarch64.dmg"
+                  download="HushWrite_1.2.2_aarch64.dmg"
                   onClick={() =>
-                    handleDownloadClick("HushWrite_1.2.1_aarch64.dmg", "macOS Apple Silicon")
+                    handleDownloadClick("HushWrite_1.2.2_aarch64.dmg", "macOS Apple Silicon")
                   }
                   className="w-full text-center text-xs sm:text-sm font-semibold text-white bg-[#141416] hover:bg-neutral-800 py-3.5 px-4 rounded-xl transition-all shadow-md hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
                 >
@@ -227,9 +227,9 @@ export function DownloadSection() {
                 </a>
 
                 <a
-                  href="/downloads/HushWrite_1.2.1_x64.dmg"
-                  download="HushWrite_1.2.1_x64.dmg"
-                  onClick={() => handleDownloadClick("HushWrite_1.2.1_x64.dmg", "macOS Intel")}
+                  href="/downloads/HushWrite_1.2.2_x64.dmg"
+                  download="HushWrite_1.2.2_x64.dmg"
+                  onClick={() => handleDownloadClick("HushWrite_1.2.2_x64.dmg", "macOS Intel")}
                   className="w-full text-center text-xs sm:text-sm font-semibold text-neutral-800 hover:bg-neutral-50 bg-white border border-neutral-200/90 py-3 px-4 rounded-xl transition-all shadow-xs hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Download className="w-4 h-4 text-neutral-500" />
@@ -339,7 +339,7 @@ export function DownloadSection() {
                 </span>
               </div>
               <a
-                href="https://github.com/alexgutscher26/HushWrite/releases/tag/v1.2.1"
+                href="https://github.com/alexgutscher26/HushWrite/releases/tag/v1.2.2"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-[11px] text-neutral-600 hover:text-neutral-950 underline mt-3 inline-block"
@@ -398,7 +398,7 @@ export function DownloadSection() {
           {showChecksumModal && (
             <div className="p-4 rounded-xl bg-neutral-950 text-white font-mono text-xs mb-4">
               <div className="flex items-center justify-between pb-3 border-b border-neutral-800 mb-3">
-                <span className="text-emerald-400 font-bold">SHA256SUMS.txt (v1.2.1)</span>
+                <span className="text-emerald-400 font-bold">SHA256SUMS.txt (v1.2.2)</span>
                 <span className="text-[10px] text-neutral-400">
                   Verify in terminal: shasum -a 256 &lt;filename&gt;
                 </span>

@@ -170,6 +170,50 @@ pub async fn get_history_entry(
     .await
 }
 
+#[derive(Debug, Clone, serde::Serialize, specta::Type)]
+pub struct SessionAudioResult {
+    pub session_id: SessionId,
+    pub has_audio: bool,
+    pub audio_bytes: Option<Vec<u8>>,
+}
+
+const GET_AUDIO: CommandSpec = CommandSpec::new("get_history_audio", CapabilityKey::History);
+
+#[tauri::command]
+#[specta::specta]
+pub async fn get_history_audio(
+    state: State<'_, AppState>,
+    input: SessionIdInput,
+) -> Result<SessionAudioResult, AppError> {
+    execute(&state, GET_AUDIO, input, |ctx, input| async move {
+        let audio_path = ctx.paths().audio_dir.join(format!("{}.wav", input.id.as_str()));
+        if audio_path.is_file() {
+            match std::fs::read(&audio_path) {
+                Ok(bytes) => Ok(SessionAudioResult {
+                    session_id: input.id,
+                    has_audio: true,
+                    audio_bytes: Some(bytes),
+                }),
+                Err(err) => {
+                    tracing::warn!(error = %err, path = %audio_path.display(), "could not read session audio file");
+                    Ok(SessionAudioResult {
+                        session_id: input.id,
+                        has_audio: false,
+                        audio_bytes: None,
+                    })
+                }
+            }
+        } else {
+            Ok(SessionAudioResult {
+                session_id: input.id,
+                has_audio: false,
+                audio_bytes: None,
+            })
+        }
+    })
+    .await
+}
+
 const DELETE: CommandSpec =
     CommandSpec::new("delete_history_entry", CapabilityKey::History).exclusive();
 
@@ -180,6 +224,10 @@ pub async fn delete_history_entry(
     input: SessionIdInput,
 ) -> Result<(), AppError> {
     execute(&state, DELETE, input, |ctx, input| async move {
+        let audio_path = ctx.paths().audio_dir.join(format!("{}.wav", input.id.as_str()));
+        if audio_path.exists() {
+            let _ = std::fs::remove_file(audio_path);
+        }
         sessions::delete_session(ctx.db(), &input.id)
     })
     .await
@@ -219,6 +267,12 @@ pub async fn delete_history_entries(
     input: DeleteHistoryEntriesInput,
 ) -> Result<u32, AppError> {
     execute(&state, DELETE_BATCH, input, |ctx, input| async move {
+        for id in &input.ids {
+            let audio_path = ctx.paths().audio_dir.join(format!("{}.wav", id.as_str()));
+            if audio_path.exists() {
+                let _ = std::fs::remove_file(audio_path);
+            }
+        }
         Ok(sessions::delete_sessions(ctx.db(), &input.ids)? as u32)
     })
     .await
@@ -231,6 +285,13 @@ const CLEAR: CommandSpec = CommandSpec::new("clear_history", CapabilityKey::Hist
 #[specta::specta]
 pub async fn clear_history(state: State<'_, AppState>) -> Result<u32, AppError> {
     execute(&state, CLEAR, (), |ctx, ()| async move {
+        if let Ok(entries) = std::fs::read_dir(&ctx.paths().audio_dir) {
+            for entry in entries.flatten() {
+                if entry.path().extension().and_then(|e| e.to_str()) == Some("wav") {
+                    let _ = std::fs::remove_file(entry.path());
+                }
+            }
+        }
         let count = sessions::delete_all_sessions(ctx.db())? as u32;
         crate::services::audit::append(
             ctx.db(),
@@ -275,6 +336,17 @@ pub async fn purge_history(
             return Ok(0);
         }
         let cutoff = now_ms() - input.retention_days * 24 * 60 * 60 * 1000;
+        let old_ids: Vec<SessionId> = ctx.db().with_connection(|conn| {
+            let mut stmt = conn.prepare("SELECT id FROM sessions WHERE started_at < ?1")?;
+            let rows = stmt.query_map([cutoff], |row| Ok(SessionId(row.get(0)?)))?;
+            rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
+        })?;
+        for id in &old_ids {
+            let audio_path = ctx.paths().audio_dir.join(format!("{}.wav", id.as_str()));
+            if audio_path.exists() {
+                let _ = std::fs::remove_file(audio_path);
+            }
+        }
         Ok(sessions::purge_older_than(ctx.db(), cutoff)? as u32)
     })
     .await

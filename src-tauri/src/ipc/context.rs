@@ -216,6 +216,7 @@ impl<R: tauri::Runtime> AppState<R> {
     /// The narrowed view the session actor runs on. Shares this state's Arcs.
     pub fn session_context(&self) -> SessionContext {
         SessionContext {
+            paths: self.paths.clone(),
             db: self.db.clone(),
             ports: self.ports.clone(),
             session: self.session.clone(),
@@ -275,6 +276,7 @@ impl Drop for InflightGuard {
  */
 #[derive(Clone)]
 pub struct SessionContext {
+    pub paths: AppPaths,
     pub db: Database,
     pub ports: Ports,
     pub session: SessionHandle,
@@ -284,7 +286,24 @@ pub struct SessionContext {
 impl SessionContext {
     /// For tests, which build one from fakes rather than from an AppState.
     pub fn new(db: Database, ports: Ports, session: SessionHandle) -> Self {
+        let temp_dir = std::env::temp_dir().join("HushWrite_test_session");
         Self {
+            paths: AppPaths::for_test(&temp_dir),
+            db,
+            ports,
+            session,
+            published_state: Arc::new(Mutex::new(SessionState::Idle)),
+        }
+    }
+
+    pub fn new_with_paths(
+        paths: AppPaths,
+        db: Database,
+        ports: Ports,
+        session: SessionHandle,
+    ) -> Self {
+        Self {
+            paths,
             db,
             ports,
             session,

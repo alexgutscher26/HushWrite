@@ -85,6 +85,18 @@ impl AppPaths {
         Ok(paths)
     }
 
+    /// For tests: creates paths pointing to an isolated directory without touching user folders.
+    pub fn for_test(dir: &Path) -> Self {
+        Self {
+            data_dir: dir.to_path_buf(),
+            models_dir: dir.join("models"),
+            logs_dir: dir.join("logs"),
+            audio_dir: dir.join("audio"),
+            db_path: dir.join("HushWrite.db"),
+            bundled_models_dir: None,
+        }
+    }
+
     fn ensure_dirs(&self) -> AppResult<()> {
         for dir in [
             &self.data_dir,

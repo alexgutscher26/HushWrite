@@ -344,6 +344,7 @@ impl<P: PermissionProvider> TextInjector for WindowsInjector<P> {
                 return Some(FrontmostApp {
                     bundle_id: "unknown".to_string(),
                     name: title,
+                    selected_text: None,
                 });
             }
 
@@ -375,11 +376,13 @@ impl<P: PermissionProvider> TextInjector for WindowsInjector<P> {
                 Some(FrontmostApp {
                     bundle_id: exe_name,
                     name: if title.is_empty() { full_path } else { title },
+                    selected_text: None,
                 })
             } else {
                 Some(FrontmostApp {
                     bundle_id: "unknown".to_string(),
                     name: title,
+                    selected_text: None,
                 })
             }
         }

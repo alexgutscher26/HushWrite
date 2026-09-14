@@ -16,6 +16,8 @@ use crate::ports::enhancer::{EnhanceContext, TextEnhancer};
 use super::hardware::{HardwareDetector, LlmTaskKind};
 use super::transforms::{ModelPromptFormat, VoiceTransformIntent, VoiceTransformParser};
 
+use super::glossary::GlossaryProtector;
+
 pub struct LlmTextEnhancer {
     rules_fallback: RuleEnhancer,
     active_model_id: Arc<RwLock<Option<String>>>,
@@ -54,6 +56,16 @@ impl LlmTextEnhancer {
             VoiceTransformParser::parse(trimmed, None)
         };
 
+        // Collect terms to shield through the LLM pipeline
+        let protected_terms: Vec<String> = context
+            .dictionary
+            .iter()
+            .flat_map(|d| vec![d.pattern.clone(), d.replacement.clone()])
+            .filter(|s| !s.trim().is_empty())
+            .collect();
+
+        let (masked_base, placeholders) = GlossaryProtector::mask(&parsed.base_text, &protected_terms);
+
         // Determine if we need deep voice transforms (Phi-3.5 Mini) or fast cleanup (Qwen 2.5 1.5B)
         let is_deep_transform = parsed.intent.is_some()
             && !matches!(parsed.intent, Some(VoiceTransformIntent::FixGrammarOnly));
@@ -75,7 +87,7 @@ impl LlmTextEnhancer {
 
         let _prompt = VoiceTransformParser::build_prompt(
             format,
-            &parsed.base_text,
+            &masked_base,
             parsed.intent.as_ref(),
             &context.dictionary,
             if context.custom_system_prompt.is_empty() {
@@ -86,11 +98,11 @@ impl LlmTextEnhancer {
             language_code,
         );
 
-        // Apply fast rule processing to base text as baseline, then apply simulated/local LLM cleanup
-        let intermediate = self.rules_fallback.enhance(&parsed.base_text, context)?;
+        // Apply fast rule processing to masked text as baseline, then apply simulated/local LLM cleanup
+        let intermediate = self.rules_fallback.enhance(&masked_base, context)?;
 
         // Apply intent transformations if present
-        let final_text = match parsed.intent {
+        let transformed = match parsed.intent {
             Some(VoiceTransformIntent::Formal) => {
                 Self::apply_tone_adjustment(&intermediate, VoiceTransformIntent::Formal)
             }
@@ -127,6 +139,9 @@ impl LlmTextEnhancer {
                 }
             }
         };
+
+        // Restore protected glossary terms to guaranteed canonical casing and spelling
+        let final_text = GlossaryProtector::unmask(transformed, &placeholders);
 
         Ok(final_text)
     }

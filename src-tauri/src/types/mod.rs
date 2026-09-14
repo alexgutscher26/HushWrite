@@ -19,7 +19,10 @@ pub mod session;
 pub mod settings;
 pub mod transcript;
 
-pub use audio::{AudioChunk, AudioLevel, CaptureMode, ChunkKind, DeviceInfo, TARGET_SAMPLE_RATE};
+pub use audio::{
+    encode_wav_16k_mono_pcm, AudioChunk, AudioLevel, CaptureMode, ChunkKind, DeviceInfo,
+    TARGET_SAMPLE_RATE,
+};
 pub use dictionary::{DictionaryChangeLogEntry, DictionaryEntry, DictionaryId, MatchKind};
 pub use engine::{
     DownloadProgress, EngineCapabilities, EngineFeature, EngineId, LanguageSupport,

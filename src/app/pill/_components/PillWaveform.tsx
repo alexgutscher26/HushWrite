@@ -26,6 +26,7 @@ export function PillWaveform({
   count?: number;
 }) {
   const barsRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const gateLineRef = useRef<HTMLDivElement | null>(null);
   const accent = getAccentConfig(accentId as AccentColorId);
 
   useTauriEvent(events.audioLevelChanged, (payload) => {
@@ -41,13 +42,25 @@ export function PillWaveform({
       const h = base + (max - base) * smoothed;
       el.style.height = `${h.toFixed(1)}px`;
     }
+
+    if (gateLineRef.current && payload.level.gate_threshold != null && payload.level.gate_threshold > 0) {
+      const gateRatio = Math.min(1, Math.max(0, payload.level.gate_threshold / 0.28));
+      const gateHeight = 4 + 16 * Math.pow(gateRatio, 0.65);
+      gateLineRef.current.style.bottom = `${gateHeight.toFixed(1)}px`;
+      gateLineRef.current.style.opacity = "0.45";
+    }
   });
 
   return (
     <div
-      className={cn("flex items-center gap-[2.5px] h-[24px] shrink-0", className)}
+      className={cn("relative flex items-center gap-[2.5px] h-[24px] shrink-0", className)}
       aria-hidden="true"
     >
+      <div
+        ref={gateLineRef}
+        className="absolute left-0 right-0 h-[1px] bg-white/40 pointer-events-none transition-all duration-150 rounded-full"
+        style={{ opacity: 0, bottom: "4px" }}
+      />
       {Array.from({ length: count }).map((_, i) => {
         const h = BASE_HEIGHTS[i % BASE_HEIGHTS.length];
         return (

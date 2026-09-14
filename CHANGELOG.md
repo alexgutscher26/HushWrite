@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.2] - 2026-09-14
+
+### Added
+
+- **Audio Playback for Quality Review**:
+  - Opt-in **"Save audio recordings"** privacy setting (`privacy.save_audio_recordings`, disabled by default) for local dictation quality review.
+  - Standard 16-bit 16kHz mono PCM WAV recording engine storing audio safely in the local application data directory.
+  - Interactive **Session Playback Modal** with dynamic word-level highlighting, click-to-seek, waveform timeline scrubber, and speed controls (0.75x–2.0x).
+  - Automatic audio file cleanup when sessions are deleted or purged via data retention policies.
+- **500ms Ring-Buffer Audio Pre-Roll**:
+  - Continuous 500ms circular buffer (8,000 samples @ 16kHz mono) in the CPAL audio capture pipeline ensuring opening syllables and words are never clipped while the microphone hardware warms up.
+
+### Performance & Reliability
+
+- **Parallel VAD + Audio Accumulation**:
+  - Decoupled Voice Activity Detection DSP computation into a dedicated `ParallelVad` worker thread (`HushWrite-vad-worker`) with lock-free atomic state queries, eliminating micro-stutters on the real-time audio capture callback.
+- **Rapid Hotkey Race Condition Protection**:
+  - State machine mutex and arming lifecycle guards in `SessionMachine` and `SessionActor` deduplicating rapid hotkey presses and cleanly aborting streams on sub-80ms taps.
+
 ## [1.2.1] - 2026-09-14
 
 ### Added

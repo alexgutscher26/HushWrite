@@ -61,12 +61,13 @@ function Update-File {
         return
     }
 
-    $Original = [System.IO.File]::ReadAllText($FullPath, [System.Text.Encoding]::UTF8)
+    $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    $Original = [System.IO.File]::ReadAllText($FullPath, $Utf8NoBom)
     $Updated = & $Mutator $Original
 
     if ($Original -ne $Updated) {
         if (-not $DryRun) {
-            [System.IO.File]::WriteAllText($FullPath, $Updated, [System.Text.Encoding]::UTF8)
+            [System.IO.File]::WriteAllText($FullPath, $Updated, $Utf8NoBom)
         }
         Write-Host "  [OK] Updated: $RelativePath" -ForegroundColor Green
         $script:ModifiedCount++

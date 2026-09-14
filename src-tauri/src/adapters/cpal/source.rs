@@ -252,6 +252,8 @@ impl AudioSource for CpalAudioSource {
                 };
 
                 let mut scratch = vec![0.0_f32; 8192];
+                let mut pre_roll = PreRollBuffer::for_500ms();
+                let mut first_frame = true;
 
                 while !drain_stop.load(Ordering::Relaxed) {
                     let read = consumer.pop_slice(&mut scratch);
@@ -273,13 +275,28 @@ impl AudioSource for CpalAudioSource {
                             let level = AudioLevel {
                                 rms: rms_of(&samples),
                                 peak: peak_of(&samples),
+                                noise_floor: None,
+                                gate_threshold: None,
                             };
                             // Levels are droppable: a missed meter frame is
                             // invisible, whereas blocking here would add
                             // latency to the audio path itself.
                             let _ = sink.try_send(CaptureEvent::Level(level));
 
-                            if sink.try_send(CaptureEvent::Samples(samples)).is_err() {
+                            let to_send = if first_frame {
+                                first_frame = false;
+                                if !pre_roll.is_empty() {
+                                    let mut combined = pre_roll.drain();
+                                    combined.extend_from_slice(&samples);
+                                    combined
+                                } else {
+                                    samples
+                                }
+                            } else {
+                                samples
+                            };
+
+                            if sink.try_send(CaptureEvent::Samples(to_send)).is_err() {
                                 tracing::warn!("capture consumer is not keeping up");
                             }
                         }
@@ -599,10 +616,102 @@ fn device_error(err: cpal::Error) -> AppError {
     .with_detail(err)
 }
 
+/**
+ * SOURCE OF TRUTH KEYWORDS: PreRollBuffer, for_500ms, push, drain
+ * WHAT:  Maintains a 500ms circular pre-roll buffer of 16kHz mono audio frames.
+ * WHY:   Prevents cutting off the initial syllables/words when the hotkey fires.
+ */
+#[derive(Debug, Clone)]
+pub struct PreRollBuffer {
+    capacity: usize,
+    buffer: Vec<f32>,
+    write_pos: usize,
+    full: bool,
+}
+
+impl PreRollBuffer {
+    pub fn new(capacity: usize) -> Self {
+        let cap = capacity.max(1);
+        Self {
+            capacity: cap,
+            buffer: vec![0.0; cap],
+            write_pos: 0,
+            full: false,
+        }
+    }
+
+    pub fn for_500ms() -> Self {
+        // 500ms at 16,000 Hz = 8,000 samples
+        Self::new(8_000)
+    }
+
+    pub fn push(&mut self, samples: &[f32]) {
+        for &sample in samples {
+            self.buffer[self.write_pos] = sample;
+            self.write_pos = (self.write_pos + 1) % self.capacity;
+            if self.write_pos == 0 {
+                self.full = true;
+            }
+        }
+    }
+
+    pub fn drain(&mut self) -> Vec<f32> {
+        let count = self.len();
+        let mut out = Vec::with_capacity(count);
+        if self.full {
+            out.extend_from_slice(&self.buffer[self.write_pos..]);
+            out.extend_from_slice(&self.buffer[..self.write_pos]);
+        } else {
+            out.extend_from_slice(&self.buffer[..self.write_pos]);
+        }
+        self.write_pos = 0;
+        self.full = false;
+        out
+    }
+
+    pub fn len(&self) -> usize {
+        if self.full {
+            self.capacity
+        } else {
+            self.write_pos
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::types::TARGET_SAMPLE_RATE;
+
+    #[test]
+    fn pre_roll_buffer_preserves_samples_in_order() {
+        let mut buffer = PreRollBuffer::new(5);
+        assert!(buffer.is_empty());
+        assert_eq!(buffer.len(), 0);
+
+        buffer.push(&[1.0, 2.0, 3.0]);
+        assert_eq!(buffer.len(), 3);
+        assert!(!buffer.is_empty());
+
+        let drained = buffer.drain();
+        assert_eq!(drained, vec![1.0, 2.0, 3.0]);
+        assert!(buffer.is_empty());
+    }
+
+    #[test]
+    fn pre_roll_buffer_wraps_around_when_overflowing_capacity() {
+        let mut buffer = PreRollBuffer::new(4);
+        buffer.push(&[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+        assert_eq!(buffer.len(), 4);
+
+        let drained = buffer.drain();
+        assert_eq!(drained, vec![3.0, 4.0, 5.0, 6.0]);
+        assert!(buffer.is_empty());
+    }
 
     #[test]
     fn the_ring_holds_at_least_a_second_of_the_worst_case_device() {

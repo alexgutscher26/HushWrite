@@ -130,21 +130,21 @@
 - [x] [UX] Waveform visualizer in the pill — Show a live audio waveform during recording using CaptureEvent::Level data already emitted so the user can see the mic is picking up their voice.
 - [x] [UX] Silence warning — If peak_amplitude == 0.0 for more than 1 second, show a brief "No microphone signal detected" error inside the pill rather than silently failing.
 - [x] [UX] Auto-detect mono vs stereo — If the user's mic sends stereo, down-mix to mono before feeding Whisper to avoid stereo-channel phasing artifacts.
-- [ ] [FEAT] Noise gate with adaptive threshold — Automatically learn the ambient noise floor during the first 500ms of each session and apply a dynamic gate so whispers do not get clipped.
+- [x] [FEAT] Noise gate with adaptive threshold — Automatically learn the ambient noise floor during the first 500ms of each session and apply a dynamic gate so whispers do not get clipped.
   - Use an exponential moving average over CaptureEvent::Level values
   - Gate threshold = noise_floor_ema * 1.5 (configurable multiplier in advanced settings)
   - Show gate threshold on the audio level meter as a faint horizontal line
-- [ ] [FEAT] Push-to-talk recording limit — Add a configurable max_recording_seconds cap (default 120s) after which recording auto-finalizes to prevent accidentally leaving the mic open.
+- [x] [FEAT] Push-to-talk recording limit — Add a configurable max_recording_seconds cap (default 120s) after which recording auto-finalizes to prevent accidentally leaving the mic open.
   - Show a countdown in the pill during the last 10 seconds
   - Play a soft chime at the auto-stop point
   - Make the cap configurable from 30s to unlimited in advanced settings
-- [ ] [FEAT] Audio playback for quality review — After each session, allow the user to re-listen to their own recording (opt-in, stored locally, auto-purged per retention policy).
+- [x] [FEAT] Audio playback for quality review — After each session, allow the user to re-listen to their own recording (opt-in, stored locally, auto-purged per retention policy).
   - Requires a new opt-in "Save audio recordings" setting (off by default, clearly labeled as local-only)
-  - Store as Opus at 16kHz mono in the session data directory
+  - Store as standard 16-bit PCM WAV at 16kHz mono in the session data directory
   - Delete audio file when the session is deleted or on retention purge
-- [ ] [PERF] Ring-buffer audio pre-roll — Maintain a 500ms circular buffer before the hotkey fires so the first word (often captured while the mic is still opening) is not cut off.
-- [ ] [PERF] Parallel VAD + accumulation — Run VAD on a separate thread from audio accumulation so the VAD decision does not block the capture callback and add latency.
-- [ ] [BUG] Double-open mic on rapid hotkey press — If the user presses and releases the hotkey faster than the CPAL stream opens (~80ms), the session may arm twice. Add a mutex guard around the arming transition in the session state machine.
+- [x] [PERF] Ring-buffer audio pre-roll — Maintain a 500ms circular buffer before the hotkey fires so the first word (often captured while the mic is still opening) is not cut off.
+- [x] [PERF] Parallel VAD + accumulation — Run VAD on a separate thread from audio accumulation so the VAD decision does not block the capture callback and add latency.
+- [x] [BUG] Double-open mic on rapid hotkey press — If the user presses and releases the hotkey faster than the CPAL stream opens (~80ms), the session may arm twice. Add a mutex guard around the arming transition in the session state machine.
 
 ---
 

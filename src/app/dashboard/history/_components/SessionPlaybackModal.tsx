@@ -10,10 +10,10 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FastForward, Pause, Play, RotateCcw, Volume2, VolumeX, X } from "lucide-react";
+import { FastForward, Mic, Pause, Play, RotateCcw, Volume2, VolumeX, X } from "lucide-react";
 import { formatCompactDuration, formatRelativeTime } from "@/lib/format";
 import { GlassPanel } from "@/components/global";
-import type { SessionSummary } from "@/lib/bindings";
+import { commands, type SessionSummary } from "@/lib/bindings";
 import { SessionFeedback } from "./SessionFeedback";
 
 export interface SessionPlaybackModalProps {
@@ -28,6 +28,9 @@ export function SessionPlaybackModal({ session, onClose }: SessionPlaybackModalP
   const [playbackRate, setPlaybackRate] = useState<number>(1.0);
   const [currentTimeMs, setCurrentTimeMs] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
+  const [hasRealAudio, setHasRealAudio] = useState(false);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Parse text into individual words
   const text = session.final_text ?? session.raw_text ?? "";
@@ -38,6 +41,40 @@ export function SessionPlaybackModal({ session, onClose }: SessionPlaybackModalP
   const totalDurationMs = Math.max(1000, session.duration_ms ?? 3000);
   const totalWords = Math.max(1, words.length);
   const msPerWord = totalDurationMs / totalWords;
+
+  // Fetch session audio if saved on disk
+  useEffect(() => {
+    let url: string | null = null;
+    let cancelled = false;
+
+    commands.getHistoryAudio({ id: session.id }).then((res) => {
+      if (cancelled) return;
+      if (res.status === "ok" && res.data.has_audio && res.data.audio_bytes) {
+        const bytes = new Uint8Array(res.data.audio_bytes);
+        const blob = new Blob([bytes], { type: "audio/wav" });
+        url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.preload = "auto";
+        audio.onended = () => {
+          setIsPlaying(false);
+          setCurrentTimeMs(totalDurationMs);
+        };
+        audioRef.current = audio;
+        setHasRealAudio(true);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
+    };
+  }, [session.id, totalDurationMs]);
 
   // Active word index derived from currentTimeMs
   const activeWordIndex = useMemo(() => {
@@ -54,16 +91,30 @@ export function SessionPlaybackModal({ session, onClose }: SessionPlaybackModalP
   const togglePlay = useCallback(() => {
     if (isPlaying) {
       setIsPlaying(false);
-      window.speechSynthesis?.cancel();
+      if (hasRealAudio && audioRef.current) {
+        audioRef.current.pause();
+      } else {
+        window.speechSynthesis?.cancel();
+      }
     } else {
       if (currentTimeMs >= totalDurationMs) {
         setCurrentTimeMs(0);
+        if (hasRealAudio && audioRef.current) {
+          audioRef.current.currentTime = 0;
+        }
       }
       setIsPlaying(true);
       lastTickRef.current = performance.now();
 
-      // Speech synthesis for natural audio reading
-      if ("speechSynthesis" in window && !isMuted) {
+      if (hasRealAudio && audioRef.current) {
+        audioRef.current.playbackRate = playbackRate;
+        audioRef.current.muted = isMuted;
+        const seekSeconds = (currentTimeMs >= totalDurationMs ? 0 : currentTimeMs) / 1000;
+        audioRef.current.currentTime = seekSeconds;
+        audioRef.current.play().catch((err) => {
+          console.warn("Audio playback failed, falling back to speech synthesis:", err);
+        });
+      } else if ("speechSynthesis" in window && !isMuted) {
         window.speechSynthesis.cancel();
         // Calculate remaining text from active word
         const startIndex = Math.max(0, activeWordIndex);
@@ -79,6 +130,7 @@ export function SessionPlaybackModal({ session, onClose }: SessionPlaybackModalP
     }
   }, [
     isPlaying,
+    hasRealAudio,
     currentTimeMs,
     totalDurationMs,
     isMuted,
@@ -87,6 +139,14 @@ export function SessionPlaybackModal({ session, onClose }: SessionPlaybackModalP
     playbackRate,
     session.language,
   ]);
+
+  // Sync mute and rate
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.muted = isMuted;
+      audioRef.current.playbackRate = playbackRate;
+    }
+  }, [isMuted, playbackRate]);
 
   // Main playback timer loop
   useEffect(() => {
@@ -98,18 +158,27 @@ export function SessionPlaybackModal({ session, onClose }: SessionPlaybackModalP
     }
 
     const step = (timestamp: number) => {
-      const delta = (timestamp - lastTickRef.current) * playbackRate;
-      lastTickRef.current = timestamp;
-
-      setCurrentTimeMs((prev) => {
-        const next = prev + delta;
-        if (next >= totalDurationMs) {
+      if (hasRealAudio && audioRef.current) {
+        const currentMs = audioRef.current.currentTime * 1000;
+        setCurrentTimeMs(currentMs);
+        if (audioRef.current.ended || currentMs >= totalDurationMs) {
           setIsPlaying(false);
-          window.speechSynthesis?.cancel();
-          return totalDurationMs;
+          return;
         }
-        return next;
-      });
+      } else {
+        const delta = (timestamp - lastTickRef.current) * playbackRate;
+        lastTickRef.current = timestamp;
+
+        setCurrentTimeMs((prev) => {
+          const next = prev + delta;
+          if (next >= totalDurationMs) {
+            setIsPlaying(false);
+            window.speechSynthesis?.cancel();
+            return totalDurationMs;
+          }
+          return next;
+        });
+      }
 
       animFrameRef.current = requestAnimationFrame(step);
     };
@@ -122,12 +191,15 @@ export function SessionPlaybackModal({ session, onClose }: SessionPlaybackModalP
         cancelAnimationFrame(animFrameRef.current);
       }
     };
-  }, [isPlaying, playbackRate, totalDurationMs]);
+  }, [isPlaying, hasRealAudio, playbackRate, totalDurationMs]);
 
-  // Clean up speech synthesis on unmount
+  // Clean up speech synthesis & audio on unmount
   useEffect(() => {
     return () => {
       window.speechSynthesis?.cancel();
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
     };
   }, []);
 
@@ -136,33 +208,43 @@ export function SessionPlaybackModal({ session, onClose }: SessionPlaybackModalP
     (index: number) => {
       const targetTime = index * msPerWord;
       setCurrentTimeMs(targetTime);
+      if (hasRealAudio && audioRef.current) {
+        audioRef.current.currentTime = targetTime / 1000;
+      }
       if (isPlaying) {
-        window.speechSynthesis?.cancel();
-        if ("speechSynthesis" in window && !isMuted) {
-          const remainingText = words.slice(index).join(" ");
-          if (remainingText) {
-            const utterance = new SpeechSynthesisUtterance(remainingText);
-            utterance.rate = playbackRate;
-            utterance.lang = session.language || "en-US";
-            synthUtteranceRef.current = utterance;
-            window.speechSynthesis.speak(utterance);
+        if (hasRealAudio && audioRef.current) {
+          audioRef.current.play().catch(() => {});
+        } else {
+          window.speechSynthesis?.cancel();
+          if ("speechSynthesis" in window && !isMuted) {
+            const remainingText = words.slice(index).join(" ");
+            if (remainingText) {
+              const utterance = new SpeechSynthesisUtterance(remainingText);
+              utterance.rate = playbackRate;
+              utterance.lang = session.language || "en-US";
+              synthUtteranceRef.current = utterance;
+              window.speechSynthesis.speak(utterance);
+            }
           }
         }
         lastTickRef.current = performance.now();
       }
     },
-    [isPlaying, isMuted, msPerWord, playbackRate, session.language, words],
+    [isPlaying, hasRealAudio, isMuted, msPerWord, playbackRate, session.language, words],
   );
 
   const seekRelative = useCallback(
     (deltaMs: number) => {
       const target = Math.max(0, Math.min(totalDurationMs, currentTimeMs + deltaMs));
       setCurrentTimeMs(target);
+      if (hasRealAudio && audioRef.current) {
+        audioRef.current.currentTime = target / 1000;
+      }
       if (isPlaying) {
         lastTickRef.current = performance.now();
       }
     },
-    [currentTimeMs, isPlaying, totalDurationMs],
+    [currentTimeMs, hasRealAudio, isPlaying, totalDurationMs],
   );
 
   return (
@@ -184,6 +266,16 @@ export function SessionPlaybackModal({ session, onClose }: SessionPlaybackModalP
               <h2 id="session-playback-title" className="text-heading text-text-primary">
                 Session Playback
               </h2>
+              {hasRealAudio ? (
+                <span className="flex items-center gap-1 rounded bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 font-mono text-caption text-emerald-400">
+                  <Mic className="size-3" />
+                  16kHz Audio
+                </span>
+              ) : (
+                <span className="rounded bg-sunken-strong px-2 py-0.5 font-mono text-caption text-text-tertiary">
+                  Synthetic Preview
+                </span>
+              )}
               {session.language ? (
                 <span className="rounded bg-sunken-strong px-1.5 py-0.5 font-mono text-caption uppercase text-text-secondary">
                   {session.language}

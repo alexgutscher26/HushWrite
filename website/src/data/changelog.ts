@@ -20,14 +20,59 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: "1.2.2",
+    anchor: "1-2-2",
+    title: "Audio Playback Review, Ring-Buffer Pre-Roll & Parallel VAD",
+    date: "September 14, 2026",
+    isLatest: true,
+    tagUrl: "https://github.com/alexgutscher26/HushWrite/releases/tag/v1.2.2",
+    downloadUrl:
+      "https://github.com/alexgutscher26/HushWrite/releases/download/v1.2.2/HushWrite-Setup-1.2.2.exe",
+    sha256: "c5f888eef0abd34b1d9876c098f93c30f4368aeb3f6fade8c5d19d5ff00137dc",
+    summary:
+      "Local audio recording playback with interactive word scrubbing and timeline synchronization, 500ms ring-buffer audio pre-roll to prevent initial word clipping, parallel VAD DSP worker thread, and rapid hotkey double-open protection.",
+    items: [
+      {
+        category: "Added",
+        title: "Audio Playback for Quality Review",
+        details: [
+          "Opt-in 'Save audio recordings' setting (disabled by default) to listen back to your dictations.",
+          "High-fidelity 16-bit 16kHz mono PCM WAV storage with interactive word highlighting and click-to-seek.",
+          "Scrubber timeline with 0.75x–2.0x speed controls and auto-purge with session deletion.",
+        ],
+      },
+      {
+        category: "Added",
+        title: "500ms Ring-Buffer Audio Pre-Roll",
+        details: [
+          "Continuous circular buffer retaining opening audio frames before hotkey engagement to eliminate first-syllable cutoff.",
+        ],
+      },
+      {
+        category: "Performance",
+        title: "Parallel VAD + Audio Accumulation",
+        details: [
+          "Decoupled Voice Activity Detection DSP into a dedicated worker thread with lock-free atomic queries, eliminating capture callback micro-stutters.",
+        ],
+      },
+      {
+        category: "Fixed",
+        title: "Rapid Hotkey Press Race Condition",
+        details: [
+          "Added state machine guards to prevent duplicate stream arming on fast key taps (<80ms) and guarantee clean audio stream disposal.",
+        ],
+      },
+    ],
+  },
+  {
     version: "1.2.1",
     anchor: "1-2-1",
     title: "Smart Inline Edit Learning & Developer Domain Packs",
     date: "September 14, 2026",
-    isLatest: true,
     tagUrl: "https://github.com/alexgutscher26/HushWrite/releases/tag/v1.2.1",
     downloadUrl:
       "https://github.com/alexgutscher26/HushWrite/releases/download/v1.2.1/HushWrite-Setup-1.2.1.exe",
+    sha256: "b8aac971af9831617c9590041d07f5814d488f1101e85528ece3d7a44760eb10",
     summary:
       "Intelligent inline edit learning with 1-click 'Always Correct' prompts, new AI/ML/GPU and developer domain packs, and dual-layer Whisper initial_prompt biasing with deterministic SQLite replacements.",
     items: [

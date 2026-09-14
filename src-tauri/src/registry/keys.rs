@@ -22,6 +22,9 @@ pub const CANCEL_COUNTDOWN_MS: &str = "dictation.cancel_countdown_ms";
 pub const DISCARD_ON_ESCAPE: &str = "dictation.discard_on_escape";
 pub const INPUT_DEVICE: &str = "dictation.input_device";
 pub const AUDIO_FEEDBACK: &str = "dictation.audio_feedback";
+pub const MAX_RECORDING_SECONDS: &str = "dictation.max_recording_seconds";
+pub const NOISE_GATE_ENABLED: &str = "audio.noise_gate_enabled";
+pub const NOISE_GATE_MULTIPLIER: &str = "audio.noise_gate_multiplier";
 
 // ── Transcription ────────────────────────────────────────────────────────
 pub const TRANSCRIPTION_ENGINE: &str = "transcription.engine";
@@ -64,6 +67,7 @@ pub const ENCRYPTION_AT_REST: &str = "privacy.encryption_at_rest";
 pub const PURGE_ON_LOCK: &str = "privacy.purge_on_lock";
 pub const INCOGNITO_MODE: &str = "privacy.incognito_mode";
 pub const AIR_GAP_MODE: &str = "privacy.air_gap_mode";
+pub const SAVE_AUDIO_RECORDINGS: &str = "privacy.save_audio_recordings";
 
 // ── General & UI ─────────────────────────────────────────────────────────
 pub const LAUNCH_AT_LOGIN: &str = "general.launch_at_login";

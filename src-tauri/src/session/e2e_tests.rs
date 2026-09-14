@@ -136,6 +136,7 @@ impl TextInjector for CapturingInjector {
         Some(FrontmostApp {
             bundle_id: "com.apple.Terminal".into(),
             name: "Terminal".into(),
+            selected_text: None,
         })
     }
     fn deliver(&self, request: &InjectionRequest) -> AppResult<InjectionOutcome> {

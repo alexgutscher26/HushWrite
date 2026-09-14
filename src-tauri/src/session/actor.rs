@@ -110,6 +110,10 @@ pub struct SessionActor {
      */
     detected_language: Option<LanguageCode>,
     settings: SessionSettings,
+    noise_floor_ema: f32,
+    noise_floor_samples: usize,
+    auto_stop_fired: bool,
+    session_audio_samples: Vec<f32>,
 
     /**
      * SOURCE OF TRUTH KEYWORDS: pending_deliveries, route_by_session
@@ -140,6 +144,10 @@ pub struct SessionActor {
     capture_start_stamp: Option<Instant>,
     /// Whether the first audio sample of the active session has been captured.
     first_sample_captured: bool,
+    /// Guard tracking whether microphone stream arming is currently in progress.
+    is_arming: bool,
+    /// Flag indicating whether a stop request arrived while arming was still in flight.
+    cancel_during_arm: bool,
 }
 
 impl SessionActor {
@@ -192,6 +200,12 @@ impl SessionActor {
             in_flight: 0,
             capture_start_stamp: None,
             first_sample_captured: false,
+            is_arming: false,
+            cancel_during_arm: false,
+            noise_floor_ema: 0.0,
+            noise_floor_samples: 0,
+            auto_stop_fired: false,
+            session_audio_samples: Vec::new(),
         }
     }
 
@@ -354,6 +368,9 @@ impl SessionActor {
 
     fn persist_row(&mut self, session_id: SessionId) {
         self.started_at = Some(Instant::now());
+        self.noise_floor_ema = 0.0;
+        self.noise_floor_samples = 0;
+        self.auto_stop_fired = false;
         // A stop-press stamp that never reached delivery belongs to a session
         // that ended some other way. Cleared here so it cannot be attributed to
         // the session starting now.
@@ -361,6 +378,7 @@ impl SessionActor {
         self.assembler.clear();
         self.chunker.clear();
         self.detected_language = None;
+        self.session_audio_samples.clear();
 
         let frontmost = self.ctx.ports.injector.frontmost_app();
         let app_bundle_id = frontmost.as_ref().map(|app| app.bundle_id.clone());
@@ -440,6 +458,9 @@ impl SessionActor {
             return;
         }
 
+        self.is_arming = true;
+        self.cancel_during_arm = false;
+
         let timer = self.latency.stage_timer(LatencyStage::DeviceOpen);
         let (tx, rx) = mpsc::channel(EVENT_QUEUE_DEPTH);
 
@@ -451,12 +472,27 @@ impl SessionActor {
         match self.ctx.ports.audio.start(&config, tx) {
             Ok(session) => {
                 drop(timer);
+                self.is_arming = false;
+                if self.cancel_during_arm {
+                    // Hotkey was released or stop was requested before stream opening finished.
+                    // Cleanly stop the audio session immediately and do not complete arming.
+                    self.cancel_during_arm = false;
+                    let _ = session.stop();
+                    self.capture = None;
+                    self.capture_rx = None;
+                    return;
+                }
                 self.capture = Some(session);
                 self.capture_rx = Some(rx);
                 let _ = self.ctx.session.send(SessionEvent::ArmingComplete).await;
             }
             Err(err) => {
                 drop(timer);
+                self.is_arming = false;
+                if self.cancel_during_arm {
+                    self.cancel_during_arm = false;
+                    return;
+                }
                 tracing::warn!(error = %err, "could not open the microphone");
                 let _ = self.ctx.session.send(SessionEvent::ArmingFailed(err)).await;
             }
@@ -464,6 +500,9 @@ impl SessionActor {
     }
 
     fn stop_capture(&mut self) {
+        if self.is_arming {
+            self.cancel_during_arm = true;
+        }
         self.capture_rx = None;
         if let Some(session) = self.capture.take() {
             if let Err(err) = session.stop() {
@@ -475,6 +514,15 @@ impl SessionActor {
     /// Escape means gone: the row, the audio and every decoded segment go in
     /// the same step. No tombstone, no purge job to trust.
     fn destroy(&mut self, session_id: SessionId) {
+        self.session_audio_samples.clear();
+        let audio_file = self
+            .ctx
+            .paths
+            .audio_dir
+            .join(format!("{}.wav", session_id.as_str()));
+        if audio_file.exists() {
+            let _ = std::fs::remove_file(audio_file);
+        }
         self.chunker.clear();
         self.assembler.clear();
         self.started_at = None;
@@ -492,6 +540,9 @@ impl SessionActor {
     async fn handle_capture(&mut self, event: CaptureEvent) {
         match event {
             CaptureEvent::Samples(samples) => {
+                if self.settings.save_audio_recordings {
+                    self.session_audio_samples.extend_from_slice(&samples);
+                }
                 if !self.first_sample_captured {
                     self.first_sample_captured = true;
                     if let Some(start) = self.capture_start_stamp.take() {
@@ -509,7 +560,30 @@ impl SessionActor {
                     }
                 }
             }
-            CaptureEvent::Level(level) => {
+            CaptureEvent::Level(mut level) => {
+                let elapsed_ms = self
+                    .started_at
+                    .map(|s| s.elapsed().as_millis() as u64)
+                    .unwrap_or(0);
+
+                if self.settings.noise_gate_enabled {
+                    // Learn ambient noise floor during first 500ms using EMA
+                    if elapsed_ms <= 500 {
+                        let alpha = 0.25f32;
+                        if self.noise_floor_samples == 0 {
+                            self.noise_floor_ema = level.rms;
+                        } else {
+                            self.noise_floor_ema = alpha * level.rms + (1.0 - alpha) * self.noise_floor_ema;
+                        }
+                        self.noise_floor_samples += 1;
+                    }
+
+                    let multiplier = self.settings.noise_gate_multiplier as f32;
+                    let threshold = self.noise_floor_ema * multiplier;
+                    level.noise_floor = Some(self.noise_floor_ema);
+                    level.gate_threshold = Some(threshold);
+                }
+
                 // Droppable by design: a missed meter frame is invisible.
                 self.ctx.ports.events.audio_level(level);
             }
@@ -644,6 +718,19 @@ impl SessionActor {
          * recording, which is exactly where detection is least reliable.
          */
         let request = self.transcribe_request();
+
+        if self.settings.save_audio_recordings && !self.session_audio_samples.is_empty() {
+            let wav_bytes = crate::types::encode_wav_16k_mono_pcm(&self.session_audio_samples);
+            let path = self
+                .ctx
+                .paths
+                .audio_dir
+                .join(format!("{}.wav", session_id.as_str()));
+            if let Err(err) = std::fs::write(&path, wav_bytes) {
+                tracing::warn!(error = %err, path = %path.display(), "could not save session audio recording");
+            }
+        }
+        self.session_audio_samples.clear();
 
         let mut pending = PendingDelivery {
             session_id: session_id.clone(),
@@ -814,6 +901,23 @@ impl SessionActor {
             .map(|start| start.elapsed().as_millis() as u64)
             .unwrap_or_default();
 
+        // Auto-finalize recording limit check
+        let max_recording_seconds = self.settings.max_recording_seconds;
+        if max_recording_seconds > 0 {
+            let max_ms = max_recording_seconds * 1000;
+            if elapsed_ms >= max_ms && !self.auto_stop_fired {
+                self.auto_stop_fired = true;
+                tracing::info!(
+                    elapsed_ms,
+                    max_recording_seconds,
+                    "recording limit reached, auto-finalizing"
+                );
+                crate::adapters::os::play_feedback(crate::adapters::os::FeedbackSound::Stop);
+                let _ = self.ctx.session.send(SessionEvent::StopRequested).await;
+                return;
+            }
+        }
+
         if let Some(deadline) = self.cancel_deadline {
             let now = Instant::now();
             if now >= deadline {
@@ -833,12 +937,24 @@ impl SessionActor {
             return;
         }
 
+        // If within 10s of max recording limit, send countdown remaining_ms
+        let countdown_remaining_ms = if max_recording_seconds > 0 {
+            let max_ms = max_recording_seconds * 1000;
+            if elapsed_ms + 10_000 >= max_ms {
+                max_ms.saturating_sub(elapsed_ms)
+            } else {
+                0
+            }
+        } else {
+            0
+        };
+
         let _ = self
             .ctx
             .session
             .send(SessionEvent::Tick {
                 elapsed_ms,
-                remaining_ms: 0,
+                remaining_ms: countdown_remaining_ms,
             })
             .await;
     }
@@ -877,8 +993,16 @@ impl SessionActor {
         let terms = services::dictionary::recent_terms(&self.ctx.db, 64).unwrap_or_default();
         let window_title = self.frontmost_app.as_ref().map(|app| app.name.as_str());
         let app_bundle = self.frontmost_app.as_ref().map(|app| app.bundle_id.as_str());
+        let selected_text = self.frontmost_app.as_ref().and_then(|app| app.selected_text.as_deref());
 
-        crate::pipeline::context::build_context_prompt(window_title, app_bundle, &terms, 64)
+        crate::pipeline::context::build_context_prompt_with_privacy(
+            window_title,
+            app_bundle,
+            selected_text,
+            &terms,
+            &[],
+            64,
+        )
     }
 }
 

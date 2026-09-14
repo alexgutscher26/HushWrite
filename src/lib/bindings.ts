@@ -15,6 +15,7 @@ export const commands = {
 	listHistory: (input: ListHistoryInput) => typedError<SessionSummary[], AppError>(__TAURI_INVOKE("list_history", { input })),
 	searchHistory: (input: SearchHistoryInput) => typedError<SessionSummary[], AppError>(__TAURI_INVOKE("search_history", { input })),
 	getHistoryEntry: (input: SessionIdInput) => typedError<SessionSummary, AppError>(__TAURI_INVOKE("get_history_entry", { input })),
+	getHistoryAudio: (input: SessionIdInput) => typedError<SessionAudioResult, AppError>(__TAURI_INVOKE("get_history_audio", { input })),
 	deleteHistoryEntry: (input: SessionIdInput) => typedError<null, AppError>(__TAURI_INVOKE("delete_history_entry", { input })),
 	deleteHistoryEntries: (input: DeleteHistoryEntriesInput) => typedError<number, AppError>(__TAURI_INVOKE("delete_history_entries", { input })),
 	/**  The privacy escape hatch. Deletes everything, immediately, with no tombstone. */
@@ -168,6 +169,8 @@ export type AppProfile = {
 export type AudioLevel = {
 	rms: number | null,
 	peak: number | null,
+	noise_floor: number | null,
+	gate_threshold: number | null,
 };
 
 /**
@@ -855,6 +858,12 @@ export type SaveTextFileInput = {
 export type SearchHistoryInput = {
 	query: string,
 	limit: number,
+};
+
+export type SessionAudioResult = {
+	session_id: SessionId,
+	has_audio: boolean,
+	audio_bytes: number[] | null,
 };
 
 /**

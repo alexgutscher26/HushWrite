@@ -324,7 +324,26 @@ function PillBody({
 
   switch (state.kind) {
     case "ARMING":
-    case "RECORDING":
+    case "RECORDING": {
+      const isNearLimit = state.kind === "RECORDING" && state.elapsed_ms >= 110_000;
+      const limitCountdown = isNearLimit ? Math.max(1, Math.ceil((120_000 - state.elapsed_ms) / 1000)) : null;
+
+      if (limitCountdown !== null) {
+        return (
+          <div className="flex min-w-0 flex-1 items-center gap-1.5 animate-in fade-in duration-150">
+            <span className="shrink-0 text-[11px] font-mono font-medium text-amber-400 bg-amber-500/20 px-1.5 py-0.2 rounded-full tabular-nums animate-pulse">
+              {limitCountdown}s
+            </span>
+            <span
+              style={{ color: accentPrimary }}
+              className="min-w-0 flex-1 truncate text-[13px] font-medium text-white/90 select-none"
+            >
+              {partialText ? getTrailingSnippet(partialText) : "Listening…"}
+            </span>
+          </div>
+        );
+      }
+
       if (backtrackNotice) {
         return (
           <div className="flex min-w-0 flex-1 items-center gap-1.5 animate-in fade-in duration-150">
@@ -352,6 +371,7 @@ function PillBody({
           Listening — hold
         </span>
       );
+    }
     case "CANCEL_PENDING":
       return <span className="flex-1" />;
     case "FAILED":

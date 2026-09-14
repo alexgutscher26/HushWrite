@@ -171,24 +171,144 @@ fn is_code_identifier(s: &str) -> bool {
     has_upper && has_lower && s.chars().all(|c| c.is_alphanumeric())
 }
 
+const SENSITIVE_APP_PATTERNS: &[&str] = &[
+    "1password",
+    "bitwarden",
+    "keepass",
+    "keepassxc",
+    "enpass",
+    "dashlane",
+    "lastpass",
+    "nordpass",
+    "proton pass",
+    "vault",
+    "authenticator",
+];
+
+const SENSITIVE_TITLE_PATTERNS: &[&str] = &[
+    "(inprivate)",
+    "- incognito",
+    "[incognito]",
+    "[inprivate]",
+    "private browsing",
+];
+
 /**
- * SOURCE OF TRUTH KEYWORDS: build_context_prompt
- * WHAT:  Combines dynamic window context tokens with stored user dictionary terms.
- * WHY:   Contextual window tokens take highest priority at the front of Whisper's
- *        prompt budget, followed by the user's recent custom vocabulary.
+ * SOURCE OF TRUTH KEYWORDS: is_blocklisted_app
+ * WHAT:  Checks whether the active application or window is sensitive (e.g. password managers,
+ *        incognito windows, or user-configured blocklisted applications).
+ * WHY:   Context harvesting must never extract identifiers or text from credential vaults
+ *        or private sessions.
  */
-pub fn build_context_prompt(
+pub fn is_blocklisted_app(
+    app_bundle: Option<&str>,
     window_title: Option<&str>,
-    _app_bundle: Option<&str>,
+    custom_blocklist: &[String],
+) -> bool {
+    if let Some(bundle) = app_bundle {
+        let bundle_lower = bundle.to_lowercase();
+        if SENSITIVE_APP_PATTERNS.iter().any(|&pat| bundle_lower.contains(pat)) {
+            return true;
+        }
+        if custom_blocklist.iter().any(|b| bundle_lower.contains(&b.to_lowercase())) {
+            return true;
+        }
+    }
+
+    if let Some(title) = window_title {
+        let title_lower = title.to_lowercase();
+        if SENSITIVE_APP_PATTERNS.iter().any(|&pat| title_lower.contains(pat)) {
+            return true;
+        }
+        if SENSITIVE_TITLE_PATTERNS.iter().any(|&pat| title_lower.contains(pat)) {
+            return true;
+        }
+        if custom_blocklist.iter().any(|b| title_lower.contains(&b.to_lowercase())) {
+            return true;
+        }
+    }
+
+    false
+}
+
+/**
+ * SOURCE OF TRUTH KEYWORDS: extract_selected_tokens
+ * WHAT:  Extracts high-signal domain terms, code identifiers, and acronyms from active selected text.
+ * WHY:   When a user highlights a function name, URL, or technical term before dictating,
+ *        extracting those tokens gives immediate zero-latency bias for the exact active topic.
+ */
+pub fn extract_selected_tokens(selected_text: &str) -> Vec<String> {
+    let trimmed = selected_text.trim();
+    if trimmed.is_empty() {
+        return Vec::new();
+    }
+
+    // Limit scanned text to 256 chars to keep processing sub-millisecond and prevent prompt pollution
+    let bounded = if trimmed.len() > 256 {
+        &trimmed[..256]
+    } else {
+        trimmed
+    };
+
+    let mut tokens: Vec<String> = Vec::new();
+    let mut seen: HashSet<String> = HashSet::new();
+
+    for word in bounded.split_whitespace() {
+        let cleaned = word.trim_matches(|c: char| !c.is_alphanumeric() && c != '_' && c != '-');
+        if cleaned.len() < 2 {
+            continue;
+        }
+
+        let lower = cleaned.to_lowercase();
+        if STOP_WORDS.contains(&lower.as_str()) {
+            continue;
+        }
+
+        if (is_code_identifier(cleaned) || is_ticket_id(cleaned) || cleaned.chars().any(|c| c.is_uppercase()))
+            && seen.insert(lower)
+        {
+            tokens.push(cleaned.to_string());
+        }
+    }
+
+    tokens
+}
+
+/**
+ * SOURCE OF TRUTH KEYWORDS: build_context_prompt_with_privacy
+ * WHAT:  Combines dynamic selected text, window context tokens, and stored user dictionary terms
+ *        while enforcing sensitive app blocklists.
+ */
+pub fn build_context_prompt_with_privacy(
+    window_title: Option<&str>,
+    app_bundle: Option<&str>,
+    selected_text: Option<&str>,
     dictionary_terms: &[String],
+    custom_blocklist: &[String],
     max_terms: usize,
 ) -> Option<String> {
+    // 1. If active app is blocklisted, suppress all dynamic window/selected context
+    if is_blocklisted_app(app_bundle, window_title, custom_blocklist) {
+        let mut combined: Vec<String> = Vec::new();
+        let mut seen: HashSet<String> = HashSet::new();
+        for term in dictionary_terms {
+            let trimmed = term.trim();
+            if !trimmed.is_empty() && seen.insert(trimmed.to_lowercase()) {
+                combined.push(trimmed.to_string());
+                if combined.len() >= max_terms {
+                    break;
+                }
+            }
+        }
+        return if combined.is_empty() { None } else { Some(combined.join(", ")) };
+    }
+
     let mut combined: Vec<String> = Vec::new();
     let mut seen: HashSet<String> = HashSet::new();
 
-    // 1. Dynamic context tokens first
-    if let Some(title) = window_title {
-        for token in extract_window_tokens(title) {
+    // 2. Selected text tokens take highest priority
+    if let Some(sel) = selected_text {
+        for token in extract_selected_tokens(sel) {
             let lower = token.to_lowercase();
             if seen.insert(lower) {
                 combined.push(token);
@@ -199,18 +319,35 @@ pub fn build_context_prompt(
         }
     }
 
-    // 2. User dictionary terms
-    for term in dictionary_terms {
-        let trimmed = term.trim();
-        if trimmed.is_empty() {
-            continue;
+    // 3. Dynamic window tokens second
+    if combined.len() < max_terms {
+        if let Some(title) = window_title {
+            for token in extract_window_tokens(title) {
+                let lower = token.to_lowercase();
+                if seen.insert(lower) {
+                    combined.push(token);
+                }
+                if combined.len() >= max_terms {
+                    break;
+                }
+            }
         }
-        let lower = trimmed.to_lowercase();
-        if seen.insert(lower) {
-            combined.push(trimmed.to_string());
-        }
-        if combined.len() >= max_terms {
-            break;
+    }
+
+    // 4. User dictionary terms
+    if combined.len() < max_terms {
+        for term in dictionary_terms {
+            let trimmed = term.trim();
+            if trimmed.is_empty() {
+                continue;
+            }
+            let lower = trimmed.to_lowercase();
+            if seen.insert(lower) {
+                combined.push(trimmed.to_string());
+            }
+            if combined.len() >= max_terms {
+                break;
+            }
         }
     }
 
@@ -219,6 +356,28 @@ pub fn build_context_prompt(
     } else {
         Some(combined.join(", "))
     }
+}
+
+/**
+ * SOURCE OF TRUTH KEYWORDS: build_context_prompt
+ * WHAT:  Combines dynamic window context tokens with stored user dictionary terms.
+ * WHY:   Contextual window tokens take highest priority at the front of Whisper's
+ *        prompt budget, followed by the user's recent custom vocabulary.
+ */
+pub fn build_context_prompt(
+    window_title: Option<&str>,
+    app_bundle: Option<&str>,
+    dictionary_terms: &[String],
+    max_terms: usize,
+) -> Option<String> {
+    build_context_prompt_with_privacy(
+        window_title,
+        app_bundle,
+        None,
+        dictionary_terms,
+        &[],
+        max_terms,
+    )
 }
 
 #[cfg(test)]
@@ -255,12 +414,53 @@ mod tests {
     }
 
     #[test]
+    fn blocks_sensitive_apps_and_incognito() {
+        assert!(is_blocklisted_app(Some("1password.exe"), None, &[]));
+        assert!(is_blocklisted_app(Some("Bitwarden"), None, &[]));
+        assert!(is_blocklisted_app(None, Some("KeePassXC - Passwords"), &[]));
+        assert!(is_blocklisted_app(None, Some("New Tab - Google Chrome (InPrivate)"), &[]));
+        assert!(is_blocklisted_app(None, Some("Secret Project - CustomApp"), &["CustomApp".to_string()]));
+        assert!(!is_blocklisted_app(Some("Code.exe"), Some("main.rs - Visual Studio Code"), &[]));
+
+        let dict = vec!["SafeTerm".to_string()];
+        let prompt = build_context_prompt_with_privacy(
+            Some("1Password - Master Vault"),
+            Some("1password.exe"),
+            Some("SecretPassword123"),
+            &dict,
+            &[],
+            10,
+        );
+        // Sensitive context must NOT be extracted, only safe dictionary terms
+        assert_eq!(prompt, Some("SafeTerm".to_string()));
+    }
+
+    #[test]
+    fn extracts_selected_text_tokens_with_high_priority() {
+        let selected = "handleOAuthCallback and UserService";
+        let dict = vec!["FallbackTerm".to_string()];
+        let prompt = build_context_prompt_with_privacy(
+            Some("index.ts - project - VS Code"),
+            Some("Code.exe"),
+            Some(selected),
+            &dict,
+            &[],
+            10,
+        ).unwrap();
+
+        let tokens: Vec<&str> = prompt.split(", ").collect();
+        assert_eq!(tokens[0], "handleOAuthCallback");
+        assert!(prompt.contains("UserService"));
+        assert!(prompt.contains("index"));
+        assert!(prompt.contains("FallbackTerm"));
+    }
+
+    #[test]
     fn combines_dynamic_context_ahead_of_dictionary_terms() {
         let title = "PaymentGateway.ts - billing-service - Visual Studio Code";
         let dict = vec!["Stripe".to_string(), "Kubernetes".to_string()];
         let prompt = build_context_prompt(Some(title), Some("code.exe"), &dict, 10).unwrap();
 
-        // Dynamic tokens should appear before static dictionary terms
         let tokens: Vec<&str> = prompt.split(", ").collect();
         assert_eq!(tokens[0], "PaymentGateway");
         assert!(prompt.contains("billing-service"));
