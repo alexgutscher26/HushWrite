@@ -1,0 +1,99 @@
+---
+title: "Air-Gap Verification Guide: Packet Captures & Network Socket Audits"
+description: "A step-by-step technical guide for security teams and enterprise auditors to independently verify zero network egress during HushWrite dictation sessions."
+date: "2026-09-14"
+updatedDate: "September 14, 2026"
+readTime: "8 min read"
+category: "Privacy & Security"
+keywords:
+  - "air gap verification guide"
+  - "wireshark voice dictation audit"
+  - "pktmon zero egress test"
+  - "little snitch dictation inspection"
+  - "hushwrite security audit"
+author:
+  name: "Alex Gutscher"
+  role: "Lead Systems Engineer"
+  avatar: "A"
+shortFormHooks:
+  - "How to prove to your Chief Information Security Officer (CISO) that zero bytes leave your laptop during dictation."
+  - "A reproducible 3-step packet capture recipe using Windows pktmon and macOS Little Snitch."
+keyTakeaways:
+  - "Privacy policies and SOC 2 attestations are legal documents; packet captures are physical proof."
+  - "HushWrite can be audited on Windows using native `pktmon` and Sysinternals TCPView without third-party tools."
+  - "macOS users can audit network activity using Little Snitch in Alert Mode or LuLu open-source firewall."
+  - "Running with physical network interfaces disabled (Airplane Mode) confirms complete local functionality."
+---
+
+> **Auditor Assurance:** In infosec and compliance audits, claims of "privacy" must be substantiated with verifiable runtime evidence. This guide provides exact commands and filters to audit HushWrite's runtime network behavior.
+
+### Why Software Architecture Must Be Verifiable
+
+Many cloud dictation tools claim in their marketing materials that they "respect your privacy" or "do not train on your voice." However, an application that streams audio over the internet is inherently vulnerable to:
+
+1. **Man-in-the-middle (MitM) inspection or TLS proxy interception.**
+2. **Third-party cloud infrastructure breaches and misconfigured S3 buckets.**
+3. **Subpoenas, warrants, and national security letters served directly on cloud hosters.**
+
+The only true guarantee against data leaks is **physical data isolation**: ensuring that the software process never opens a network socket in the first place.
+
+---
+
+### Audit Recipe 1: Windows 10/11 Network Packet Monitor (`pktmon`)
+
+Windows includes a built-in kernel-level packet monitor (`pktmon.exe`) that captures all network traffic passing through the Windows network driver interface specification (NDIS):
+
+```powershell
+# Step 1: Open an elevated Administrator PowerShell prompt
+# Step 2: Add a filter targeting the HushWrite process or outbound TLS ports
+pktmon filter remove
+pktmon filter add HushWriteFilter -p 443 -p 80
+
+# Step 3: Start real-time event tracing
+pktmon start --etw -p 0
+
+# Step 4: Perform a 60-second voice dictation session in HushWrite
+# Dictate 100+ words into any text editor.
+
+# Step 5: Stop tracing and format the log file
+pktmon stop
+pktmon format PktMon.etl -o hushwrite_audit.txt
+
+# Step 6: Verify total packets transmitted
+Get-Content hushwrite_audit.txt | Select-String "HushWrite"
+```
+
+**Expected Audit Result:** Zero outbound packets matching the `HushWrite.exe` process ID.
+
+---
+
+### Audit Recipe 2: Live Socket Inspection with Sysinternals TCPView
+
+1. Download **TCPView** from Microsoft Sysinternals (`live.sysinternals.com/tcpview.exe`).
+2. Launch TCPView and sort the table by the **Process Name** column.
+3. Locate `HushWrite.exe`.
+4. Trigger your dictation hotkey (`Alt + Space`), speak for 30 seconds, and release to inject text.
+5. **Observation:** Notice that `HushWrite.exe` never establishes an established (`ESTABLISHED`), listening (`LISTENING`), or time-wait (`TIME_WAIT`) TCP/UDP socket.
+
+---
+
+### Audit Recipe 3: macOS Packet Inspection with Little Snitch / LuLu
+
+For Apple Silicon Mac users:
+
+1. Install **Little Snitch** or the open-source **Objective-See LuLu** firewall.
+2. Set the firewall filtering mode to **Alert Mode** (Prompt on any new outbound connection).
+3. Launch `HushWrite.app` and dictate a full document in Notes or TextEdit.
+4. **Observation:** The firewall will remain completely silent because the process makes zero attempts to bind or connect to network sockets.
+
+---
+
+### Air-Gap Mode: Physical Hard-Kill of Network Sockets
+
+In enterprise environments with classified or strict regulatory requirements:
+
+- **Disable all network interfaces** (Ethernet, Wi-Fi, Bluetooth).
+- Launch HushWrite.
+- Dictate and format text with zero degradation in speed, accuracy, or model responsiveness.
+
+This physical test conclusively proves that speech recognition, punctuation inference, and text injection operate 100% locally on your machine.

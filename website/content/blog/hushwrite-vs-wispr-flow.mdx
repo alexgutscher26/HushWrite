@@ -1,0 +1,73 @@
+---
+title: "HushWrite vs Wispr Flow: On-Device Whisper vs $15/mo Cloud Streaming"
+description: "A comprehensive technical comparison of HushWrite and Wispr Flow. Evaluating latency benchmarks, privacy guarantees, Windows support, and total cost of ownership."
+date: "2026-09-14"
+updatedDate: "September 14, 2026"
+readTime: "8 min read"
+category: "Comparisons"
+keywords:
+  - "hushwrite vs wispr flow"
+  - "wispr flow alternative windows"
+  - "local dictation vs wispr flow"
+  - "wispr flow privacy review"
+  - "on device voice dictation comparison"
+author:
+  name: "Alex Gutscher"
+  role: "Lead Systems Engineer"
+  avatar: "A"
+shortFormHooks:
+  - "Why pay $15/month for cloud dictation when your PC GPU can run Whisper in 130 milliseconds?"
+  - "The architectural difference between streaming audio over WebSockets and running on-device whisper.cpp."
+keyTakeaways:
+  - "Wispr Flow streams audio to remote GPU clusters, requiring high-speed internet and charging ~$15/month."
+  - "HushWrite runs Whisper locally on your GPU via DirectML and Metal, delivering sub-150ms tail latency with zero cloud transmission."
+  - "HushWrite offers 100% open-source, auditable code with no artificial weekly word limits."
+  - "Windows users get first-class hardware GPU acceleration with zero focus-loss glitches in elevated IDEs."
+---
+
+### Introduction: The Rise of Modern Push-to-Talk Dictation
+
+Wispr Flow popularized the modern push-to-talk voice dictation workflow for knowledge workers. By holding a global hotkey, speaking, and releasing, users could bypass the clunkiness of legacy speech-to-text systems.
+
+However, Wispr Flow is built on a **cloud-first architecture**: your audio is streamed over WebSockets to remote GPU clusters, free usage is capped at 2,000 words per week, and continued use requires a recurring ~$15/month ($180/year) subscription.
+
+**HushWrite** was created to deliver that same polished push-to-talk experience—but executed **100% locally on your own computer's GPU**.
+
+---
+
+### Technical & Architectural Comparison
+
+| Architectural Parameter | Wispr Flow | HushWrite (Local-First) |
+|:---|:---|:---|
+| **Audio Processing Model** | Remote Cloud GPU Clusters | **100% On-Device (DirectML / Metal)** |
+| **Outbound Data Egress** | Continuous audio stream over HTTPS/WSS | **0.00 KB (Air-Gapped)** |
+| **Tail Latency ($p95$)** | 450–900 ms (Network dependent) | **130–180 ms (Hardware direct)** |
+| **Offline Capability** | Inoperable without internet | **100% Operational in Airplane Mode** |
+| **Windows Support** | Web / Electron client | **Native Rust Win32 DirectML Engine** |
+| **Free Tier Limitation** | Capped at 2,000 words / week | **Unlimited dictation forever (Open Source)** |
+| **Pricing Model** | ~$15.00 / month ($180.00 / year) | **Free MIT Core / Lifetime Upgrade** |
+| **Source Code Auditing** | Closed-source commercial binary | **100% Open Source on GitHub** |
+
+---
+
+### Total Cost of Ownership Over 3 Years
+
+Because Wispr Flow relies on expensive cloud GPU inference, they pass those infrastructure costs to users via recurring monthly subscriptions:
+
+```
+3-Year Dictation Cost Comparison:
+• Wispr Flow ($15/mo):  $540.00  (Recurring Cloud Tax)
+• Superwhisper (Mac):   $200.00  (Mac Only, Closed Source)
+• HushWrite (Starter):  $0.00    (Free Forever, 100% Local)
+• HushWrite (Pro):      $149.00  (Lifetime License, Zero Subscriptions)
+```
+
+With modern discrete GPUs (NVIDIA RTX, AMD Radeon) and Apple Silicon neural engines capable of transcribing audio in under 150 milliseconds, paying a monthly cloud fee to process your voice on someone else's server is an outdated model.
+
+---
+
+### Privacy & Corporate Compliance
+
+For lawyers, doctors, and software engineers working under strict non-disclosure agreements (NDAs) or regulatory frameworks (HIPAA, GDPR), streaming voice drafts to cloud servers creates unneeded risk.
+
+HushWrite guarantees that **no audio, transcripts, or telemetry ever leave your workstation**, making IT approval immediate and friction-free.

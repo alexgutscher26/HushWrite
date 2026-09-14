@@ -848,12 +848,12 @@
 
 - [x] [FEAT] Live download counter — Show a real-time (or near-real-time) download count on the hero section. Fetch from a lightweight Cloudflare Worker that reads from an R2 counter bucket. Falls back gracefully to a static number if the fetch fails.
 - [ ] [FEAT] Latency benchmark interactive demo — An interactive chart on the `/developers` page where visitors can select their CPU tier (budget, mid-range, high-end) and model size (tiny, base, small, medium, large) and see projected RTF and WER numbers from the published benchmark matrix.
-- [ ] [SEO] Blog / technical articles infrastructure — Add a `/blog` route using MDX files stored in `website/content/blog/`. Each article gets its own `<head>` meta tags, OpenGraph image, and JSON-LD `Article` schema.
+- [x] [SEO] Blog / technical articles infrastructure — Add a `/blog` route using MDX files stored in `website/content/blog/`. Each article gets its own `<head>` meta tags, OpenGraph image, and JSON-LD `Article` schema.
   - First 6 articles: latency comparison, privacy deep-dive, developer workflow guide, air-gap verification, HushWrite vs Wispr Flow, HushWrite for lawyers
   - Auto-generate sitemap entries for each blog post
-- [ ] [FEAT] Changelog page (`/changelog`) — A public, human-readable changelog page built from `CHANGELOG.md` entries, with each version as an anchor. Update on every release. Linked from the footer and in-app update notification.
+- [x] [FEAT] Changelog page (`/changelog`) — A public, human-readable changelog page built from `CHANGELOG.md` entries, with each version as an anchor. Update on every release. Linked from the footer and in-app update notification.
 - [ ] [FEAT] Interactive air-gap proof widget — An embedded component on the landing page showing a simulated Wireshark capture during a HushWrite dictation session (0 packets to external IPs). Animated and visually compelling. Links to the full verification guide.
-- [ ] [SEO] Programmatic comparison pages expansion — Generate 20 additional comparison pages: `/vs-otter-ai`, `/vs-dragon-anywhere`, `/vs-google-docs-voice`, `/vs-microsoft-dictate`, `/vs-whisperkit`, etc. Each page follows the same template with a structured feature comparison table.
+- [x] [SEO] Programmatic comparison pages expansion — Generate 20 additional comparison pages: `/vs-otter-ai`, `/vs-dragon-anywhere`, `/vs-google-docs-voice`, `/vs-microsoft-dictate`, `/vs-whisperkit`, etc. Each page follows the same template with a structured feature comparison table.
 - [ ] [FEAT] Security badge widget — A self-hosted badge at `https://hushwrite.app/badge/air-gapped.svg` that third parties can embed in their docs to indicate HushWrite-compatible integrations. Returns a dynamically generated SVG.
 - [x] [PERF] Core Web Vitals optimization — Profile the website against Lighthouse and PageSpeed Insights. Targets: LCP < 1.5s, INP < 100ms, CLS < 0.05. Optimize by:
   - Converting hero images to AVIF/WebP with `next/image`

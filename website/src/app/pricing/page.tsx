@@ -32,8 +32,7 @@ const COMMUNITY_PACKS = [
   {
     title: "VS Code & GitHub Engineering Pack",
     category: "Developer",
-    badge: "Free Pack",
-    downloads: "2.4k installs",
+    badge: "Official Preset",
     description:
       "Conventional commit prefixes (feat:, fix:), CamelCase symbol conversion, and pull request markdown schemas.",
     example: "“insert pr template” → Markdown checklist with test coverage & reviewers",
@@ -41,8 +40,7 @@ const COMMUNITY_PACKS = [
   {
     title: "Legal Brief & Privilege Drafting Pack",
     category: "Legal",
-    badge: "Free Pack",
-    downloads: "1.1k installs",
+    badge: "Official Preset",
     description:
       "Confidentiality headers, Latin maxims (res judicata, habeas corpus), statutory formats, and client intake schemas.",
     example: "“insert privileged header” → CONFIDENTIAL ATTORNEY-CLIENT PRIVILEGED",
@@ -50,8 +48,7 @@ const COMMUNITY_PACKS = [
   {
     title: "Customer Support & Fast Replies",
     category: "Operations",
-    badge: "Free Pack",
-    downloads: "1.8k installs",
+    badge: "Official Preset",
     description:
       "Empathetic ticket signoffs, refund policy explanations, and structured reproduction step checklists.",
     example: "“insert refund snippet” → Formatted policy reply with order ID prompt",
@@ -59,8 +56,7 @@ const COMMUNITY_PACKS = [
   {
     title: "Clinical SOAP Notes & Medical Terms",
     category: "Healthcare",
-    badge: "Free Pack",
-    downloads: "950 installs",
+    badge: "Official Preset",
     description:
       "Subjective, Objective, Assessment, Plan (SOAP) layout with 400+ common medication phonetic mappings.",
     example: "“insert soap template” → Formatted clinical chart headers",

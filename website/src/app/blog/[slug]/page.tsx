@@ -3,46 +3,88 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { BLOG_POSTS, BlogPost } from "@/data/blogPosts";
+import { getAllBlogPosts, getBlogPostBySlug } from "@/lib/blog";
+import { BlogPost } from "@/data/blogPosts";
+import type { Metadata } from "next";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return BLOG_POSTS.map((post) => ({
+  const posts = getAllBlogPosts();
+  return posts.map((post) => ({
     slug: post.slug,
   }));
 }
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = BLOG_POSTS.find((p) => p.slug === slug);
+  const post = getBlogPostBySlug(slug);
   if (!post) return { title: "Article Not Found · HushWrite" };
 
   return {
     title: `${post.title} · HushWrite Blog`,
     description: post.description,
     keywords: post.keywords,
+    alternates: {
+      canonical: `https://hushwrite.app/blog/${post.slug}`,
+    },
     openGraph: {
-      title: post.title,
+      title: `${post.title} · HushWrite Blog`,
       description: post.description,
       type: "article",
+      url: `https://hushwrite.app/blog/${post.slug}`,
+      publishedTime: post.date,
+      authors: [post.author.name],
+      siteName: "HushWrite",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description,
     },
   };
 }
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = BLOG_POSTS.find((p) => p.slug === slug);
+  const post = getBlogPostBySlug(slug);
 
   if (!post) {
     notFound();
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    dateModified: post.updatedDate || post.date,
+    author: {
+      "@type": "Person",
+      name: post.author.name,
+      jobTitle: post.author.role,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "HushWrite",
+      url: "https://hushwrite.app",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://hushwrite.app/favicon.ico",
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://hushwrite.app/blog/${post.slug}`,
+    },
+    keywords: post.keywords.join(", "),
+  };
+
   // Helper to parse inline markdown: links [text](url), **bold**, `code`, and *italic*
   const formatInlineMarkdown = (text: string): React.ReactNode => {
-    // Regex for matching [text](url), **bold**, `code`, or *italic*
     const parts = text.split(/(\[.*?\]\(.*?\)|\*\*.*?\*\*|`.*?`|\*.*?\*)/g);
     return parts.map((part, i) => {
       if (part.startsWith("[") && part.includes("](") && part.endsWith(")")) {
@@ -118,51 +160,53 @@ export default async function BlogPostPage({ params }: Props) {
           .filter((_, cIdx, arr) => cIdx > 0 && cIdx < arr.length - 1)
           .map((c) => c.trim()),
       );
-      if (rows.length >= 2) {
-        const header = rows[0];
-        const body = rows.slice(2);
+      tableBuffer = [];
 
-        elements.push(
-          <div
-            key={`table-${keyId}`}
-            className="my-6 rounded-2xl border border-neutral-200/90 overflow-x-auto bg-white shadow-xs"
-          >
-            <table className="w-full text-left text-xs border-collapse font-mono">
-              <thead>
-                <tr className="bg-neutral-50/90 border-b border-neutral-200 text-neutral-800">
-                  {header.map((h, hIdx) => (
-                    <th key={hIdx} className="p-3.5 font-semibold">
-                      {formatInlineMarkdown(h)}
-                    </th>
+      if (rows.length < 2) return;
+      const headers = rows[0];
+      const dataRows = rows.slice(2);
+
+      elements.push(
+        <div
+          key={`table-${keyId}`}
+          className="my-6 overflow-x-auto border border-neutral-200/90 rounded-2xl shadow-xs bg-white"
+        >
+          <table className="w-full text-left text-xs border-collapse min-w-[500px]">
+            <thead>
+              <tr className="border-b border-neutral-200 text-neutral-950 font-mono bg-neutral-50/80">
+                {headers.map((h, hIdx) => (
+                  <th key={hIdx} className="p-3.5 px-4 font-bold">
+                    {formatInlineMarkdown(h)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100 text-neutral-700 font-mono">
+              {dataRows.map((row, rIdx) => (
+                <tr key={rIdx} className="hover:bg-neutral-50/60 transition-colors">
+                  {row.map((cell, cIdx) => (
+                    <td
+                      key={cIdx}
+                      className={`p-3.5 px-4 ${cIdx === 0 ? "font-bold text-neutral-950" : ""}`}
+                    >
+                      {formatInlineMarkdown(cell)}
+                    </td>
                   ))}
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-100 text-neutral-700">
-                {body.map((r, rIdx) => (
-                  <tr key={rIdx} className="hover:bg-neutral-50/50 transition-colors">
-                    {r.map((cell, cIdx) => (
-                      <td key={cIdx} className="p-3.5">
-                        {formatInlineMarkdown(cell)}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>,
-        );
-      }
-      tableBuffer = [];
+              ))}
+            </tbody>
+          </table>
+        </div>,
+      );
     };
 
     lines.forEach((line, idx) => {
-      // Code blocks
-      if (line.startsWith("```")) {
+      if (line.trim().startsWith("```")) {
         if (inCodeBlock) {
           elements.push(
             <pre
-              key={`code-${idx}`}
-              className="p-4 sm:p-5 rounded-2xl bg-[#0e0e11] border border-neutral-800 font-mono text-xs text-neutral-100 overflow-x-auto my-6 leading-relaxed shadow-sm"
+              key={idx}
+              className="p-4 rounded-2xl bg-neutral-950 text-neutral-200 text-xs font-mono overflow-x-auto mb-6 shadow-inner border border-neutral-800"
             >
               <code>{codeBuffer.join("\n")}</code>
             </pre>,
@@ -170,7 +214,7 @@ export default async function BlogPostPage({ params }: Props) {
           codeBuffer = [];
           inCodeBlock = false;
         } else {
-          flushTable(`pre-code-${idx}`);
+          flushTable(idx);
           inCodeBlock = true;
         }
         return;
@@ -181,72 +225,70 @@ export default async function BlogPostPage({ params }: Props) {
         return;
       }
 
-      // Tables
       if (line.trim().startsWith("|") && line.trim().endsWith("|")) {
-        tableBuffer.push(line);
+        tableBuffer.push(line.trim());
         return;
-      } else if (tableBuffer.length > 0) {
-        flushTable(`auto-${idx}`);
+      } else {
+        flushTable(idx);
       }
 
-      // Headings
-      if (line.startsWith("## ")) {
-        elements.push(
-          <h2
-            key={idx}
-            className="text-2xl sm:text-3xl font-bold text-neutral-950 mt-12 mb-5 tracking-tight"
-          >
-            {formatInlineMarkdown(line.replace("## ", ""))}
-          </h2>,
-        );
-      } else if (line.startsWith("### ")) {
+      if (line.startsWith("### ")) {
         elements.push(
           <h3
             key={idx}
-            className="text-xl sm:text-2xl font-bold text-neutral-950 mt-10 mb-4 tracking-tight"
+            className="text-lg sm:text-xl font-bold text-neutral-950 mt-10 mb-4 tracking-tight"
           >
             {formatInlineMarkdown(line.replace("### ", ""))}
           </h3>,
         );
       } else if (line.startsWith("#### ")) {
         elements.push(
-          <h4 key={idx} className="text-base sm:text-lg font-bold text-emerald-700 mt-6 mb-2">
+          <h4 key={idx} className="text-sm sm:text-base font-bold text-neutral-900 mt-6 mb-2">
             {formatInlineMarkdown(line.replace("#### ", ""))}
           </h4>,
         );
-      } else if (line.startsWith("---")) {
-        elements.push(<hr key={idx} className="border-neutral-200 my-8" />);
-      } else if (line.startsWith("- ")) {
+      } else if (line.startsWith("## ")) {
         elements.push(
-          <li
+          <h2
             key={idx}
-            className="text-xs sm:text-sm text-neutral-700 leading-relaxed ml-4 list-disc mb-2"
+            className="text-xl sm:text-2xl font-bold text-neutral-950 mt-12 mb-5 tracking-tight border-b border-neutral-100 pb-3"
           >
-            {formatInlineMarkdown(line.replace("- ", ""))}
-          </li>,
-        );
-      } else if (/^\d+\.\s/.test(line)) {
-        const match = line.match(/^(\d+\.)\s(.*)$/);
-        elements.push(
-          <div
-            key={idx}
-            className="flex items-start gap-2.5 text-xs sm:text-sm text-neutral-700 leading-relaxed mb-2.5 ml-1"
-          >
-            <span className="font-mono text-emerald-700 font-semibold shrink-0">
-              {match ? match[1] : ""}
-            </span>
-            <div>{formatInlineMarkdown(match ? match[2] : line)}</div>
-          </div>,
+            {formatInlineMarkdown(line.replace("## ", ""))}
+          </h2>,
         );
       } else if (line.startsWith("> ")) {
         elements.push(
           <blockquote
             key={idx}
-            className="p-4 sm:p-5 my-6 rounded-2xl bg-neutral-50/80 border-l-4 border-emerald-600 text-xs sm:text-sm italic text-neutral-800 shadow-2xs"
+            className="p-4 sm:p-5 my-6 rounded-2xl bg-emerald-50/40 border-l-4 border-emerald-500 text-xs sm:text-sm text-neutral-800 leading-relaxed font-sans shadow-xs"
           >
             {formatInlineMarkdown(line.replace("> ", ""))}
           </blockquote>,
         );
+      } else if (line.startsWith("- ")) {
+        elements.push(
+          <li
+            key={idx}
+            className="text-xs sm:text-sm text-neutral-700 leading-relaxed flex items-start gap-2.5 mb-2 ml-2"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mt-1.5 shrink-0" />
+            <span>{formatInlineMarkdown(line.replace("- ", ""))}</span>
+          </li>,
+        );
+      } else if (line.match(/^\d+\.\s/)) {
+        elements.push(
+          <li
+            key={idx}
+            className="text-xs sm:text-sm text-neutral-700 leading-relaxed flex items-start gap-2 mb-2 ml-2"
+          >
+            <span className="font-mono text-emerald-700 font-semibold text-xs">
+              {line.match(/^\d+\./)?.[0]}
+            </span>
+            <span>{formatInlineMarkdown(line.replace(/^\d+\.\s/, ""))}</span>
+          </li>,
+        );
+      } else if (line.trim() === "---") {
+        elements.push(<hr key={idx} className="my-8 border-neutral-200/80" />);
       } else if (line.trim().length > 0) {
         elements.push(
           <p key={idx} className="text-xs sm:text-sm text-neutral-700 leading-relaxed mb-4">
@@ -261,10 +303,17 @@ export default async function BlogPostPage({ params }: Props) {
     return elements;
   };
 
-  const otherPosts = BLOG_POSTS.filter((p) => p.slug !== post.slug).slice(0, 2);
+  const allPosts = getAllBlogPosts();
+  const otherPosts = allPosts.filter((p) => p.slug !== post.slug).slice(0, 2);
 
   return (
     <main className="min-h-screen bg-white text-neutral-900 selection:bg-neutral-900 selection:text-white relative overflow-hidden">
+      {/* JSON-LD Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Background glow & subtle texture */}
       <div className="absolute inset-0 pointer-events-none -z-10 flex items-center justify-center overflow-hidden">
         <div className="absolute -top-32 w-[700px] h-[600px] bg-gradient-to-b from-neutral-100/90 to-transparent rounded-full blur-[100px] pointer-events-none" />
@@ -284,7 +333,9 @@ export default async function BlogPostPage({ params }: Props) {
             Blog
           </Link>
           <span>/</span>
-          <span className="text-emerald-700 font-semibold truncate max-w-[240px]">{post.category}</span>
+          <span className="text-emerald-700 font-semibold truncate max-w-[240px]">
+            {post.category}
+          </span>
         </nav>
 
         {/* Article Header */}
@@ -316,30 +367,34 @@ export default async function BlogPostPage({ params }: Props) {
               {post.author.avatar}
             </div>
             <div>
-              <span className="text-xs font-semibold text-neutral-950 block">{post.author.name}</span>
+              <span className="text-xs font-semibold text-neutral-950 block">
+                {post.author.name}
+              </span>
               <span className="text-[11px] font-mono text-neutral-500">{post.author.role}</span>
             </div>
           </div>
         </header>
 
         {/* Key Takeaways Box */}
-        <div className="p-6 sm:p-7 rounded-3xl bg-neutral-50/80 border border-neutral-200/90 mb-12 shadow-xs">
-          <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-emerald-700 mb-3">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Key Strategic Takeaways
+        {post.keyTakeaways.length > 0 && (
+          <div className="p-6 sm:p-7 rounded-3xl bg-neutral-50/80 border border-neutral-200/90 mb-12 shadow-xs">
+            <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-emerald-700 mb-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Key Strategic Takeaways
+            </div>
+            <ul className="space-y-2">
+              {post.keyTakeaways.map((takeaway, idx) => (
+                <li
+                  key={idx}
+                  className="text-xs sm:text-sm text-neutral-700 leading-relaxed flex items-start gap-2"
+                >
+                  <span className="text-emerald-700 font-mono font-semibold">0{idx + 1}.</span>
+                  <span>{takeaway}</span>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="space-y-2">
-            {post.keyTakeaways.map((takeaway, idx) => (
-              <li
-                key={idx}
-                className="text-xs sm:text-sm text-neutral-700 leading-relaxed flex items-start gap-2"
-              >
-                <span className="text-emerald-700 font-mono font-semibold">0{idx + 1}.</span>
-                <span>{takeaway}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        )}
 
         {/* Rendered Content */}
         <div className="prose prose-neutral max-w-none text-neutral-800">

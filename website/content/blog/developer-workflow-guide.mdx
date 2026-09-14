@@ -1,0 +1,95 @@
+---
+title: "The Developer Workflow Guide: Dictating Code, Commits & PRs in Cursor & VS Code"
+description: "How software engineers use local AI voice dictation to write Conventional Commits, code comments, pull requests, and Cursor prompts at 200+ WPM."
+date: "2026-09-14"
+updatedDate: "September 14, 2026"
+readTime: "7 min read"
+category: "Guides"
+keywords:
+  - "voice dictation for developers"
+  - "dictate code cursor ide"
+  - "voice conventional commits"
+  - "vs code push to talk speech"
+  - "developer productivity speech to text"
+author:
+  name: "Alex Gutscher"
+  role: "Lead Systems Engineer"
+  avatar: "A"
+shortFormHooks:
+  - "Typing git commit messages is the biggest bottleneck in your daily coding velocity."
+  - "How to configure phonetic dictionaries so Whisper never misinterprets TypeScript types again."
+keyTakeaways:
+  - "Speaking PR descriptions and architecture specs is 3x faster than manual keyboard typing."
+  - "App-aware context rules automatically format `feat(scope):` conventional commit structures."
+  - "Custom phonetic dictionaries bias Whisper's beam search to accurately spell framework names like `tRPC`, `TailwindCSS`, and `Kubernetes`."
+  - "Zero code egress ensures your proprietary codebase and secrets remain strictly confidential."
+---
+
+### Why Typing Breaks Developer Flow
+
+Modern software development requires switching constantly between writing high-density syntax (code) and high-volume prose (commit messages, PR descriptions, architectural documentation, and Slack explanations).
+
+While developers spend years mastering mechanical keyboards and vim keybindings, typing detailed pull request summaries or answering architectural questions remains a high-friction chore.
+
+By adopting **local push-to-talk voice dictation**, engineers can dictate thoughts at 180–220 words per minute directly into their active editor window without ever taking their hands off the home row.
+
+---
+
+### Key Developer Dictation Workflows
+
+#### 1. Conventional Commits in the Terminal or IDE
+
+HushWrite recognizes active developer environments (VS Code, Cursor, Zed, JetBrains, Windows Terminal) and automatically applies formatting rules:
+
+```bash
+# Speak: "feature auth add oauth refresh token rotation"
+# HushWrite types into your terminal:
+git commit -m "feat(auth): add OAuth refresh token rotation"
+```
+
+#### 2. Detailed Pull Request Descriptions in GitHub / GitLab
+
+Instead of writing one-line PR summaries, dictate a comprehensive breakdown of architectural decisions, testing checklists, and breaking changes in under 30 seconds:
+
+```markdown
+### Summary of Changes
+- Refactored sqlite connection pool to use WAL mode for concurrent reader throughput.
+- Added deterministic LRU cache for Whisper model weights in VRAM.
+- Hardened Win32 SendInput dispatch queue against elevated UIPI window focus loss.
+
+### Verification Checklist
+- [x] Ran \`cargo test --workspace\` with 100% pass rate.
+- [x] Verified zero memory leaks over 500 consecutive dictation cycles.
+```
+
+#### 3. AI Prompts in Cursor, Claude Code, and Copilot Chat
+
+When interacting with AI coding assistants, the bottleneck is often prompt length. Short prompts lead to hallucinations, while long, detailed context produces high-quality code. Dictating detailed prompts allows you to express nuanced architecture constraints effortlessly:
+
+> *"Refactor this React hook to use an immutable state reducer. Ensure that whenever the connection drops, we trigger exponential backoff retry with jitter, up to a maximum of 5 attempts before notifying the user with a toast."*
+
+---
+
+### Custom Phonetic Dictionary for Code Terminology
+
+Generic voice recognition tools frequently butcher programming libraries and variable names:
+
+| Spoken Phrase | Generic Dictation Output | HushWrite with Phonetic Biasing |
+|:---|:---|:---|
+| *"tee are pee see"* | "T R P C" | `tRPC` |
+| *"tailwind see ess ess"* | "tail wind C S S" | `TailwindCSS` |
+| *"koo-ber-net-eez"* | "coober netties" | `Kubernetes` |
+| *"you eye automation"* | "you eye automation" | `UIAutomation` |
+| *"camel case handle auth"*| "camel case handle auth" | `handleAuthToken` |
+
+To add project-specific terms, open **Settings > Dictionary** in HushWrite or commit a `.hushwrite/dictionary.json` file into your repository root.
+
+---
+
+### Recommended Shortcut Bindings for Developers
+
+For maximum ergonomics, bind push-to-talk to an unused modifier or auxiliary mouse button:
+
+- **Desktop Workstation:** Auxiliary Mouse 4 (Thumb Button) or `Caps Lock` (remapped via Powertoys).
+- **Laptop Keyboard:** `Alt + Space` (Windows) or `Option + Space` (macOS).
+- **Double-Tap Quick Mode:** Double-tap `Alt` to trigger continuous listening mode for long-form design docs.

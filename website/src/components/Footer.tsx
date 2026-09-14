@@ -40,6 +40,7 @@ const COMPARISONS_LINKS: FooterLink[] = [
 ];
 
 const RESOURCES_LINKS: FooterLink[] = [
+  { href: "/changelog", label: "Changelog & Releases", badge: "v1.0.2" },
   { href: "/blog", label: "Technical Blog" },
   {
     href: "/blog/how-to-dictate-github-issues-prs-cursor-prompts",
@@ -71,6 +72,10 @@ const RESOURCES_LINKS: FooterLink[] = [
 
 const ECOSYSTEM_LINKS: FooterLink[] = [
   {
+    href: "/changelog",
+    label: "Release Notes & History",
+  },
+  {
     href: "https://github.com/alexgutscher26/HushWrite",
     label: "GitHub Repository",
     external: true,
@@ -80,7 +85,7 @@ const ECOSYSTEM_LINKS: FooterLink[] = [
     href: "https://github.com/alexgutscher26/HushWrite/tags",
     label: "Official Releases & SHA256",
     external: true,
-    badge: "v1.2.1",
+    badge: "v1.0.2",
   },
   {
     href: "#download",

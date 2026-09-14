@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,18 +7,18 @@ import { Download } from "lucide-react";
 // ---------------------------------------------------------------------------
 // DownloadCounter
 //
-// Fetches the live count directly from the Cloudflare Worker.
-// Renders nothing if the Worker is unreachable — no static fallback.
+// Fetches the real live download count from /api/download-count (aggregated
+// directly from GitHub Releases statistics + verified downloads).
+// No fake or inflated numbers.
 // ---------------------------------------------------------------------------
 
-const WORKER_URL =
-  "https://hushwrite-download-counter.workinbox69.workers.dev";
+const ENDPOINT = "/api/download-count";
 
 function formatCount(n: number): string {
   if (n >= 1_000) {
     return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "k+";
   }
-  return n.toLocaleString() + "+";
+  return n.toLocaleString();
 }
 
 export function DownloadCounter({ className = "" }: { className?: string }) {
@@ -27,18 +28,18 @@ export function DownloadCounter({ className = "" }: { className?: string }) {
   useEffect(() => {
     let cancelled = false;
 
-    fetch(WORKER_URL)
+    fetch(ENDPOINT)
       .then((r) => {
         if (!r.ok) throw new Error(`${r.status}`);
         return r.json() as Promise<{ count: number }>;
       })
       .then(({ count }) => {
-        if (!cancelled && typeof count === "number" && count > 0) {
+        if (!cancelled && typeof count === "number" && count >= 0) {
           setCount(count);
         }
       })
       .catch(() => {
-        // Worker unreachable — render nothing
+        // Unreachable — render nothing
       });
 
     return () => {
@@ -49,7 +50,11 @@ export function DownloadCounter({ className = "" }: { className?: string }) {
   // Animate from 0 → real count once data arrives
   useEffect(() => {
     if (count === null) return;
-    const duration = 1200;
+    if (count === 0) {
+      setDisplayed(0);
+      return;
+    }
+    const duration = 1000;
     const startTime = performance.now();
     let raf: number;
 
@@ -75,7 +80,9 @@ export function DownloadCounter({ className = "" }: { className?: string }) {
       <span className="font-semibold text-neutral-900 tabular-nums">
         {formatCount(displayed)}
       </span>
-      <span className="text-neutral-500">free downloads</span>
+      <span className="text-neutral-500">
+        {displayed === 1 ? "free download" : "free downloads"}
+      </span>
       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
     </div>
   );

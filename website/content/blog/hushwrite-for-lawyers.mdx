@@ -1,0 +1,83 @@
+---
+title: "HushWrite for Lawyers: Protecting Attorney-Client Privilege in AI Dictation"
+description: "How attorneys and legal teams can leverage 200+ WPM voice dictation to draft briefs and client memos without waiving confidentiality under ABA Model Rule 1.6."
+date: "2026-09-14"
+updatedDate: "September 14, 2026"
+readTime: "9 min read"
+category: "Privacy & Security"
+keywords:
+  - "voice dictation for lawyers"
+  - "attorney client privilege voice typing"
+  - "aba model rule 1.6 dictation"
+  - "private legal dictation software"
+  - "hushwrite legal compliance"
+author:
+  name: "Alex Gutscher"
+  role: "Lead Systems Engineer"
+  avatar: "A"
+shortFormHooks:
+  - "Does using consumer cloud voice typing waive attorney-client privilege?"
+  - "How to dictate complex legal citations, Latin maxims, and confidential memos at 220 WPM."
+keyTakeaways:
+  - "Transmitting privileged client communications to third-party cloud transcription servers risks waiving confidentiality under ABA Model Rule 1.6."
+  - "HushWrite executes speech recognition entirely inside local volatile RAM, eliminating third-party disclosure vectors."
+  - "Custom phonetic dictionaries accurately transcribe case citations, statutory references, and Latin terms (*habeas corpus*, *res judicata*)."
+  - "One-click history purge and Incognito Mode ensure sensitive client matter notes are never retained on disk."
+---
+
+> **Legal Ethics Notice:** ABA Model Rule 1.6 (Confidentiality of Information) requires lawyers to make "reasonable efforts to prevent the inadvertent or unauthorized disclosure of, or unauthorized access to, information relating to the representation of a client."
+
+### The Ethical Dilemma of Cloud Voice Dictation in Legal Practice
+
+Attorneys and litigation teams draft millions of words every year: client intake memos, deposition summaries, trial briefs, motion filings, and settlement communications.
+
+Voice dictation allows practitioners to write at 180–220 words per minute—nearly triple the speed of manual typing. However, adopting **cloud-based transcription apps** introduces severe ethical and evidentiary risks:
+
+1. **Third-Party Disclosure:** Uploading unencrypted client statements to a cloud vendor's servers can be construed as voluntary disclosure to a third party, potentially waiving attorney-client privilege.
+2. **Subpoena & Cloud Discovery:** Transcripts and audio files stored on a SaaS vendor's cloud database are subject to direct subpoenas and civil discovery requests without the law firm's advance notice.
+3. **Model Training & Data Mining:** Cloud providers often reserve rights in their terms of service to utilize submitted audio to fine-tune AI models.
+
+---
+
+### How On-Device Architecture Protects Legal Privilege
+
+HushWrite solves the confidentiality dilemma by eliminating the cloud entirely:
+
+```
+[Attorney Speaks] 
+       │
+       ▼
+[Local Workstation RAM] ──(DirectML / Metal)──► [Local Whisper Neural Network]
+       │                                                         │
+       ▼                                                         ▼
+[Audio Buffer Zeroized & Purged] ◄── [SendInput Types Text Into Word / Clio]
+```
+
+- **Zero Network Transit:** Audio never leaves your physical workstation.
+- **Zero Third-Party Vendor Access:** No cloud sub-processors or cloud databases exist.
+- **Immediate RAM Erasure:** Audio buffers exist purely in temporary system memory and are freed the instant text is typed.
+- **Deterministic Auto-Purge:** Configure local history retention to 0 days (Incognito Mode) or immediate purge upon workstation lock.
+
+---
+
+### Transcribing Specialized Legal Terminology
+
+Generic voice software often stumbles on complex statutory citations, procedural terms, and Latin legal maxims. HushWrite includes built-in legal phonetic biasing:
+
+| Spoken Phrase | Generic Cloud Dictation | HushWrite with Legal Dictionary |
+|:---|:---|:---|
+| *"hay-bee-us cor-pus"* | "have you score pass" | *habeas corpus* |
+| *"rez joo-dih-kah-tuh"* | "rest you the cotter" | *res judicata* |
+| *"section nineteen eighty three"*| "section 1983" | 42 U.S.C. § 1983 |
+| *"subpoena duces tecum"* | "sub peanut to sister come" | *subpoena duces tecum* |
+| *"in camera inspection"* | "in camera inspection" | *in camera* inspection |
+
+Attorneys can add proprietary client names, expert witness rosters, and case docket numbers directly into the custom dictionary in seconds.
+
+---
+
+### Practical Implementation for Law Firms
+
+1. **Deploy Without IT Friction:** Install the standalone Windows/macOS binary without configuring cloud API keys or signing complex vendor BAAs.
+2. **Enable Incognito Mode for Sensitive Matters:** For ultra-sensitive M&A deals or criminal defense matters, toggle Incognito Mode to disable local SQLite history logging completely.
+3. **Verify with Network Monitoring:** Law firm IT teams can verify zero outbound network activity using Windows Packet Monitor or macOS LuLu.

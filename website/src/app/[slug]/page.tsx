@@ -210,7 +210,7 @@ export default async function HighIntentSeoPage({ params }: Props) {
                     HushWrite (Local-First)
                   </th>
                   <th className="p-3.5 px-4 w-1/3 text-neutral-500">
-                    Cloud Alternatives (e.g. Wispr)
+                    Competitor / Cloud Architecture
                   </th>
                 </tr>
               </thead>
