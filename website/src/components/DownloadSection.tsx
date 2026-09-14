@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { trackDownload } from "@/lib/trackDownload";
 import {
   Download,
   Check,
@@ -35,6 +36,7 @@ export function DownloadSection() {
   } | null>(null);
 
   const handleDownloadClick = (filename: string, platformName: string) => {
+    trackDownload(filename);
     setDownloadToast({
       title: `Downloading HushWrite for ${platformName}`,
       desc: `Your download (${filename}) has started. Check your Downloads folder.`,

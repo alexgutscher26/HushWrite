@@ -1,7 +1,8 @@
-﻿/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useState, useEffect } from "react";
+import { trackDownload } from "@/lib/trackDownload";
 import { DownloadCounter } from "@/components/DownloadCounter";
 import {
   Mic,
@@ -262,6 +263,7 @@ export function Hero() {
         <a
           href="/downloads/HushWrite_1.2.2_x64-setup.exe"
           download="HushWrite_1.2.2_x64-setup.exe"
+          onClick={() => trackDownload("HushWrite_1.2.2_x64-setup.exe")}
           rel="noopener"
           // @ts-expect-error — fetchpriority is a valid HTML attribute not yet in React types
           fetchpriority="high"

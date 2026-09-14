@@ -44,9 +44,16 @@ export function DownloadCounter({ className = "" }: { className?: string }) {
     loadCount();
     const interval = setInterval(loadCount, 30_000);
 
+    const handleDownloaded = () => {
+      setCount((prev) => (prev !== null ? prev + 1 : 1));
+    };
+
+    window.addEventListener("hushwrite:downloaded", handleDownloaded);
+
     return () => {
       cancelled = true;
       clearInterval(interval);
+      window.removeEventListener("hushwrite:downloaded", handleDownloaded);
     };
   }, []);
 
