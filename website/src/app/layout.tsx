@@ -24,7 +24,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://HushWrite.app"),
+  metadataBase: new URL("https://hushwrite.app"),
+  applicationName: "HushWrite",
   title: "HushWrite · Private On-Device AI Voice Dictation | macOS & Windows",
   description:
     "Dictate anywhere. Nothing leaves your device. Fast, polished voice dictation for macOS and Windows that never sends your voice or transcripts off your computer.",
@@ -39,11 +40,12 @@ export const metadata: Metadata = {
     "Rust",
   ],
   authors: [{ name: "HushWrite Contributors" }],
+  category: "productivity",
   openGraph: {
     title: "HushWrite · Speak naturally. Write anywhere. Keep it private.",
     description:
       "Turn your voice into polished text in any app—processed locally on your PC or Mac. No uploaded audio. No cloud transcript history.",
-    url: "https://HushWrite.app",
+    url: "https://hushwrite.app",
     siteName: "HushWrite",
     images: [
       {
@@ -72,6 +74,15 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark scroll-smooth`}>
+      <head>
+        {/* Preconnect to Google Fonts CDN — eliminates render-blocking font latency (LCP) */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Preconnect to the download counter Worker so the first fetch is faster */}
+        <link rel="preconnect" href="https://hushwrite-download-counter.workinbox69.workers.dev" crossOrigin="anonymous" />
+        {/* dns-prefetch fallback for browsers that don't support preconnect */}
+        <link rel="dns-prefetch" href="https://hushwrite-download-counter.workinbox69.workers.dev" />
+      </head>
       <body className="min-h-screen bg-[#000000] font-sans text-white antialiased selection:bg-white/20 selection:text-white">
         <a
           href="#main-content"

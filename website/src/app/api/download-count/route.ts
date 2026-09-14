@@ -3,51 +3,29 @@ import { NextResponse } from "next/server";
 // ---------------------------------------------------------------------------
 // /api/download-count
 //
-// Fetches the live download counter from the Cloudflare Worker.
-// Falls back to a plausible static value if the Worker is unavailable,
-// so the hero widget always renders something meaningful.
-//
-// Cloudflare Worker URL — set DOWNLOAD_COUNTER_URL in Vercel env vars.
-// Until the Worker is deployed this route returns the STATIC_FALLBACK.
+// Server-side proxy to the Cloudflare Worker.
+// Returns 503 instead of a fake number if the Worker is unreachable.
+// The client-side DownloadCounter component hits the Worker directly,
+// but this route exists for server-side usage / caching if needed.
 // ---------------------------------------------------------------------------
 
-const WORKER_URL = process.env.DOWNLOAD_COUNTER_URL ?? "";
-const STATIC_FALLBACK = 1_842; // bump manually when you know the real number
+const WORKER_URL =
+  "https://hushwrite-download-counter.workinbox69.workers.dev";
 
-// Cache the response for 60 seconds at the CDN / browser layer.
 export const revalidate = 60;
 
 export async function GET() {
-  // If no Worker URL is configured yet, return the static fallback immediately.
-  if (!WORKER_URL) {
-    return NextResponse.json(
-      { count: STATIC_FALLBACK, source: "static" },
-      {
-        headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
-        },
-      },
-    );
-  }
-
   try {
     const res = await fetch(WORKER_URL, {
       next: { revalidate: 60 },
-      signal: AbortSignal.timeout(3_000), // 3-second hard timeout
+      signal: AbortSignal.timeout(3_000),
     });
 
-    if (!res.ok) {
-      throw new Error(`Worker responded ${res.status}`);
-    }
+    if (!res.ok) throw new Error(`Worker responded ${res.status}`);
 
-    const data = (await res.json()) as { count?: number };
-    const count =
-      typeof data.count === "number" && data.count > 0
-        ? data.count
-        : STATIC_FALLBACK;
-
+    const data = (await res.json()) as { count: number };
     return NextResponse.json(
-      { count, source: "live" },
+      { count: data.count },
       {
         headers: {
           "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
@@ -55,35 +33,21 @@ export async function GET() {
       },
     );
   } catch {
-    // Network error, timeout, or bad JSON — serve the static fallback.
     return NextResponse.json(
-      { count: STATIC_FALLBACK, source: "static" },
-      {
-        headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
-        },
-      },
+      { error: "Counter unavailable" },
+      { status: 503 },
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Increment endpoint — called by the /api/download route after a redirect.
-// Fire-and-forget; never blocks the download response.
-// ---------------------------------------------------------------------------
 export async function POST() {
-  if (!WORKER_URL) {
-    return NextResponse.json({ ok: true, source: "noop" });
-  }
-
   try {
     await fetch(`${WORKER_URL}/increment`, {
       method: "POST",
       signal: AbortSignal.timeout(2_000),
     });
+    return NextResponse.json({ ok: true });
   } catch {
-    // Silently ignore — incrementing is best-effort.
+    return NextResponse.json({ ok: false }, { status: 503 });
   }
-
-  return NextResponse.json({ ok: true });
 }

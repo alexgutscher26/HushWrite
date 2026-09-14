@@ -855,11 +855,11 @@
 - [ ] [FEAT] Interactive air-gap proof widget — An embedded component on the landing page showing a simulated Wireshark capture during a HushWrite dictation session (0 packets to external IPs). Animated and visually compelling. Links to the full verification guide.
 - [ ] [SEO] Programmatic comparison pages expansion — Generate 20 additional comparison pages: `/vs-otter-ai`, `/vs-dragon-anywhere`, `/vs-google-docs-voice`, `/vs-microsoft-dictate`, `/vs-whisperkit`, etc. Each page follows the same template with a structured feature comparison table.
 - [ ] [FEAT] Security badge widget — A self-hosted badge at `https://hushwrite.app/badge/air-gapped.svg` that third parties can embed in their docs to indicate HushWrite-compatible integrations. Returns a dynamically generated SVG.
-- [ ] [PERF] Core Web Vitals optimization — Profile the website against Lighthouse and PageSpeed Insights. Targets: LCP < 1.5s, INP < 100ms, CLS < 0.05. Optimize by:
+- [x] [PERF] Core Web Vitals optimization — Profile the website against Lighthouse and PageSpeed Insights. Targets: LCP < 1.5s, INP < 100ms, CLS < 0.05. Optimize by:
   - Converting hero images to AVIF/WebP with `next/image`
   - Deferring non-critical JS with `next/dynamic`
   - Preloading the primary CTA download link
-- [ ] [SEO] Structured data for SoftwareApplication — Ensure `SoftwareApplication` schema on the homepage includes `operatingSystem`, `applicationCategory`, `offers` (with price and priceCurrency), `aggregateRating`, and `downloadUrl`. Validate with Google's Rich Results Test after every deploy.
+- [x] [SEO] Structured data for SoftwareApplication — Ensure `SoftwareApplication` schema on the homepage includes `operatingSystem`, `applicationCategory`, `offers` (with price and priceCurrency), `aggregateRating`, and `downloadUrl`. Validate with Google's Rich Results Test after every deploy.
 - [ ] [FEAT] Newsletter signup with double opt-in — A minimal email signup form that uses a self-hosted Listmonk instance (or Buttondown API) for double opt-in. No third-party tracking pixels. Privacy policy linked inline.
 - [ ] [FEAT] Verified checksum download page — A dedicated `/verify` page where users can paste a SHA-256 hash and verify it matches the known-good checksum for any version of HushWrite. Useful for enterprise procurement teams.
 

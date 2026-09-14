@@ -262,6 +262,9 @@ export function Hero() {
         <a
           href="/downloads/HushWrite_1.2.1_x64-setup.exe"
           download="HushWrite_1.2.1_x64-setup.exe"
+          rel="noopener"
+          // @ts-expect-error — fetchpriority is a valid HTML attribute not yet in React types
+          fetchpriority="high"
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-[#141416] hover:bg-neutral-800 text-white text-sm font-semibold shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
         >
           <Download className="w-4 h-4 text-emerald-400" />

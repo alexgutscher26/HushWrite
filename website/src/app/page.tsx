@@ -32,6 +32,10 @@ const HOME_SCHEMA = {
   },
   description:
     "Private, on-device AI voice dictation for macOS and Windows. Runs 100% locally with whisper.cpp, zero cloud telemetry, and sub-200ms latency.",
+  downloadUrl: "https://HushWrite.app/downloads/HushWrite_1.2.1_x64-setup.exe",
+  softwareVersion: "1.2.1",
+  fileSize: "18MB",
+  releaseNotes: "https://HushWrite.app/changelog",
   aggregateRating: {
     "@type": "AggregateRating",
     ratingValue: "4.92",
@@ -148,6 +152,13 @@ export default function Home() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(HOME_SCHEMA) }}
+      />
+      {/* Preload primary CTA download — improves LCP and reduces TTFB for the download itself */}
+      <link
+        rel="preload"
+        href="/downloads/HushWrite_1.2.1_x64-setup.exe"
+        as="fetch"
+        crossOrigin="anonymous"
       />
       {/* Fluid Island Pill Navbar */}
       <Navbar />
