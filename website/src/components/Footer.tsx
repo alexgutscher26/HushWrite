@@ -80,7 +80,7 @@ const ECOSYSTEM_LINKS: FooterLink[] = [
     href: "https://github.com/alexgutscher26/HushWrite/tags",
     label: "Official Releases & SHA256",
     external: true,
-    badge: "v1.2.0",
+    badge: "v1.2.1",
   },
   {
     href: "#download",
@@ -242,7 +242,7 @@ export function Footer() {
               <div className="flex items-center gap-2">
                 <span className="font-bold text-base text-neutral-950 tracking-tight">HushWrite</span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-mono font-medium">
-                  v1.2.0
+                  v1.2.1
                 </span>
               </div>
             </div>

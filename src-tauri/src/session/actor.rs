@@ -31,6 +31,7 @@ use crate::pipeline::worker::{AsrWorker, DecodeResult};
 use crate::pipeline::Chunker;
 use crate::ports::audio::{CaptureConfig, CaptureEvent, CaptureSession};
 use crate::ports::engine::TranscribeRequest;
+use crate::ports::injector::FrontmostApp;
 use crate::ports::permissions::{OsPermission, PermissionState};
 use crate::services;
 use crate::telemetry::{now_ms, LatencyRecorder};
@@ -85,6 +86,8 @@ pub struct SessionActor {
     /// Whether the last emitted state was a capturing one, so the stop chime
     /// can fire on the EDGE out of capture rather than on arrival at Idle.
     was_capturing: bool,
+    /// Foreground app captured at session start for profiles and dynamic context biasing.
+    frontmost_app: Option<FrontmostApp>,
 
     /**
      * SOURCE OF TRUTH KEYWORDS: finalize_started, TotalFinalize
@@ -179,6 +182,7 @@ impl SessionActor {
             started_at: None,
             cancel_deadline: None,
             was_capturing: false,
+            frontmost_app: None,
             finalize_started: None,
             detected_language: None,
             settings,
@@ -358,12 +362,9 @@ impl SessionActor {
         self.chunker.clear();
         self.detected_language = None;
 
-        let app_bundle_id = self
-            .ctx
-            .ports
-            .injector
-            .frontmost_app()
-            .map(|app| app.bundle_id);
+        let frontmost = self.ctx.ports.injector.frontmost_app();
+        let app_bundle_id = frontmost.as_ref().map(|app| app.bundle_id.clone());
+        self.frontmost_app = frontmost;
 
         // Settings are re-read per session so a rebind or a per-app profile
         // takes effect on the NEXT recording rather than requiring a restart —
@@ -866,16 +867,18 @@ impl SessionActor {
      * WHAT:  The vocabulary prompt, most-important term first.
      * WHY:   Ordering is a contract with the engine adapter: over whisper's
      *        ~224-token budget it keeps the LEADING terms and drops from the
-     *        tail. Sorted most-recently-used first, so the terms the user
-     *        actually says survive truncation.
+     *        tail. Dynamic active window context tokens (e.g. current file name,
+     *        project repository, active ticket) are placed first, followed by
+     *        the user's recent custom vocabulary so the terms the user actually
+     *        says and sees on screen survive truncation.
      * WHERE: Attached to every TranscribeRequest.
      */
     fn prompt(&self) -> Option<String> {
-        let terms = services::dictionary::recent_terms(&self.ctx.db, 64).ok()?;
-        if terms.is_empty() {
-            return None;
-        }
-        Some(terms.join(", "))
+        let terms = services::dictionary::recent_terms(&self.ctx.db, 64).unwrap_or_default();
+        let window_title = self.frontmost_app.as_ref().map(|app| app.name.as_str());
+        let app_bundle = self.frontmost_app.as_ref().map(|app| app.bundle_id.as_str());
+
+        crate::pipeline::context::build_context_prompt(window_title, app_bundle, &terms, 64)
     }
 }
 

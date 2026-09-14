@@ -50,7 +50,7 @@ pub fn normalise_whitespace(text: &str) -> String {
  *        ADJACENT.
  */
 pub fn dedupe_stutters(text: &str) -> String {
-    let words: Vec<&str> = text.split(' ').filter(|w| !w.is_empty()).collect();
+    let words: Vec<&str> = text.split_whitespace().collect();
     if words.len() < 2 {
         return text.to_string();
     }
@@ -61,9 +61,10 @@ pub fn dedupe_stutters(text: &str) -> String {
     while index < words.len() {
         let mut matched = false;
 
-        // Try the longest phrase first, so "how do you how do you" collapses as
-        // a phrase rather than leaving fragments behind.
-        for span in (1..=3).rev() {
+        // Check spans starting from 1 up to 8 words so that single repeated words
+        // (the most common stutter/loop) collapse immediately without being chunked
+        // into artificial larger sub-phrases.
+        for span in 1..=8 {
             if index + span * 2 > words.len() {
                 continue;
             }
@@ -73,6 +74,11 @@ pub fn dedupe_stutters(text: &str) -> String {
             if phrases_match(first, second) {
                 out.extend_from_slice(first);
                 index += span * 2;
+                // Collapse ALL subsequent consecutive identical phrases
+                while index + span <= words.len() && phrases_match(first, &words[index..index + span])
+                {
+                    index += span;
+                }
                 matched = true;
                 break;
             }

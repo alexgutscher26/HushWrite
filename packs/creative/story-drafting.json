@@ -10,7 +10,12 @@
     { "term": "juxtaposition", "phonetic": "jux tuh puh zish un", "bias_weight": 1.3 },
     { "term": "bildungsroman", "phonetic": "bil dungs roh mahn", "bias_weight": 1.5 },
     { "term": "verisimilitude", "phonetic": "vair uh sih mil uh tood", "bias_weight": 1.4 },
-    { "term": "in medias res", "phonetic": "in mee dee uhs rayz", "bias_weight": 1.4 }
+    { "term": "in medias res", "phonetic": "in mee dee uhs rayz", "bias_weight": 1.4 },
+    { "term": "protagonist", "phonetic": "proh tag uh nist", "bias_weight": 1.4 },
+    { "term": "antagonist", "phonetic": "an tag uh nist", "bias_weight": 1.4 },
+    { "term": "catalyst", "phonetic": "kat uh list", "bias_weight": 1.4 },
+    { "term": "climax", "phonetic": "kly maks", "bias_weight": 1.4 },
+    { "term": "resolution", "phonetic": "rez uh loo shun", "bias_weight": 1.4 }
   ],
   "abbreviations": {
     "pov": "POV",

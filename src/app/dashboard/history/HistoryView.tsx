@@ -225,16 +225,18 @@ export function HistoryView({ hotkey, mode }: HistoryViewProps) {
               <button
                 type="button"
                 aria-label="Play session transcript"
+                title="Play Recording — Listen to the recorded audio for this transcription"
                 onClick={() => setPlaybackSession(item)}
-                className="rounded-input p-1 text-text-secondary transition-colors hover:bg-sunken hover:text-text-primary"
+                className="rounded-input p-1 text-text-secondary transition-colors hover:bg-sunken hover:text-text-primary cursor-pointer"
               >
                 <Play className="size-4" />
               </button>
               <button
                 type="button"
                 aria-label="Copy transcript"
+                title="Copy Transcript (⏎) — Copy formatted text directly to clipboard"
                 onClick={() => copy(item)}
-                className="rounded-input p-1 text-text-secondary transition-colors hover:bg-sunken hover:text-text-primary"
+                className="rounded-input p-1 text-text-secondary transition-colors hover:bg-sunken hover:text-text-primary cursor-pointer"
               >
                 {copiedId === item.id ? (
                   <Check className="size-4 text-success" />
@@ -245,8 +247,9 @@ export function HistoryView({ hotkey, mode }: HistoryViewProps) {
               <button
                 type="button"
                 aria-label="Delete transcript"
+                title="Delete Transcript — Permanently remove this entry and audio from local disk"
                 onClick={() => remove(item)}
-                className="rounded-input p-1 text-text-secondary transition-colors hover:bg-sunken hover:text-danger"
+                className="rounded-input p-1 text-text-secondary transition-colors hover:bg-sunken hover:text-danger cursor-pointer"
               >
                 <Trash2 className="size-4" />
               </button>
@@ -257,7 +260,12 @@ export function HistoryView({ hotkey, mode }: HistoryViewProps) {
         toolbar={
           selecting ? (
             <span className="flex items-center gap-2">
-              <button type="button" onClick={toggleSelectAll} className={BUTTON_CLASS}>
+              <button
+                type="button"
+                onClick={toggleSelectAll}
+                title={allSelected ? "Deselect all entries" : "Select all visible entries in history"}
+                className={cn(BUTTON_CLASS, "cursor-pointer")}
+              >
                 {allSelected ? "Deselect all" : "Select all"}
               </button>
               <span className="text-caption text-text-secondary">{selectedIds.size} selected</span>
@@ -268,8 +276,10 @@ export function HistoryView({ hotkey, mode }: HistoryViewProps) {
                 onBlur={() => {
                   if (confirmDelete === "selected") setConfirmDelete(null);
                 }}
+                title="Delete selected transcripts from local disk"
                 className={cn(
                   BUTTON_CLASS,
+                  "cursor-pointer",
                   confirmDelete === "selected"
                     ? "bg-danger text-opaque-elevated hover:bg-danger"
                     : "text-text-primary hover:text-danger",
@@ -283,8 +293,10 @@ export function HistoryView({ hotkey, mode }: HistoryViewProps) {
                 onBlur={() => {
                   if (confirmDelete === "all") setConfirmDelete(null);
                 }}
+                title="Clear entire transcription database"
                 className={cn(
                   BUTTON_CLASS,
+                  "cursor-pointer",
                   confirmDelete === "all"
                     ? "bg-danger text-opaque-elevated hover:bg-danger"
                     : "text-text-secondary hover:text-danger",
@@ -299,7 +311,8 @@ export function HistoryView({ hotkey, mode }: HistoryViewProps) {
                   setSelectedIds(new Set());
                   setConfirmDelete(null);
                 }}
-                className={cn(BUTTON_CLASS, "text-text-secondary")}
+                title="Exit bulk selection mode"
+                className={cn(BUTTON_CLASS, "text-text-secondary cursor-pointer")}
               >
                 Done
               </button>
@@ -309,10 +322,10 @@ export function HistoryView({ hotkey, mode }: HistoryViewProps) {
               <button
                 type="button"
                 onClick={toggleIncognito}
-                title="Toggle incognito zero-history mode"
+                title="Zero-History Incognito Mode — Dictations are delivered directly and immediately discarded with zero transcripts or audio saved to disk"
                 className={cn(
                   BUTTON_CLASS,
-                  "flex items-center gap-1.5",
+                  "flex items-center gap-1.5 cursor-pointer",
                   incognito
                     ? "bg-text-primary text-opaque-elevated hover:bg-text-primary"
                     : "text-text-secondary hover:text-text-primary",
@@ -323,7 +336,12 @@ export function HistoryView({ hotkey, mode }: HistoryViewProps) {
               </button>
               <ExportAction onError={setExportError} />
               {feed.items.length > 0 ? (
-                <button type="button" onClick={() => setSelecting(true)} className={BUTTON_CLASS}>
+                <button
+                  type="button"
+                  onClick={() => setSelecting(true)}
+                  title="Bulk Selection — Select multiple transcripts for batch deletion or review"
+                  className={cn(BUTTON_CLASS, "cursor-pointer")}
+                >
                   Select
                 </button>
               ) : null}

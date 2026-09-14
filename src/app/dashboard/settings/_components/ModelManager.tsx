@@ -502,7 +502,7 @@ function ModelAction({
           disabled={isAnyDownloading}
           onClick={() => onDownload(descriptor.id)}
           className="hairline flex shrink-0 items-center gap-1.5 rounded-input bg-sunken px-2.5 py-1 text-xs font-semibold text-text-primary transition-colors hover:bg-sunken-strong disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          title={isAnyDownloading ? "Another download is in progress" : undefined}
+          title={isAnyDownloading ? "Another model download is currently in progress" : `Resume downloading ${descriptor.display_name}`}
         >
           <Download className="size-3.5" />
           Resume
@@ -513,7 +513,7 @@ function ModelAction({
           aria-label={`Delete partial download for ${descriptor.display_name}`}
           onClick={() => onDelete(descriptor.id)}
           className="shrink-0 rounded-input p-1 text-text-secondary transition-colors hover:bg-sunken hover:text-danger disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          title={isAnyDownloading ? "Another download is in progress" : "Delete partial download"}
+          title={isAnyDownloading ? "Another download is in progress" : `Delete partial download for ${descriptor.display_name} to free disk space`}
         >
           <Trash2 className="size-4" />
         </button>
@@ -533,7 +533,7 @@ function ModelAction({
           aria-label={`Delete ${descriptor.display_name}`}
           onClick={() => onDelete(descriptor.id)}
           className="shrink-0 rounded-input p-1 text-text-secondary transition-colors hover:bg-sunken hover:text-danger cursor-pointer"
-          title="Delete file"
+          title={`Delete ${descriptor.display_name} model files`}
         >
           <Trash2 className="size-4" />
         </button>
@@ -554,7 +554,10 @@ function ModelAction({
     if (isActive) {
       return (
         <div className="flex items-center gap-2 shrink-0">
-          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+          <span
+            title={`Active Engine Model — Currently processing voice dictations locally (~${descriptor.approx_ram_mb} MB RAM)`}
+            className="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 cursor-default"
+          >
             <Check className="size-3.5" />
             Active Model
           </span>
@@ -563,7 +566,7 @@ function ModelAction({
             aria-label={`Delete ${descriptor.display_name}`}
             onClick={() => onDelete(descriptor.id)}
             className="shrink-0 rounded-input p-1 text-text-secondary transition-colors hover:bg-sunken hover:text-danger cursor-pointer"
-            title="Delete local file"
+            title={`Delete ${descriptor.display_name} from disk (${formatBytes(descriptor.size_bytes)})`}
           >
             <Trash2 className="size-4" />
           </button>
@@ -576,6 +579,7 @@ function ModelAction({
         <button
           type="button"
           onClick={onActivate}
+          title={`Switch to ${descriptor.display_name} (${descriptor.approx_ram_mb} MB RAM footprint)`}
           className="hairline flex shrink-0 items-center gap-1.5 rounded-input bg-text-primary px-3 py-1 text-xs font-semibold text-opaque-elevated transition-all hover:opacity-90 cursor-pointer shadow-xs"
         >
           <Check className="size-3.5" />
@@ -586,7 +590,7 @@ function ModelAction({
           aria-label={`Delete ${descriptor.display_name}`}
           onClick={() => onDelete(descriptor.id)}
           className="shrink-0 rounded-input p-1 text-text-secondary transition-colors hover:bg-sunken hover:text-danger cursor-pointer"
-          title="Delete local file"
+          title={`Delete local model files (${formatBytes(descriptor.size_bytes)}) to free storage`}
         >
           <Trash2 className="size-4" />
         </button>
@@ -599,6 +603,7 @@ function ModelAction({
       <button
         type="button"
         onClick={onUnlock}
+        title={`Unlock ${descriptor.display_name} — Start a 14-day free Pro trial`}
         className="hairline flex shrink-0 items-center gap-1.5 rounded-input bg-sunken px-2.5 py-1 text-xs font-semibold text-text-primary transition-colors hover:bg-sunken-strong cursor-pointer"
       >
         <Sparkles className="size-3" />
@@ -615,7 +620,7 @@ function ModelAction({
           disabled={isAnyDownloading}
           onClick={() => onDownload(descriptor.id)}
           className="hairline flex shrink-0 items-center gap-2 rounded-input bg-sunken px-3 py-1 text-body text-text-primary transition-colors hover:bg-sunken-strong disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          title={isAnyDownloading ? "Another download is in progress" : undefined}
+          title={isAnyDownloading ? "Another download is in progress" : `Retry downloading ${descriptor.display_name} (${formatBytes(descriptor.size_bytes)})`}
         >
           <Download className="size-4" />
           Try again
@@ -625,7 +630,7 @@ function ModelAction({
           aria-label={`Delete ${descriptor.display_name}`}
           onClick={() => onDelete(descriptor.id)}
           className="shrink-0 rounded-input p-1 text-text-secondary transition-colors hover:bg-sunken hover:text-danger cursor-pointer"
-          title="Delete file"
+          title={`Delete corrupted download files for ${descriptor.display_name}`}
         >
           <Trash2 className="size-4" />
         </button>
@@ -639,7 +644,7 @@ function ModelAction({
       disabled={isAnyDownloading}
       onClick={() => onDownload(descriptor.id)}
       className="hairline flex shrink-0 items-center gap-2 rounded-input bg-sunken px-3 py-1 text-body text-text-primary transition-colors hover:bg-sunken-strong disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-      title={isAnyDownloading ? "Another download is in progress" : undefined}
+      title={isAnyDownloading ? "Another download is in progress" : `Download ${descriptor.display_name} (${formatBytes(descriptor.size_bytes)}, approx ${descriptor.approx_ram_mb} MB RAM)`}
     >
       <Download className="size-4" />
       Download

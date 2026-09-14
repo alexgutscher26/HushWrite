@@ -122,14 +122,14 @@ export function SessionFeedback({ session, className, onFeedbackChange }: Sessio
     <div className={cn("relative inline-flex items-center gap-0.5", className)}>
       <button
         type="button"
-        title="Accurate transcription"
+        title="Accurate Transcription — Rate this local transcription as high fidelity"
         aria-label="Good transcription"
         onClick={(e) => {
           e.stopPropagation();
           handleRate("positive");
         }}
         className={cn(
-          "rounded p-1 transition-colors",
+          "rounded p-1 transition-colors cursor-pointer",
           feedback?.rating === "positive"
             ? "text-success bg-success/15"
             : "text-text-tertiary hover:text-text-secondary hover:bg-sunken"
@@ -140,14 +140,14 @@ export function SessionFeedback({ session, className, onFeedbackChange }: Sessio
 
       <button
         type="button"
-        title="Needs improvement"
+        title="Transcription Issues — Flag misheard terms, punctuation, or add custom words to your dictionary"
         aria-label="Poor transcription"
         onClick={(e) => {
           e.stopPropagation();
           handleRate("negative");
         }}
         className={cn(
-          "rounded p-1 transition-colors",
+          "rounded p-1 transition-colors cursor-pointer",
           feedback?.rating === "negative"
             ? "text-warning bg-warning/15"
             : "text-text-tertiary hover:text-text-secondary hover:bg-sunken"

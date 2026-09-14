@@ -192,8 +192,8 @@ function CalendarHeatmap({
         <button
           type="button"
           onClick={() => setMonthOffset((o) => o - 1)}
-          className="rounded p-1 text-text-tertiary transition-colors hover:bg-sunken hover:text-text-primary"
-          title="Previous months"
+          className="rounded p-1 text-text-tertiary transition-colors hover:bg-sunken hover:text-text-primary cursor-pointer"
+          title="View previous months of voice activity history"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
         </button>
@@ -210,8 +210,8 @@ function CalendarHeatmap({
           type="button"
           onClick={() => setMonthOffset((o) => Math.min(0, o + 1))}
           disabled={monthOffset >= 0}
-          className="rounded p-1 text-text-tertiary transition-colors hover:bg-sunken hover:text-text-primary disabled:opacity-30"
-          title="Next months"
+          className="rounded p-1 text-text-tertiary transition-colors hover:bg-sunken hover:text-text-primary disabled:opacity-30 cursor-pointer"
+          title="View newer months of voice activity history"
         >
           <ChevronRight className="h-3.5 w-3.5" />
         </button>
@@ -552,8 +552,8 @@ export function InsightsView({ hotkey: _hotkey, mode: _mode }: InsightsViewProps
           <button
             type="button"
             onClick={handleShare}
-            className="group flex h-10 w-10 items-center justify-center rounded-full border border-teal-600/30 bg-teal-500/5 text-teal-800 transition-all hover:scale-105 hover:bg-teal-500/15 dark:border-teal-400/30 dark:bg-teal-400/10 dark:text-teal-300"
-            title="Share your insights"
+            className="group flex h-10 w-10 items-center justify-center rounded-full border border-teal-600/30 bg-teal-500/5 text-teal-800 transition-all hover:scale-105 hover:bg-teal-500/15 dark:border-teal-400/30 dark:bg-teal-400/10 dark:text-teal-300 cursor-pointer"
+            title="Share Voice Insights — Copy your total words dictated, speaking rate (WPM), and typing time saved to clipboard"
           >
             {copiedShare ? (
               <Check className="h-4 w-4 text-teal-600 dark:text-teal-400" />

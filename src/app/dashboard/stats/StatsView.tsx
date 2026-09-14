@@ -305,7 +305,7 @@ export function StatsView({ metrics, hotkey, mode }: StatsViewProps) {
                               type="button"
                               onClick={() => setSearchOpen(true)}
                               className="p-1 text-stone-400 hover:text-stone-700 dark:hover:text-stone-300 transition-colors"
-                              title="Search transcripts"
+                              title="Search Transcripts — Instant keyword filter across all recorded speech"
                             >
                               <Search className="h-3.5 w-3.5" />
                             </button>
@@ -349,8 +349,8 @@ export function StatsView({ metrics, hotkey, mode }: StatsViewProps) {
                               <button
                                 type="button"
                                 onClick={() => play(session)}
-                                title="Play"
-                                className="rounded p-1 text-stone-400 hover:bg-stone-200/50 hover:text-stone-800 dark:hover:bg-stone-800 dark:hover:text-white transition-colors"
+                                title="Replay Audio Recording — Listen to the original captured microphone audio"
+                                className="rounded p-1 text-stone-400 hover:bg-stone-200/50 hover:text-stone-800 dark:hover:bg-stone-800 dark:hover:text-white transition-colors cursor-pointer"
                               >
                                 <Play className="h-3.5 w-3.5" />
                               </button>
@@ -359,8 +359,8 @@ export function StatsView({ metrics, hotkey, mode }: StatsViewProps) {
                               <button
                                 type="button"
                                 onClick={() => copy(session)}
-                                title="Copy"
-                                className="rounded p-1 text-stone-400 hover:bg-stone-200/50 hover:text-stone-800 dark:hover:bg-stone-800 dark:hover:text-white transition-colors"
+                                title="Copy Transcript (⏎) — Copy formatted text directly to clipboard"
+                                className="rounded p-1 text-stone-400 hover:bg-stone-200/50 hover:text-stone-800 dark:hover:bg-stone-800 dark:hover:text-white transition-colors cursor-pointer"
                               >
                                 {copiedId === session.id ? (
                                   <Check className="h-3.5 w-3.5 text-teal-600" />
@@ -373,9 +373,13 @@ export function StatsView({ metrics, hotkey, mode }: StatsViewProps) {
                               <button
                                 type="button"
                                 onClick={() => toggleFlag(session.id)}
-                                title="Flag"
+                                title={
+                                  isFlagged
+                                    ? "Remove Flag — Unmark this transcription"
+                                    : "Flag Transcription — Bookmark for later review"
+                                }
                                 className={cn(
-                                  "rounded p-1 transition-colors",
+                                  "rounded p-1 transition-colors cursor-pointer",
                                   isFlagged
                                     ? "text-amber-600 bg-amber-50 dark:bg-amber-950/40"
                                     : "text-stone-400 hover:bg-stone-200/50 hover:text-stone-800 dark:hover:bg-stone-800 dark:hover:text-white",
@@ -389,8 +393,8 @@ export function StatsView({ metrics, hotkey, mode }: StatsViewProps) {
                                 <button
                                   type="button"
                                   onClick={() => setMenuOpenId(isMenuOpen ? null : session.id)}
-                                  title="More"
-                                  className="rounded p-1 text-stone-400 hover:bg-stone-200/50 hover:text-stone-800 dark:hover:bg-stone-800 dark:hover:text-white transition-colors"
+                                  title="More Actions — Additional copy and deletion options"
+                                  className="rounded p-1 text-stone-400 hover:bg-stone-200/50 hover:text-stone-800 dark:hover:bg-stone-800 dark:hover:text-white transition-colors cursor-pointer"
                                 >
                                   <MoreVertical className="h-3.5 w-3.5" />
                                 </button>

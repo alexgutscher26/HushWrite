@@ -12,6 +12,7 @@
 pub mod adaptive;
 pub mod assembler;
 pub mod chunker;
+pub mod context;
 pub mod vad;
 pub mod worker;
 

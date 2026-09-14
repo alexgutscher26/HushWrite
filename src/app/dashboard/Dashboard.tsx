@@ -207,7 +207,7 @@ export function Dashboard() {
           <button
             type="button"
             onClick={() => showToast("Alex's Personal Account")}
-            title="Alex Gutscher"
+            title="User Account Profile — Signed in locally as Alex Gutscher"
             className="flex h-7 w-7 items-center justify-center rounded-full text-stone-500 hover:bg-stone-200/60 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800/60 dark:hover:text-white transition-colors cursor-pointer"
           >
             <User className="h-4 w-4" />
@@ -218,7 +218,7 @@ export function Dashboard() {
         <div data-tauri-drag-region={false} className="flex items-center gap-2.5">
           {isAirGapped && (
             <div
-              title="Air-Gap / Hardware Isolation Mode Active: All outbound networking and update checks are disabled."
+              title="Air-Gap & Hardware Isolation Active — All outbound networking, cloud telemetry, and auto-update pings are completely disabled."
               className="flex items-center gap-1.5 rounded-full border border-emerald-300/80 bg-emerald-50/90 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800 shadow-xs dark:border-emerald-700/60 dark:bg-emerald-950/50 dark:text-emerald-300"
             >
               <span className="relative flex h-2 w-2">
@@ -236,7 +236,7 @@ export function Dashboard() {
           <button
             type="button"
             onClick={() => setShowChangelog(true)}
-            title="Notifications & Updates"
+            title="Changelog & Updates — View latest release notes, improvements, and feature updates"
             className="flex h-7 w-7 items-center justify-center rounded-lg text-stone-500 hover:bg-stone-200/60 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-800/60 dark:hover:text-white transition-colors cursor-pointer"
           >
             <Bell className="h-3.5 w-3.5" />
@@ -275,7 +275,8 @@ export function Dashboard() {
                 <button
                   type="button"
                   onClick={() => void commands.openOnboardingWindow()}
-                  className="flex items-center gap-1.5 rounded-xl bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-amber-700 transition-colors"
+                  title="Resume Guided Setup — Walk through permissions, model downloads, and audio calibration"
+                  className="flex items-center gap-1.5 rounded-xl bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-amber-700 transition-colors cursor-pointer"
                 >
                   <span>Resume Setup</span>
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -283,8 +284,8 @@ export function Dashboard() {
                 <button
                   type="button"
                   onClick={() => setResumeCardDismissed(true)}
-                  title="Dismiss banner"
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-amber-700 hover:bg-amber-200/50 dark:text-amber-400 dark:hover:bg-amber-900/40 transition-colors"
+                  title="Dismiss onboarding banner — You can resume setup at any time from Settings"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-amber-700 hover:bg-amber-200/50 dark:text-amber-400 dark:hover:bg-amber-900/40 transition-colors cursor-pointer"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -325,6 +326,7 @@ export function Dashboard() {
                       ).then(() => showToast("Personal invite link copied to clipboard!"));
                     }
                   }}
+                  title="Copy Personal Referral Link — Share with teammates and friends to unlock Pro developer features"
                   className="flex items-center gap-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 px-3 py-1.5 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer"
                 >
                   <Copy className="h-3.5 w-3.5" />
@@ -337,7 +339,7 @@ export function Dashboard() {
                     await unwrapCommand(() => commands.dismissReferralPrompt());
                     referralStatus.reload();
                   }}
-                  title="Dismiss referral prompt"
+                  title="Dismiss referral notice — You can always find your referral link in the Invite & Earn sidebar menu"
                   className="flex h-7 w-7 items-center justify-center rounded-lg text-emerald-700 hover:bg-emerald-200/50 dark:text-emerald-300 dark:hover:bg-emerald-900/50 transition-colors cursor-pointer"
                 >
                   <X className="h-3.5 w-3.5" />

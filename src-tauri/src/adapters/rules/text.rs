@@ -347,6 +347,19 @@ mod tests {
     #[test]
     fn an_immediately_repeated_word_is_collapsed() {
         assert_eq!(dedupe_stutters("the the cat sat"), "the cat sat");
+        assert_eq!(dedupe_stutters("the the the cat sat"), "the cat sat");
+    }
+
+    #[test]
+    fn severe_repetition_loops_are_collapsed_to_single_instance() {
+        let repeated_introducing = vec!["Introducing,"; 37].join(" ");
+        assert_eq!(
+            dedupe_stutters(&repeated_introducing),
+            "Introducing,"
+        );
+
+        let repeated_words = vec!["word"; 15].join(" ");
+        assert_eq!(dedupe_stutters(&repeated_words), "word");
     }
 
     #[test]
@@ -356,6 +369,20 @@ mod tests {
         assert_eq!(
             dedupe_stutters("i want to i want to go home"),
             "i want to go home"
+        );
+        assert_eq!(
+            dedupe_stutters("i want to i want to i want to go home"),
+            "i want to go home"
+        );
+    }
+
+    #[test]
+    fn longer_repeated_phrases_are_collapsed() {
+        assert_eq!(
+            dedupe_stutters(
+                "thank you very much for watching this video thank you very much for watching this video"
+            ),
+            "thank you very much for watching this video"
         );
     }
 

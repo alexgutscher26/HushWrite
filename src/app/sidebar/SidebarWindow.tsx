@@ -51,37 +51,42 @@ interface SidebarItem {
 }
 
 export function SidebarWindow({ activeRoute, onSelect }: SidebarWindowProps) {
-  const topItems: SidebarItem[] = [
+  const topItems: (SidebarItem & { tooltip: string })[] = [
     {
       id: "dictation",
       label: "Dictation",
+      tooltip: "Dictation & Transcriptions — View live dictations, waveform HUD, and recent transcript history",
       icon: Mic,
       route: "dictation",
     },
     {
       id: "insights",
       label: "Insights",
+      tooltip: "Voice Analytics & Insights — Track speaking rate (WPM), total voice time, and transcription accuracy",
       icon: Gauge,
       route: "insights",
     },
     {
       id: "dictionary",
       label: "Dictionary",
+      tooltip: "Custom Vocabulary & Domain Packs — Teach HushWrite technical terms, acronyms, and project identifiers",
       icon: BookOpen,
       route: "dictionary",
     },
   ];
 
-  const bottomItems: SidebarItem[] = [
+  const bottomItems: (SidebarItem & { tooltip: string })[] = [
     {
       id: "billing",
       label: "Plan & Billing",
+      tooltip: "Plan & Billing — Manage your HushWrite subscription tier, Pro license key, and renewal details",
       icon: CreditCard,
       route: "billing",
     },
     {
       id: "invite",
       label: "Invite & Earn Pro",
+      tooltip: "Invite & Earn Pro — Share your referral link with colleagues to unlock free Pro months and packs",
       icon: Gift,
       route: "invite",
       isSpecial: true,
@@ -89,12 +94,14 @@ export function SidebarWindow({ activeRoute, onSelect }: SidebarWindowProps) {
     {
       id: "settings",
       label: "Settings",
+      tooltip: "Preferences & Engine Settings — Configure hotkeys, audio devices, local Whisper models, and overlay HUD",
       icon: Settings,
       route: "settings",
     },
     {
       id: "help",
       label: "Help & Shortcuts",
+      tooltip: "Help, Documentation & Shortcuts — View keyboard combinations, diagnostics, and cheatsheets",
       icon: HelpCircle,
       route: "help",
     },
@@ -114,7 +121,7 @@ export function SidebarWindow({ activeRoute, onSelect }: SidebarWindowProps) {
         <button
           type="button"
           onClick={() => onSelect("dictation")}
-          title="HushWrite Dictation"
+          title="HushWrite — Fast, private, local speech-to-text dictation"
           aria-label="HushWrite Dictation"
           className="flex h-8 w-8 items-center justify-center rounded-xl transition-opacity hover:opacity-75 cursor-pointer mb-1"
         >
@@ -130,7 +137,7 @@ export function SidebarWindow({ activeRoute, onSelect }: SidebarWindowProps) {
                 key={item.id}
                 type="button"
                 onClick={() => onSelect(item.route)}
-                title={item.label}
+                title={item.tooltip}
                 aria-label={item.label}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
@@ -160,7 +167,7 @@ export function SidebarWindow({ activeRoute, onSelect }: SidebarWindowProps) {
               key={item.id}
               type="button"
               onClick={() => onSelect(item.route)}
-              title={item.label}
+              title={item.tooltip}
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}
               className={cn(

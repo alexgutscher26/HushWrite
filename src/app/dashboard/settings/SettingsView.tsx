@@ -412,6 +412,7 @@ export function SettingsView({ registry, section }: SettingsViewProps) {
                   key={tab.id}
                   type="button"
                   onClick={() => handleTabChange(tab.id)}
+                  title={`${tab.label} — ${tab.description}`}
                   className={cn(
                     "flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer",
                     isActive
@@ -430,7 +431,7 @@ export function SettingsView({ registry, section }: SettingsViewProps) {
                   <span>{tab.label}</span>
                   {hasWarning && (
                     <span
-                      title="Microphone permission required"
+                      title="Microphone permission required — click to grant microphone access in Windows/macOS Settings"
                       className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse"
                     />
                   )}

@@ -22,7 +22,6 @@ import {
   Plus,
   Check,
   Users,
-  User,
   Info,
   BookOpen,
   Code,
@@ -774,8 +773,8 @@ export function DictionaryView() {
             <button
               type="button"
               onClick={() => setChangelogOpen(true)}
-              title="View dictionary version history and undo changes"
-              className="flex h-8 items-center gap-1.5 rounded-xl border border-stone-200/90 bg-stone-50/80 px-3 text-xs font-semibold text-stone-700 shadow-2xs hover:bg-stone-100 hover:text-stone-900 dark:border-stone-800 dark:bg-stone-900/60 dark:text-stone-300 dark:hover:bg-stone-800 dark:hover:text-white transition-all active:scale-[0.98]"
+              title="Dictionary Version History & Undo — Review all additions, updates, and revert accidental changes"
+              className="flex h-8 items-center gap-1.5 rounded-xl border border-stone-200/90 bg-stone-50/80 px-3 text-xs font-semibold text-stone-700 shadow-2xs hover:bg-stone-100 hover:text-stone-900 dark:border-stone-800 dark:bg-stone-900/60 dark:text-stone-300 dark:hover:bg-stone-800 dark:hover:text-white transition-all active:scale-[0.98] cursor-pointer"
             >
               <History className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" />
               <span>History & Undo</span>
@@ -784,8 +783,8 @@ export function DictionaryView() {
             <button
               type="button"
               onClick={() => setRepoImporterOpen(true)}
-              title="Import symbols and dependencies from a codebase"
-              className="flex h-8 items-center gap-1.5 rounded-xl border border-stone-200/90 bg-stone-50/80 px-3 text-xs font-semibold text-stone-700 shadow-2xs hover:bg-stone-100 hover:text-stone-900 dark:border-stone-800 dark:bg-stone-900/60 dark:text-stone-300 dark:hover:bg-stone-800 dark:hover:text-white transition-all active:scale-[0.98]"
+              title="Import Codebase Vocabulary — Extract types, functions, variables, and dependencies from repositories or package.json"
+              className="flex h-8 items-center gap-1.5 rounded-xl border border-stone-200/90 bg-stone-50/80 px-3 text-xs font-semibold text-stone-700 shadow-2xs hover:bg-stone-100 hover:text-stone-900 dark:border-stone-800 dark:bg-stone-900/60 dark:text-stone-300 dark:hover:bg-stone-800 dark:hover:text-white transition-all active:scale-[0.98] cursor-pointer"
             >
               <Code className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" />
               <span>Import Codebase…</span>
@@ -801,7 +800,8 @@ export function DictionaryView() {
                 setPrefilledTerm("");
                 setAddModalOpen(true);
               }}
-              className="flex h-8 items-center gap-1.5 rounded-xl bg-stone-900 px-3.5 text-xs font-semibold text-white shadow-xs hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-white transition-all active:scale-[0.98]"
+              title="Add Custom Word — Teach HushWrite a new name, technical jargon, or phonetic trigger"
+              className="flex h-8 items-center gap-1.5 rounded-xl bg-stone-900 px-3.5 text-xs font-semibold text-white shadow-xs hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-white transition-all active:scale-[0.98] cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
               <span>Add new</span>
@@ -846,6 +846,7 @@ export function DictionaryView() {
                 )}
               </button>
 
+              {/* Shared with team tab commented out
               <button
                 type="button"
                 onClick={() => setActiveTab("team")}
@@ -861,6 +862,7 @@ export function DictionaryView() {
                   <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-stone-900 dark:bg-white rounded-full" />
                 )}
               </button>
+              */}
 
               <button
                 type="button"
@@ -910,9 +912,9 @@ export function DictionaryView() {
                     <button
                       type="button"
                       onClick={() => setSearchOpen((v) => !v)}
-                      title="Search dictionary"
+                      title="Search Dictionary — Instant filter across custom replacements and heard-as patterns"
                       className={cn(
-                        "flex h-7 w-7 items-center justify-center rounded-lg transition-colors",
+                        "flex h-7 w-7 items-center justify-center rounded-lg transition-colors cursor-pointer",
                         searchOpen || searchQuery
                           ? "bg-stone-100 text-stone-900 dark:bg-stone-800 dark:text-white"
                           : "text-stone-400 hover:bg-stone-100 hover:text-stone-700 dark:text-stone-500 dark:hover:bg-stone-800 dark:hover:text-stone-300",
@@ -924,8 +926,16 @@ export function DictionaryView() {
                     <button
                       type="button"
                       onClick={cycleSort}
-                      title={`Sort words (${sortMode})`}
-                      className="flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-700 dark:text-stone-500 dark:hover:bg-stone-800 dark:hover:text-stone-300 transition-colors"
+                      title={
+                        sortMode === "default"
+                          ? "Sort: Default order (click to sort A-Z)"
+                          : sortMode === "az"
+                            ? "Sort: Alphabetical A-Z (click to sort Z-A)"
+                            : sortMode === "za"
+                              ? "Sort: Alphabetical Z-A (click to sort Favorites first)"
+                              : "Sort: Favorites first (click for default order)"
+                      }
+                      className="flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-700 dark:text-stone-500 dark:hover:bg-stone-800 dark:hover:text-stone-300 transition-colors cursor-pointer"
                     >
                       <ArrowUpDown className="h-3.5 w-3.5" />
                     </button>
@@ -933,9 +943,9 @@ export function DictionaryView() {
                     <button
                       type="button"
                       onClick={handleRefresh}
-                      title="Refresh entries"
+                      title="Refresh Dictionary — Reload vocabulary database from disk"
                       className={cn(
-                        "flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-700 dark:text-stone-500 dark:hover:bg-stone-800 dark:hover:text-stone-300 transition-colors",
+                        "flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:bg-stone-100 hover:text-stone-700 dark:text-stone-500 dark:hover:bg-stone-800 dark:hover:text-stone-300 transition-colors cursor-pointer",
                         isRefreshing && "animate-spin text-stone-700 dark:text-stone-200",
                       )}
                     >
@@ -1276,8 +1286,8 @@ export function DictionaryView() {
                         <button
                           type="button"
                           onClick={() => setEditingEntry(entry)}
-                          title="Edit word"
-                          className="flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:bg-stone-200/60 hover:text-stone-800 dark:hover:bg-stone-700/60 dark:hover:text-stone-200 transition-colors"
+                          title="Edit Word — Modify phonetic triggers, casing, and whole-word matching rules"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:bg-stone-200/60 hover:text-stone-800 dark:hover:bg-stone-700/60 dark:hover:text-stone-200 transition-colors cursor-pointer"
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
@@ -1285,8 +1295,8 @@ export function DictionaryView() {
                         <button
                           type="button"
                           onClick={() => handleDelete(entry)}
-                          title="Delete word"
-                          className="flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400 transition-colors"
+                          title="Delete Word — Remove this term and phonetic trigger from your vocabulary"
+                          className="flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400 transition-colors cursor-pointer"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -1294,9 +1304,13 @@ export function DictionaryView() {
                         <button
                           type="button"
                           onClick={() => toggleStar(term)}
-                          title={isStarred ? "Remove star" : "Star word"}
+                          title={
+                            isStarred
+                              ? "Remove Favorite — Unmark from starred words"
+                              : "Favorite Word — Star to prioritize in custom sorting"
+                          }
                           className={cn(
-                            "flex h-7 w-7 items-center justify-center rounded-lg transition-colors",
+                            "flex h-7 w-7 items-center justify-center rounded-lg transition-colors cursor-pointer",
                             isStarred
                               ? "text-amber-500 hover:text-amber-600"
                               : "text-stone-400 hover:bg-stone-200/60 hover:text-amber-500 dark:hover:bg-stone-700/60",
@@ -1459,7 +1473,7 @@ function WordModal({
   const [heardAs, setHeardAs] = useState(initialHeardAs);
   const [matchKind, setMatchKind] = useState<MatchKind>(initialMatchKind);
   const [isSparkle, setIsSparkle] = useState(initialSparkle);
-  const [scope, setScope] = useState<"personal" | "team">(initialScope);
+  const [scope] = useState<"personal" | "team">(initialScope);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -1555,7 +1569,7 @@ function WordModal({
             />
           </div>
 
-          {/* Scope Selector */}
+          {/* Scope Selector commented out since teams are not used
           <div>
             <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
               Dictionary Scope
@@ -1589,6 +1603,7 @@ function WordModal({
               </button>
             </div>
           </div>
+          */}
 
           {/* Match Mode */}
           <div>
@@ -1856,8 +1871,8 @@ function DictionaryChangelogModal({
                     type="button"
                     onClick={() => handleUndo(item)}
                     disabled={undoingId === item.id}
-                    title="Undo this change"
-                    className="flex h-7 shrink-0 items-center gap-1 rounded-lg border border-stone-200 bg-white px-2.5 text-[11px] font-semibold text-stone-700 shadow-2xs hover:bg-stone-100 hover:text-stone-900 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700 dark:hover:text-white transition-all active:scale-[0.97] disabled:opacity-50"
+                    title="Undo this change — Revert this dictionary addition, deletion, or modification"
+                    className="flex h-7 shrink-0 items-center gap-1 rounded-lg border border-stone-200 bg-white px-2.5 text-[11px] font-semibold text-stone-700 shadow-2xs hover:bg-stone-100 hover:text-stone-900 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700 dark:hover:text-white transition-all active:scale-[0.97] disabled:opacity-50 cursor-pointer"
                   >
                     {undoingId === item.id ? (
                       <RotateCw className="h-3 w-3 animate-spin" />

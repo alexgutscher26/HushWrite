@@ -68,7 +68,8 @@ export function ExportAction({ onError }: { onError: (error: AppError | null) =>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={cn(BUTTON_CLASS, "flex items-center gap-2")}
+        title="Export History — Save your entire transcript database to JSON, CSV, Markdown, or Plain Text"
+        className={cn(BUTTON_CLASS, "flex items-center gap-2 cursor-pointer")}
       >
         <Download className="size-4" />
         Export
@@ -84,7 +85,8 @@ export function ExportAction({ onError }: { onError: (error: AppError | null) =>
           type="button"
           disabled={busy !== null}
           onClick={() => run(format)}
-          className={BUTTON_CLASS}
+          title={`Export all transcript records as a .${FORMAT_META[format].extension} file`}
+          className={cn(BUTTON_CLASS, "cursor-pointer")}
         >
           {busy === format ? "Exporting…" : FORMAT_META[format].label}
         </button>
@@ -92,7 +94,8 @@ export function ExportAction({ onError }: { onError: (error: AppError | null) =>
       <button
         type="button"
         onClick={() => setOpen(false)}
-        className={cn(BUTTON_CLASS, "text-text-secondary")}
+        title="Cancel export"
+        className={cn(BUTTON_CLASS, "text-text-secondary cursor-pointer")}
       >
         Cancel
       </button>
