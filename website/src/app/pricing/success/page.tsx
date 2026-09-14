@@ -146,8 +146,14 @@ function SuccessContent() {
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const isLifetime = sessionData.tier === "pro_lifetime";
-  const planTitle = isLifetime ? "Founding Beta Perpetual License" : "Pro Annual Pass";
+  const isLifetime =
+    sessionData.tier === "pro_lifetime" || sessionData.tier === "beta_backer_pwyw";
+  const planTitle =
+    sessionData.tier === "beta_backer_pwyw"
+      ? "Early Beta-Backer Lifetime License"
+      : isLifetime
+        ? "Founding Beta Perpetual License"
+        : "Pro Annual Pass";
 
   return (
     <div className="relative pt-32 pb-20 px-4 max-w-4xl mx-auto text-center">

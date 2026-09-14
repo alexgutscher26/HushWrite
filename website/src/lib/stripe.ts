@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 
-export type PlanTierKey = "pro_lifetime" | "pro_annual";
+export type PlanTierKey = "pro_lifetime" | "pro_annual" | "beta_backer_pwyw";
 export type DiscountCode = "SWITCHER-40" | "STUDENT-50" | "OSS-50" | string;
 
 export interface PricingDetails {
@@ -51,8 +51,28 @@ export function getStripeClient(): Stripe | null {
   return stripeInstance;
 }
 
-export function calculatePrice(tier: PlanTierKey, discountCode?: string | null): PricingDetails {
+export function calculatePrice(
+  tier: PlanTierKey,
+  discountCode?: string | null,
+  customAmountDollars?: number | null,
+): PricingDetails {
   const normalizedDiscount = discountCode?.trim().toUpperCase();
+
+  if (tier === "beta_backer_pwyw") {
+    const originalAmountCents = 4900;
+    // Default to $25 if not provided, clamp minimum to $10 (1000 cents)
+    const dollars = Math.max(10, Math.round(Number(customAmountDollars) || 25));
+    const amountCents = dollars * 100;
+
+    return {
+      tier,
+      name: `HushWrite Early Beta Backer Lifetime ($${dollars} Pay What You Want)`,
+      amountCents,
+      currency: "usd",
+      discountApplied: `Beta Backer Tier ($${dollars} custom contribution, $49 std value)`,
+      originalAmountCents,
+    };
+  }
 
   if (tier === "pro_lifetime") {
     const originalAmountCents = 4900; // $49.00 Founding Beta
@@ -177,6 +197,8 @@ export function generateLicenseKey(tier: PlanTierKey, discountCode?: string | nu
     prefix = "STUDENT";
   } else if (discount === "OSS-50") {
     prefix = "OSS";
+  } else if (tier === "beta_backer_pwyw") {
+    prefix = "BACKER";
   } else if (tier === "pro_lifetime") {
     prefix = "FOUNDING";
   }

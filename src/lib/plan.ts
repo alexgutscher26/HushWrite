@@ -270,13 +270,17 @@ export function usePlan() {
     const cleanKey = key.trim().toUpperCase();
     if (!cleanKey) return false;
 
-    const isLifetime = cleanKey.startsWith("LIFETIME-") || cleanKey.startsWith("FOUNDING-");
+    const isLifetime =
+      cleanKey.startsWith("LIFETIME-") ||
+      cleanKey.startsWith("FOUNDING-") ||
+      cleanKey.startsWith("BACKER-");
     const isTeam = cleanKey.startsWith("TEAM-");
     const isPro =
       cleanKey.startsWith("PRO-") ||
       cleanKey.startsWith("STUDENT-") ||
       cleanKey.startsWith("OSS-") ||
       cleanKey.startsWith("SWITCHER-") ||
+      cleanKey.startsWith("BACKER-") ||
       cleanKey.length >= 8;
 
     if (isTeam || isPro) {

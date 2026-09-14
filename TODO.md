@@ -892,7 +892,7 @@
 
 - [ ] [BIZ] Usage-based "Pro features" trial — Allow all users to try Pro features (LLM post-processing, advanced analytics, team dictionary) for 14 days with no credit card required. Activate via a one-click button in settings. Measure conversion rate from trial to paid.
 - [ ] [BIZ] Contextual upgrade prompt in-app — When a user hits a limit (e.g. tries to enable LLM cleanup which is Pro), show a contextual, non-blocking upgrade card explaining exactly what they'd get and how much it costs. Never a modal blocker.
-- [ ] [BIZ] "Pay what you want" beta-backer tier — A limited-time offer (first 500 users) to get the Core Lifetime license for any amount ≥ $10. Generates goodwill and word-of-mouth without devaluing the standard pricing.
+- [x] [BIZ] "Pay what you want" beta-backer tier — A limited-time offer (first 500 users) to get the Core Lifetime license for any amount ≥ $10. Generates goodwill and word-of-mouth without devaluing the standard pricing.
 - [ ] [BIZ] Student verification flow — Partner with SheerID or Student Beans to verify student status and automatically apply the 50% discount. Remove the need for manual email verification.
 - [ ] [BIZ] "HushWrite for Teams" waitlist — Add a Teams waitlist landing page at `/teams` even before the product exists. Collect emails from early-interest team leads. Use responses to validate feature priorities.
 - [ ] [BIZ] Lifetime license gifting — Allow purchasing a Core Lifetime license as a gift. The buyer receives a redeemable code to share. Tracked via a `gift_licenses` table in the purchase database.

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -10,6 +11,7 @@ import { Footer } from "@/components/Footer";
 import { BadgeGenerator } from "@/components/BadgeGenerator";
 import { SwitcherModal } from "@/components/SwitcherModal";
 import { StudentGrantModal } from "@/components/StudentGrantModal";
+import { BetaBackerModal } from "@/components/BetaBackerModal";
 import { PlanTierKey } from "@/lib/stripe";
 
 type ProBilling = "lifetime" | "annual";
@@ -109,6 +111,9 @@ function PricingContent() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
   const [isStudentGrantOpen, setIsStudentGrantOpen] = useState(false);
+  const [isBetaBackerOpen, setIsBetaBackerOpen] = useState(
+    searchParams.get("backer") === "true" || searchParams.get("pwyw") === "true",
+  );
   const [studentGrantTab, setStudentGrantTab] = useState<"student" | "oss">("student");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
 
@@ -381,6 +386,41 @@ function PricingContent() {
                 </span>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Limited "Pay What You Want" Beta-Backer Card */}
+        <div className="mb-12 max-w-3xl w-full p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border-2 border-amber-500/40 shadow-[0_4px_24px_rgba(245,158,11,0.12)] text-left flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-800 flex items-center justify-center shrink-0">
+              <span className="text-xl">💛</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-xs font-mono font-semibold uppercase text-amber-800 tracking-wider">
+                  Limited Early Backer Offer (First 500 Spots)
+                </span>
+                <span className="px-2 py-0.5 rounded-md bg-amber-100 border border-amber-300 text-[11px] font-mono font-bold text-amber-900 shadow-xs">
+                  From $10
+                </span>
+              </div>
+              <h2 className="text-sm sm:text-base font-bold text-neutral-950">
+                "Pay What You Want" Beta-Backer Lifetime License
+              </h2>
+              <p className="text-xs text-neutral-600 mt-0.5">
+                Support indie privacy software. Choose any contribution ≥ $10 and own Core Lifetime forever.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsBetaBackerOpen(true)}
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-zinc-950 font-bold text-xs transition-all shadow-md shadow-amber-500/20 flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>Back for $10+</span>
+              <span>→</span>
+            </button>
           </div>
         </div>
 
@@ -726,6 +766,11 @@ function PricingContent() {
       <Footer />
 
       {/* Interactive Custom Modals */}
+      <BetaBackerModal
+        isOpen={isBetaBackerOpen}
+        onClose={() => setIsBetaBackerOpen(false)}
+      />
+
       <SwitcherModal
         isOpen={isSwitcherOpen}
         onClose={() => setIsSwitcherOpen(false)}

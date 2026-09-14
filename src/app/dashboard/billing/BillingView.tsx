@@ -272,6 +272,33 @@ export function BillingView() {
         </div>
       </div>
 
+      {/* Beta Backer Pay What You Want Banner */}
+      <div className="hairline rounded-card bg-amber-500/10 border-amber-500/20 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <span className="text-xl shrink-0">💛</span>
+          <div>
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-body font-bold text-text-primary">
+                "Pay What You Want" Beta-Backer Lifetime Tier
+              </span>
+              <span className="rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-0.2 text-[10px] font-mono font-semibold">
+                From $10 · First 500 Spots
+              </span>
+            </div>
+            <p className="text-caption text-text-secondary">
+              Support indie privacy software. Choose any amount ≥ $10 and receive a permanent Core Lifetime License.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => handleOpenLink("https://HushWrite.app/pricing?pwyw=true")}
+          className="hairline h-8 rounded-input bg-amber-500 text-zinc-950 font-bold px-3 text-caption hover:opacity-90 transition-opacity shrink-0 cursor-pointer"
+        >
+          Back for $10+ →
+        </button>
+      </div>
+
       {/* Switcher Guarantee Banner */}
       <div className="hairline rounded-card bg-surface p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-start gap-3">

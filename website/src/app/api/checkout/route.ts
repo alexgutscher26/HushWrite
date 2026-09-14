@@ -13,20 +13,21 @@ export async function POST(req: NextRequest) {
       body = {};
     }
 
-    const { tier, discountCode, customerEmail } = body as {
+    const { tier, discountCode, customerEmail, customAmount } = body as {
       tier: PlanTierKey;
       discountCode?: string | null;
       customerEmail?: string | null;
+      customAmount?: number | null;
     };
 
-    if (tier !== "pro_lifetime" && tier !== "pro_annual") {
+    if (tier !== "pro_lifetime" && tier !== "pro_annual" && tier !== "beta_backer_pwyw") {
       return NextResponse.json(
-        { error: "Invalid tier specified. Expected 'pro_lifetime' or 'pro_annual'." },
+        { error: "Invalid tier specified. Expected 'pro_lifetime', 'pro_annual', or 'beta_backer_pwyw'." },
         { status: 400 },
       );
     }
 
-    const pricing = calculatePrice(tier, discountCode);
+    const pricing = calculatePrice(tier, discountCode, customAmount);
     const origin =
       process.env.NEXT_PUBLIC_APP_URL ||
       req.headers.get("origin") ||

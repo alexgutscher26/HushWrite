@@ -30,8 +30,12 @@ export async function POST(req: NextRequest) {
 
     const cleanKey = licenseKey.trim().toUpperCase();
 
-    // 1. Lifetime & Founding licenses are perpetual (100% offline, never cancel)
-    if (cleanKey.startsWith("LIFETIME-") || cleanKey.startsWith("FOUNDING-")) {
+    // 1. Lifetime, Founding & Beta Backer licenses are perpetual (100% offline, never cancel)
+    if (
+      cleanKey.startsWith("LIFETIME-") ||
+      cleanKey.startsWith("FOUNDING-") ||
+      cleanKey.startsWith("BACKER-")
+    ) {
       return NextResponse.json<LicenseVerifyResponse>({
         valid: true,
         tier: "pro",
