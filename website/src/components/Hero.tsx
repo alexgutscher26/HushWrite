@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { DownloadCounter } from "@/components/DownloadCounter";
 import {
   Mic,
   ShieldCheck,
@@ -276,6 +277,11 @@ export function Hero() {
           <Terminal className="w-4 h-4 text-neutral-500" />
           <span>macOS: Download Early-Access Beta</span>
         </a>
+      </div>
+
+      {/* Download counter — social proof, renders only when data is ready */}
+      <div className="relative flex justify-center mb-10 z-10 -mt-6">
+        <DownloadCounter />
       </div>
 
       {/* Interactive Desktop Product Simulator */}

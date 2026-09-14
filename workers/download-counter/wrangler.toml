@@ -1,0 +1,10 @@
+name = "hushwrite-download-counter"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# KV namespace binding
+# Create with: wrangler kv:namespace create "DOWNLOAD_COUNTER"
+# Then replace the placeholder ID below with the one printed by that command.
+[[kv_namespaces]]
+binding = "DOWNLOAD_COUNTER"
+id = "7c16b72d8710477dafa70b4b6469db10"

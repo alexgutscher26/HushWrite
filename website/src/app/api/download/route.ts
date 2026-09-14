@@ -16,6 +16,15 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Fire-and-forget counter increment — never blocks the download redirect.
+  void fetch(new URL("/api/download-count", origin).toString(), {
+    method: "POST",
+  }).catch(() => {
+    // Silently ignore — incrementing is best-effort.
+  });
+
+  void targetPlatform; // may be used for platform-specific routing in the future
+
   // Default to serving the Windows x64 NSIS setup executable
   return NextResponse.redirect(
     new URL("/downloads/HushWrite_1.2.1_x64-setup.exe", origin),

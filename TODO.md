@@ -37,6 +37,14 @@
 26. [Community & Ecosystem](#community--ecosystem)
 27. [Mobile & Cross-Platform](#mobile--cross-platform)
 28. [AI & Machine Learning Roadmap](#ai--machine-learning-roadmap)
+29. [Air-Gap & Verifiable Offline Mode](#air-gap--verifiable-offline-mode)
+30. [Onboarding & Growth Experiments](#onboarding--growth-experiments)
+31. [macOS Feature Parity](#macos-feature-parity)
+32. [Enterprise & Compliance](#enterprise--compliance)
+33. [Release Engineering & CI/CD](#release-engineering--cicd)
+34. [Website & Marketing Engineering](#website--marketing-engineering)
+35. [Observability & Diagnostics](#observability--diagnostics)
+36. [Monetization Experiments](#monetization-experiments)
 
 ---
 
@@ -708,6 +716,189 @@
   - Implement opt-in background audio/text correction pair dataset logger with anchor regularization for acoustic LoRA fine-tuning.
 - [ ] [FEAT] Multimodal context injection — Allow users to screenshot the current screen and pass it as context to the LLM post-processing pass, so the LLM can infer intent from the visual context (e.g. if a code file is visible, prefer code formatting).
 - [ ] [FEAT] Voice cloning protection — Detect if the input audio is a synthetic voice clone (using a lightweight spoofing detection model) and refuse to transcribe it, protecting against replay attacks on voice-triggered systems.
+
+---
+
+## Air-Gap & Verifiable Offline Mode
+
+> Goal: prove the mode, not just claim it. Visible state, blocked-egress tests, and a fail-closed default — otherwise a dependency or telemetry path can quietly reopen the boundary.
+
+- [x] [SEC] In-app "Air-Gap / Hardware Isolation Mode" kill-switch — Closes reqwest sockets, blocks GitHub release check, and blocks CDN model manifest fetch. Persists across restarts. Shows a persistent "Air-Gapped" badge in the dashboard header.
+- [ ] [SEC] Egress smoke-test harness — A `cargo test --features air_gap_smoke` target that boots the app in a mock network environment, confirms zero outbound socket connections are attempted, and fails if any `reqwest::Client` call escapes the local-only adapter.
+  - Mock network via `mockito` or a custom `Tower` transport layer that rejects non-loopback addresses
+  - Assert that update checks, model manifest fetches, and CDN downloads all return `AirGapBlocked` errors cleanly
+  - Run in CI on every PR that touches `services/`, `bootstrap/`, or `registry/`
+- [ ] [SEC] Reproducible network lockdown guide — A `docs/AIR_GAP_VERIFICATION.md` that walks users through:
+  1. Enabling Air-Gap Mode in settings
+  2. Configuring Windows Firewall to block all outbound traffic for `HushWrite.exe`
+  3. Using Wireshark / `netstat` to confirm zero packets leave the machine during a 60-second dictation session
+  4. A checkable "pass" criterion: zero established connections outside `127.0.0.1`
+- [ ] [SEC] Fail-closed default for model downloads — When Air-Gap Mode is active and a user attempts to download a new model, show a clear error: "Air-Gap Mode is active. Download a model manually and import it via File > Import Model." Never silently disable air-gap to satisfy a download.
+- [ ] [SEC] Process-level network sandbox option (Windows) — Optionally launch `HushWrite.exe` via a restricted Windows Job Object (`JOBOBJECT_BASIC_LIMIT_INFORMATION`) that denies outbound connections at the OS level, independently of the in-app toggle.
+  - Document that this is a defense-in-depth option for high-security environments
+  - Provide a PowerShell wrapper script: `Start-HushWriteAirGapped.ps1`
+- [ ] [SEC] Air-Gap Mode tamper indicator — If any binary or registry change is detected that would re-enable networking while Air-Gap Mode is set, show a persistent warning on next launch: "Air-Gap setting may have been modified externally."
+- [ ] [CONTENT] Third-party egress verification video — Record a screen capture showing Wireshark open beside HushWrite during a full dictation session with Air-Gap Mode on. Publish as a pinned post on Discord and a page on the website.
+- [ ] [SEC] Dependency network audit — Run `cargo tree` and audit every `[dependencies]` crate for hidden telemetry or background HTTP clients. Document the audit result in `docs/DEPENDENCY_AUDIT.md`.
+  - Flag: `reqwest`, `ureq`, `hyper`, `isahc`, and any crate that transitively pulls in an HTTP client
+  - Confirm each HTTP-capable crate is gated behind a feature flag or is never called in production code paths
+
+---
+
+## Onboarding & Growth Experiments
+
+> Goal: maximize the percentage of first-time installs that complete onboarding and dictate at least once within 10 minutes.
+
+- [x] [UX] 5-minute "first wow" onboarding flow — Mic permissions → model weight download → first in-app dictation test.
+- [x] [UX] Adaptive onboarding re-entry — Resume from last completed step rather than restarting if user exits mid-flow.
+- [ ] [FEAT] A/B test: instant vs. guided onboarding — Test two onboarding variants: (A) immediate skip-to-dictation with a floating tip overlay vs. (B) the current guided 4-step flow. Measure completion rate and time-to-first-dictation. Store the variant flag in registry.
+  - Variant selection: hash user UUID mod 2 for deterministic assignment
+  - Log variant and outcome to the local analytics table (no cloud)
+  - Evaluate after 500 completed installs
+- [ ] [FEAT] Video onboarding mode — An optional 90-second embedded video (self-hosted, no YouTube embed) that demos the core flow. Show as an alternative to the interactive tutorial.
+  - Video is bundled as a `.mp4` in the app resources (no network dependency)
+  - Auto-play muted with captions; click to unmute
+  - Skip button always visible
+- [ ] [UX] Social proof on first launch — Show a rotating "HushWrite users have dictated X million words" stat (calculated locally from the community analytics page) on the welcome screen to establish trust at install time.
+- [ ] [FEAT] Hardware compatibility check at install — Before downloading a model, run a quick CPU capability scan (SIMD support, core count, RAM) and pre-select the best-fit model quantization. Show estimated download time and decoding speed.
+  - Use CPUID instruction via a small Rust binary
+  - Map `AVX2 + 8 cores + 16GB RAM` → suggest `large-v3-turbo Q5_0`
+  - Map `no AVX + 4 cores + 8GB RAM` → suggest `tiny Q4_0`
+- [ ] [FEAT] Post-install follow-up email prompt — After 48 hours (detected by a local timer in registry), prompt the user once to optionally enter their email for the newsletter. Store locally only; never auto-submit.
+- [ ] [UX] Personalization quiz at onboarding — Ask 3 questions: primary use case (writing, coding, meetings), typing speed estimate, and preferred verbosity level. Pre-configure enhancement rules and model selection based on answers.
+- [ ] [GROWTH] Referral flow at first-success moment — Immediately after the user's first successful dictation delivery, show a non-intrusive "Share HushWrite" card with a pre-populated tweet and a personal referral link. Never show before that milestone.
+- [ ] [DX] Onboarding analytics in local DB — Track funnel step completion (step 1 done, step 2 done, etc.) and drop-off points in a local `onboarding_events` SQLite table. Surface an onboarding conversion funnel in the dev diagnostics panel.
+
+---
+
+## macOS Feature Parity
+
+> macOS parity items needed before a public macOS GA release.
+
+- [ ] [FEAT] macOS notarization — Submit the `.dmg` to Apple's notarization service via `xcrun altool` or `notarytool` in CI. Unsigned DMGs trigger Gatekeeper quarantine warnings on first open.
+  - Requires an Apple Developer ID Application certificate
+  - Integrate into the GitHub Actions `macos-latest` build job
+  - Add the notarization step before the `staple` step
+- [ ] [FEAT] macOS Gatekeeper approval guide — Until full notarization is in place, provide a clear in-app first-launch dialog explaining the manual approval steps (System Settings → Privacy & Security → Open Anyway) with annotated screenshots.
+- [ ] [FEAT] Metal GPU acceleration (macOS) — Verify `whisper-rs` with the `metal` feature compiles and runs correctly on Apple Silicon and Intel Macs. Publish benchmark results (RTF) for M1, M2, M3, M4, and Intel Core i7 in `docs/BENCHMARKS.md`.
+- [ ] [FEAT] CoreML encoder acceleration — Re-enable the `coreml` feature gate for macOS builds and automate the `.mlmodelc` encoder compilation step via `coremltools` in the build pipeline. Document the first-run Neural Engine compile time (15-60s) in the onboarding UI.
+- [ ] [WIN → macOS] Tray icon dark mode support — Mirror the Windows dark/light tray icon variants for macOS NSStatusItem using `NSAppearance` observation.
+- [ ] [FEAT] macOS permission audit — Verify that `NSMicrophoneUsageDescription`, `NSAppleEventsUsageDescription`, and accessibility permissions are correctly requested and that the app exits gracefully if any critical permission is denied (instead of silently failing).
+- [ ] [BUG] macOS Dock icon appears during recording — When the pill window is shown, macOS sometimes shows the HushWrite app in the Dock. Set `activation_policy = Accessory` to prevent this, while still allowing the settings window to activate the Dock item on demand.
+- [ ] [FEAT] macOS Raycast integration — A Raycast extension that triggers dictation from the Raycast launcher and shows the 5 most recent transcripts in a Raycast list view.
+- [ ] [FEAT] macOS Shortcuts app integration — Register `HushWrite.startDictation` and `HushWrite.stopDictation` as Shortcuts-compatible intents so users can chain dictation into multi-step Shortcuts automations.
+- [ ] [UX] macOS native menu bar extra — Replace the generic Tauri tray icon with a proper `NSStatusItem` with a recording waveform animation that respects the macOS menu bar appearance on light, dark, and high-contrast modes.
+
+---
+
+## Enterprise & Compliance
+
+> Goal: unblock procurement in regulated industries (healthcare, legal, finance, government).
+
+- [ ] [SEC] HIPAA architectural alignment document — Publish a `docs/HIPAA_ALIGNMENT.md` that maps each HIPAA Security Rule safeguard (§164.312) to a HushWrite control. Emphasize: data never leaves the device, no BAA required, configurable retention, audit log.
+  - Include explicit disclaimer: HushWrite is a general-purpose tool and does not certify HIPAA compliance. The document explains how the architecture supports compliance programs.
+- [ ] [BIZ] Enterprise MSI deployment guide — A `docs/ENTERPRISE_DEPLOYMENT.md` covering silent install via `msiexec /q`, Group Policy registry key pre-provisioning, and how to pre-configure the default model and Air-Gap Mode via a deployment config file.
+  - Silent install command: `msiexec /i HushWrite_1.2.1_x64_en-US.msi /qn /l*v install.log`
+  - Registry keys that can be pre-set: `HKLM\Software\HushWrite\*`
+  - Group Policy ADMX template: `HushWrite.admx` defining all IT-controllable settings
+- [ ] [INFRA] Offline license validation — Ship a license key validator that works fully offline using RSA signature verification against a bundled public key. No phone-home required to activate Pro or Enterprise tiers.
+  - License payload: JSON `{ "tier": "enterprise", "seats": 100, "expiry": "2027-09-01", "issued_to": "Acme Corp" }` signed with RSA-PSS SHA-256
+  - Validation: verify signature against bundled `license_public_key.pem` at startup
+  - Grace period: 30 days of offline operation after the license expiry date before features are locked
+- [ ] [SEC] SOC 2 Type I readiness self-assessment — A `docs/SOC2_READINESS.md` mapping the five Trust Service Criteria (Security, Availability, Processing Integrity, Confidentiality, Privacy) to HushWrite's architecture controls.
+- [ ] [BIZ] Volume purchase portal — A self-serve portal where IT admins can purchase 10-1000 seat enterprise licenses, download the latest MSI, and retrieve license keys. Payments via Stripe; portal hosted on `enterprise.hushwrite.app`.
+- [ ] [FEAT] Fleet management registry export — Enterprise IT can export a JSON report of all HushWrite registry keys across managed machines via a PowerShell script: `Get-HushWriteFleetReport.ps1`.
+- [ ] [FEAT] Centralized dictionary server (Enterprise) — Allow enterprise admins to host a read-only dictionary server on an internal URL. HushWrite clients poll it for updates on a configurable interval. All traffic stays within the corporate network.
+  - Protocol: simple HTTPS GET returning `{ "version": 42, "entries": [...] }` JSON
+  - Client polls every 6 hours when on a corporate network (detected via DNS suffix)
+  - Updates merged read-only; local personal entries are preserved
+- [ ] [COMPLIANCE] Data residency declaration — Publish a one-page `docs/DATA_RESIDENCY.md` confirming that all voice data, transcripts, and settings are stored exclusively on the end-user device and never replicated to any server, cloud storage, or CDN.
+- [ ] [SEC] Penetration test (external) — Commission an external pen test of the local WebSocket API endpoint, the model download pipeline, and the IPC command factory. Publish a redacted summary of findings and remediations.
+
+---
+
+## Release Engineering & CI/CD
+
+> Goal: make releasing a new version a one-command, fully automated, reproducible operation.
+
+- [ ] [INFRA] Fully automated release pipeline — A GitHub Actions workflow triggered by pushing a `v*` tag that:
+  1. Runs `cargo test` and `bun test` across all supported platforms
+  2. Bumps the version in `package.json`, `Cargo.toml`, and `tauri.conf.json` via a script
+  3. Builds `x86_64-pc-windows-msvc` NSIS + MSI bundles
+  4. Builds `aarch64-apple-darwin` and `x86_64-apple-darwin` DMGs
+  5. Signs Windows binaries via Azure Trusted Signing and macOS binaries via `codesign + notarytool`
+  6. Uploads artifacts to the GitHub Release
+  7. Updates `website/public/downloads/` and triggers a Vercel deployment
+  8. Generates `SHA256SUMS.txt` and attaches it to the release
+  9. Posts a release summary to the Discord `#announcements` channel
+- [ ] [INFRA] Version bump script — A single `scripts/bump_version.ps1` script that accepts a semver string and atomically updates `package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json`, `website/src/components/Hero.tsx`, `website/src/components/DownloadSection.tsx`, `website/src/components/Footer.tsx`, and `website/src/app/api/download/route.ts` in one pass.
+- [ ] [INFRA] Windows ARM64 target — Add `aarch64-pc-windows-msvc` to the CI build matrix for Snapdragon X Elite / Surface Pro devices. Validate that `whisper.cpp` compiles with NEON SIMD on ARM64 Windows.
+- [ ] [INFRA] Delta update pipeline automation — Automate `scripts/generate_delta.py` as part of the release workflow: compare against the previous release binary and generate `*.patch` files alongside the full installer. Upload patches to the GitHub Release assets.
+- [ ] [DX] Release checklist template — A GitHub Issue template `RELEASE_CHECKLIST.md` opened automatically by the CI pipeline that tracks: sign-off on changelog, smoke test on Windows 10/11, smoke test on macOS, website preview verification, and Discord announcement.
+- [ ] [INFRA] Nightly build artifacts — A scheduled CI job that produces unsigned nightly builds from `main` and uploads them to a `nightly` pre-release tag. Download links clearly marked as "Nightly — Unsupported." Used by beta testers and contributors.
+- [ ] [DX] Build reproducibility — Configure the Rust build to use a fixed toolchain pinned in `rust-toolchain.toml` and validate that two independent builds from the same source produce bit-identical binaries (modulo timestamp fields). Document the verification steps.
+- [ ] [INFRA] Winget manifest auto-update — After each GitHub Release, a CI job automatically opens a PR to the `winget-pkgs` repository with updated version, SHA-256, and installer URL in the HushWrite manifest YAML files.
+- [ ] [DX] Pre-release staging environment — A `staging` branch that deploys the website to `staging.hushwrite.app` via a separate Vercel project. Used to validate download links and changelogs before merging to `main`.
+
+---
+
+## Website & Marketing Engineering
+
+> Goal: make the website a high-converting, technically credible, and SEO-dominant presence.
+
+- [x] [FEAT] Live download counter — Show a real-time (or near-real-time) download count on the hero section. Fetch from a lightweight Cloudflare Worker that reads from an R2 counter bucket. Falls back gracefully to a static number if the fetch fails.
+- [ ] [FEAT] Latency benchmark interactive demo — An interactive chart on the `/developers` page where visitors can select their CPU tier (budget, mid-range, high-end) and model size (tiny, base, small, medium, large) and see projected RTF and WER numbers from the published benchmark matrix.
+- [ ] [SEO] Blog / technical articles infrastructure — Add a `/blog` route using MDX files stored in `website/content/blog/`. Each article gets its own `<head>` meta tags, OpenGraph image, and JSON-LD `Article` schema.
+  - First 6 articles: latency comparison, privacy deep-dive, developer workflow guide, air-gap verification, HushWrite vs Wispr Flow, HushWrite for lawyers
+  - Auto-generate sitemap entries for each blog post
+- [ ] [FEAT] Changelog page (`/changelog`) — A public, human-readable changelog page built from `CHANGELOG.md` entries, with each version as an anchor. Update on every release. Linked from the footer and in-app update notification.
+- [ ] [FEAT] Interactive air-gap proof widget — An embedded component on the landing page showing a simulated Wireshark capture during a HushWrite dictation session (0 packets to external IPs). Animated and visually compelling. Links to the full verification guide.
+- [ ] [SEO] Programmatic comparison pages expansion — Generate 20 additional comparison pages: `/vs-otter-ai`, `/vs-dragon-anywhere`, `/vs-google-docs-voice`, `/vs-microsoft-dictate`, `/vs-whisperkit`, etc. Each page follows the same template with a structured feature comparison table.
+- [ ] [FEAT] Security badge widget — A self-hosted badge at `https://hushwrite.app/badge/air-gapped.svg` that third parties can embed in their docs to indicate HushWrite-compatible integrations. Returns a dynamically generated SVG.
+- [ ] [PERF] Core Web Vitals optimization — Profile the website against Lighthouse and PageSpeed Insights. Targets: LCP < 1.5s, INP < 100ms, CLS < 0.05. Optimize by:
+  - Converting hero images to AVIF/WebP with `next/image`
+  - Deferring non-critical JS with `next/dynamic`
+  - Preloading the primary CTA download link
+- [ ] [SEO] Structured data for SoftwareApplication — Ensure `SoftwareApplication` schema on the homepage includes `operatingSystem`, `applicationCategory`, `offers` (with price and priceCurrency), `aggregateRating`, and `downloadUrl`. Validate with Google's Rich Results Test after every deploy.
+- [ ] [FEAT] Newsletter signup with double opt-in — A minimal email signup form that uses a self-hosted Listmonk instance (or Buttondown API) for double opt-in. No third-party tracking pixels. Privacy policy linked inline.
+- [ ] [FEAT] Verified checksum download page — A dedicated `/verify` page where users can paste a SHA-256 hash and verify it matches the known-good checksum for any version of HushWrite. Useful for enterprise procurement teams.
+
+---
+
+## Observability & Diagnostics
+
+> Goal: give users and developers enough local diagnostic data to self-serve on issues without cloud telemetry.
+
+- [ ] [DX] In-app diagnostics panel — A `Settings > Diagnostics` page showing:
+  - App version, Tauri version, OS version, architecture
+  - Active model name, quantization, file size, and last-loaded timestamp
+  - Average `TailDecodeMs` and `TotalFinalizeMs` from the last 50 sessions
+  - Current SQLite database size and session count
+  - Audio device name, sample rate, and channel count
+  - A "Copy diagnostics" button that formats all fields as a Markdown code block for easy support ticket pasting
+- [ ] [DX] Structured log viewer — A `Settings > Logs` tab that renders the last 500 log lines from the rolling log file in a virtual-scrolled list, with severity color coding (TRACE grey, DEBUG blue, INFO green, WARN amber, ERROR red). Filterable by severity and searchable by keyword.
+- [ ] [PERF] Session timing breakdown — In the History detail view, show a timing breakdown for each session: `ArmMs`, `VADMs`, `ChunkDecodeMs`, `PostProcessMs`, `DeliveryMs`. Helps users understand where latency is coming from.
+- [ ] [DX] One-click diagnostic report — A button in `Settings > Diagnostics` that bundles the last 3 log files, the diagnostic panel JSON, and the registry settings dump (with sensitive values redacted) into a `.zip` file that the user can attach to a support ticket.
+- [ ] [PERF] Real-time performance overlay — An optional developer overlay (toggle in advanced settings) that shows a live HUD during recording: CPU%, RAM used by HushWrite, current audio level, VAD state, and the number of chunks pending decode.
+- [ ] [INFRA] Local Prometheus metrics endpoint — Emit session metrics (`hushwrite_decode_duration_ms`, `hushwrite_session_word_count`, `hushwrite_delivery_method_total`) to a Prometheus-compatible `/metrics` endpoint on `127.0.0.1:{port}`. Documented for power users running local Grafana.
+- [ ] [DX] Error telemetry opt-in (local-only) — An opt-in setting that writes a structured JSON error report to `%APPDATA%\HushWrite\errors\` on every panic or unhandled error. The user can review and delete these files. No network transmission ever.
+- [ ] [INFRA] Health check command — A `HushWrite.exe --health` CLI flag that exits with code 0 if the app is running correctly (model loaded, audio device available, SQLite accessible) and code 1 with a JSON error body if any component is degraded.
+
+---
+
+## Monetization Experiments
+
+> Goal: test which pricing and value-delivery levers actually drive conversion without harming trust.
+
+- [ ] [BIZ] Usage-based "Pro features" trial — Allow all users to try Pro features (LLM post-processing, advanced analytics, team dictionary) for 14 days with no credit card required. Activate via a one-click button in settings. Measure conversion rate from trial to paid.
+- [ ] [BIZ] Contextual upgrade prompt in-app — When a user hits a limit (e.g. tries to enable LLM cleanup which is Pro), show a contextual, non-blocking upgrade card explaining exactly what they'd get and how much it costs. Never a modal blocker.
+- [ ] [BIZ] "Pay what you want" beta-backer tier — A limited-time offer (first 500 users) to get the Core Lifetime license for any amount ≥ $10. Generates goodwill and word-of-mouth without devaluing the standard pricing.
+- [ ] [BIZ] Student verification flow — Partner with SheerID or Student Beans to verify student status and automatically apply the 50% discount. Remove the need for manual email verification.
+- [ ] [BIZ] "HushWrite for Teams" waitlist — Add a Teams waitlist landing page at `/teams` even before the product exists. Collect emails from early-interest team leads. Use responses to validate feature priorities.
+- [ ] [BIZ] Lifetime license gifting — Allow purchasing a Core Lifetime license as a gift. The buyer receives a redeemable code to share. Tracked via a `gift_licenses` table in the purchase database.
+- [ ] [VIRALITY] Word count milestone shareable cards — When a user hits 10,000 / 100,000 / 1,000,000 words dictated, generate a shareable card (PNG) they can post to X or LinkedIn. Include their username, stat, and the HushWrite logo.
+- [ ] [BIZ] LTD (Lifetime Deal) platform listing — Launch on AppSumo, StackSocial, or DealMirror for a limited 30-day window to acquire a burst of users and reviews. Set a redemption cap to prevent over-dilution.
+- [ ] [VIRALITY] Refer-a-developer program — A separate referral code for developers that gives both the referrer and referee one month of Pro free. Tracked by a lightweight Cloudflare Worker. Zero user data leaves the device; only the referral code is exchanged.
 
 ---
 
