@@ -16,8 +16,9 @@ export interface Env {
 }
 
 const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "https://hushwrite.app",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
   "Content-Type": "application/json",
 } as const;
 
@@ -46,7 +47,7 @@ export default {
       return new Response(JSON.stringify({ ok: true, count: next }), {
         headers: {
           ...CORS_HEADERS,
-          "Cache-Control": "no-store",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
         },
       });
     }
@@ -57,8 +58,7 @@ export default {
       return new Response(JSON.stringify({ count }), {
         headers: {
           ...CORS_HEADERS,
-          // Allow CDN to cache for 60s; always revalidate after
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
         },
       });
     }

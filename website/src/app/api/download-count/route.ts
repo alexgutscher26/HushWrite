@@ -7,7 +7,8 @@ import { NextResponse } from "next/server";
 // Cloudflare KV counter (and GitHub Releases asset statistics fallback).
 // ---------------------------------------------------------------------------
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const WORKER_URL =
   process.env.DOWNLOAD_COUNTER_URL ||
@@ -28,8 +29,8 @@ let lastFetchTime = 0;
 
 async function fetchLiveDownloads(): Promise<number> {
   const now = Date.now();
-  // Cache for 60 seconds in-memory to reduce worker and API calls
-  if (cachedCount !== null && now - lastFetchTime < 60_000) {
+  // Short 2s in-memory throttle to protect against bursts
+  if (cachedCount !== null && now - lastFetchTime < 2_000) {
     return cachedCount;
   }
 
@@ -37,7 +38,7 @@ async function fetchLiveDownloads(): Promise<number> {
   try {
     const workerRes = await fetch(WORKER_URL, {
       headers: { Accept: "application/json" },
-      next: { revalidate: 60 },
+      cache: "no-store",
       signal: AbortSignal.timeout(3_000),
     });
 
@@ -60,7 +61,7 @@ async function fetchLiveDownloads(): Promise<number> {
         "User-Agent": "HushWrite-Website-Counter",
         Accept: "application/vnd.github.v3+json",
       },
-      next: { revalidate: 60 },
+      cache: "no-store",
       signal: AbortSignal.timeout(4_000),
     });
 
@@ -97,12 +98,20 @@ export async function GET() {
       { count },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
         },
       },
     );
   } catch {
-    return NextResponse.json({ count: cachedCount ?? 0 }, { status: 200 });
+    return NextResponse.json(
+      { count: cachedCount ?? 0 },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        },
+      },
+    );
   }
 }
 
