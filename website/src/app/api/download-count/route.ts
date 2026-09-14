@@ -86,7 +86,7 @@ async function fetchLiveDownloads(): Promise<number> {
     // Both unavailable, return cached value or 0
   }
 
-  return cachedCount ?? 1842;
+  return cachedCount ?? 0;
 }
 
 export async function GET() {
@@ -102,7 +102,7 @@ export async function GET() {
       },
     );
   } catch {
-    return NextResponse.json({ count: cachedCount ?? 1842 }, { status: 200 });
+    return NextResponse.json({ count: cachedCount ?? 0 }, { status: 200 });
   }
 }
 
@@ -129,5 +129,5 @@ export async function POST() {
   if (cachedCount !== null) {
     cachedCount += 1;
   }
-  return NextResponse.json({ ok: true, count: cachedCount ?? 1843 });
+  return NextResponse.json({ ok: true, count: cachedCount ?? 1 });
 }
