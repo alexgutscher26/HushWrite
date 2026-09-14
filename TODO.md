@@ -105,7 +105,7 @@
   - Use RegisterRawInputDevices with HID_USAGE_PAGE_GENERIC and HID_USAGE_GENERIC_MOUSE
   - Parse RI_MOUSE_BUTTON_4_DOWN / RI_MOUSE_BUTTON_5_DOWN from RAWMOUSE.usButtonFlags
   - Forward to the same session actor event as keyboard push-to-talk
-- [ ] [WIN] [FEAT] Dark mode tray icon variants — Ship two tray icon assets (light and dark) and switch based on SystemUsesLightTheme registry key.
+- [x] [WIN] [FEAT] Dark mode tray icon variants — Ship two tray icon assets (light and dark) and switch based on SystemUsesLightTheme registry key.
   - Poll the registry on WM_SETTINGCHANGE with lParam == L"ImmersiveColorSet" to detect theme switches at runtime without restarting
 - [ ] [WIN] [PERF] Low-latency audio path via WASAPI event-driven mode — Switch from the current callback-polling model to IAudioClient::SetEventHandle + a dedicated high-priority thread (SetThreadPriority(THREAD_PRIORITY_TIME_CRITICAL)) to reduce jitter below 2ms.
 - [ ] [WIN] [UX] Per-monitor DPI awareness v2 — Declare PerMonitorV2 in the app manifest so the pill and dashboard scale correctly when dragged across mixed-DPI displays (e.g. laptop 200% + external 100%).

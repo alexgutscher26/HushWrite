@@ -65,6 +65,188 @@ pub fn last_session_wpm() -> Option<f64> {
     LAST_SESSION_WPM.lock().ok().and_then(|g| *g)
 }
 
+#[cfg(target_os = "windows")]
+pub fn is_windows_system_light_theme() -> bool {
+    use windows::Win32::System::Registry::{
+        RegCloseKey, RegOpenKeyExW, RegQueryValueExW, HKEY, HKEY_CURRENT_USER, KEY_READ,
+        REG_DWORD, REG_VALUE_TYPE,
+    };
+    use windows::core::w;
+
+    unsafe {
+        let mut hkey: HKEY = HKEY::default();
+        let subkey = w!("Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize");
+        if RegOpenKeyExW(HKEY_CURRENT_USER, subkey, 0, KEY_READ, &mut hkey).is_ok() {
+            let mut data: u32 = 0;
+            let mut data_len = std::mem::size_of::<u32>() as u32;
+            let mut val_type: REG_VALUE_TYPE = REG_VALUE_TYPE::default();
+            let val_name = w!("SystemUsesLightTheme");
+            let res = RegQueryValueExW(
+                hkey,
+                val_name,
+                None,
+                Some(&mut val_type),
+                Some(&mut data as *mut u32 as *mut u8),
+                Some(&mut data_len),
+            );
+            let _ = RegCloseKey(hkey);
+            if res.is_ok() && val_type == REG_DWORD {
+                return data == 1;
+            }
+        }
+    }
+    false
+}
+
+pub fn get_tray_icon_image() -> Result<tauri::image::Image<'static>, AppError> {
+    #[cfg(target_os = "windows")]
+    {
+        if is_windows_system_light_theme() {
+            tauri::image::Image::from_bytes(include_bytes!("../icons/tray-dark.png"))
+                .map_err(menu_error)
+        } else {
+            tauri::image::Image::from_bytes(include_bytes!("../icons/tray-light.png"))
+                .map_err(menu_error)
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        tauri::image::Image::from_bytes(include_bytes!("../icons/tray.png"))
+            .map_err(menu_error)
+    }
+}
+
+pub fn update_tray_theme(app: &AppHandle) {
+    if let Some(tray) = app.tray_by_id("HushWrite") {
+        match get_tray_icon_image() {
+            Ok(icon) => {
+                if let Err(err) = tray.set_icon(Some(icon)) {
+                    tracing::warn!(error = %err, "could not update tray icon theme");
+                }
+            }
+            Err(err) => {
+                tracing::warn!(error = %err, "could not load tray icon for current theme");
+            }
+        }
+    }
+}
+
+#[cfg(target_os = "windows")]
+static THEME_LISTENER_HWND: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
+
+#[cfg(target_os = "windows")]
+pub fn start_theme_listener(app: AppHandle) {
+    std::thread::Builder::new()
+        .name("HushWrite-theme-listener".to_string())
+        .spawn(move || unsafe {
+            use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
+            use windows::Win32::System::LibraryLoader::GetModuleHandleW;
+            use windows::Win32::UI::WindowsAndMessaging::{
+                CreateWindowExW, DefWindowProcW, DestroyWindow, DispatchMessageW, GetMessageW,
+                PostQuitMessage, RegisterClassW, TranslateMessage, MSG, WINDOW_EX_STYLE,
+                WM_CLOSE, WM_DESTROY, WM_SETTINGCHANGE, WNDCLASSW, WS_OVERLAPPED,
+            };
+
+            static APP_HANDLE_SLOT: std::sync::Mutex<Option<AppHandle>> = std::sync::Mutex::new(None);
+            if let Ok(mut slot) = APP_HANDLE_SLOT.lock() {
+                *slot = Some(app);
+            }
+
+            unsafe extern "system" fn theme_wndproc(
+                hwnd: HWND,
+                msg: u32,
+                w_param: WPARAM,
+                l_param: LPARAM,
+            ) -> LRESULT {
+                match msg {
+                    WM_SETTINGCHANGE => {
+                        let should_check = if l_param.0 != 0 {
+                            let ptr = l_param.0 as *const u16;
+                            let mut len = 0;
+                            while len < 64 && *ptr.add(len) != 0 {
+                                len += 1;
+                            }
+                            let slice = std::slice::from_raw_parts(ptr, len);
+                            let param_str = String::from_utf16_lossy(slice);
+                            param_str.eq_ignore_ascii_case("ImmersiveColorSet")
+                                || param_str.eq_ignore_ascii_case("UserPreferencesMask")
+                                || param_str.eq_ignore_ascii_case("ColorizationColor")
+                                || param_str.is_empty()
+                        } else {
+                            true
+                        };
+
+                        if should_check {
+                            if let Ok(guard) = APP_HANDLE_SLOT.lock() {
+                                if let Some(ref handle) = *guard {
+                                    update_tray_theme(handle);
+                                }
+                            }
+                        }
+                        DefWindowProcW(hwnd, msg, w_param, l_param)
+                    }
+                    WM_CLOSE => {
+                        let _ = DestroyWindow(hwnd);
+                        LRESULT(0)
+                    }
+                    WM_DESTROY => {
+                        PostQuitMessage(0);
+                        LRESULT(0)
+                    }
+                    _ => DefWindowProcW(hwnd, msg, w_param, l_param),
+                }
+            }
+
+            let hinstance = match GetModuleHandleW(None) {
+                Ok(h) => h,
+                Err(err) => {
+                    tracing::error!(error = %err, "could not get module handle for theme listener window");
+                    return;
+                }
+            };
+
+            let class_name = windows::core::w!("HushWriteThemeListenerWindow");
+            let wc = WNDCLASSW {
+                lpfnWndProc: Some(theme_wndproc),
+                hInstance: hinstance.into(),
+                lpszClassName: class_name,
+                ..Default::default()
+            };
+
+            let _ = RegisterClassW(&wc);
+
+            let hwnd = match CreateWindowExW(
+                WINDOW_EX_STYLE(0),
+                class_name,
+                windows::core::w!("HushWriteThemeListener"),
+                WS_OVERLAPPED,
+                0,
+                0,
+                0,
+                0,
+                None,
+                None,
+                hinstance,
+                None,
+            ) {
+                Ok(h) => h,
+                Err(err) => {
+                    tracing::error!(error = %err, "failed to create hidden window for theme listener");
+                    return;
+                }
+            };
+
+            THEME_LISTENER_HWND.store(hwnd.0 as isize, Ordering::SeqCst);
+
+            let mut msg = MSG::default();
+            while GetMessageW(&mut msg, None, 0, 0).into() {
+                let _ = TranslateMessage(&msg);
+                DispatchMessageW(&msg);
+            }
+        })
+        .expect("could not spawn theme listener thread");
+}
+
 /**
  * SOURCE OF TRUTH KEYWORDS: install_tray
  * WHAT:  Builds the menu bar item and its menu.
@@ -111,14 +293,11 @@ pub fn install_tray(app: &AppHandle) -> AppResult<()> {
         // is a different drawing problem from an app icon: it is 22pt, it must
         // read at that size, and macOS uses ONLY its alpha channel. The app
         // icon shrunk into that slot is a smudge.
-        .icon(
-            tauri::image::Image::from_bytes(include_bytes!("../icons/tray.png"))
-                .map_err(menu_error)?,
-        )
+        .icon(get_tray_icon_image()?)
         // Template rendering: macOS recolours the shape for light menu bars,
         // dark menu bars and the pressed state from the alpha alone. Without it
         // the glyph is a fixed colour that is wrong in one of the three.
-        .icon_as_template(true)
+        .icon_as_template(cfg!(target_os = "macos"))
         .tooltip("HushWrite")
         .menu(&menu)
         // The menu is the only interaction. Left-click opening it too would
@@ -136,6 +315,9 @@ pub fn install_tray(app: &AppHandle) -> AppResult<()> {
         })
         .build(app)
         .map_err(menu_error)?;
+
+    #[cfg(target_os = "windows")]
+    start_theme_listener(app.clone());
 
     Ok(())
 }
@@ -970,5 +1152,11 @@ mod tests {
             pill.radius * 2.0 <= pill.height + f64::EPSILON,
             "a radius over half the height cannot round a rectangle, and the vibrancy layer would square off"
         );
+    }
+
+    #[test]
+    fn tray_icon_image_resolves_without_error() {
+        let icon_res = get_tray_icon_image();
+        assert!(icon_res.is_ok(), "tray icon image should resolve cleanly");
     }
 }
