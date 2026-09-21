@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "id": "landing-page",
+  "title": "HushWrite Landing Page",
+  "description": "Cinematic 3D presentation of the HushWrite landing page hero and features",
+  "definition": {
+    "scene": {
+      "version": 3,
+      "camera": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "perspective": 1400,
+        "rotateX": 10,
+        "rotateY": -16,
+        "rotateZ": 0
+      },
+      "focus": {
+        "distance": 1400,
+        "fStop": 5.6,
+        "focalLength": 85,
+        "maxBlur": 6
+      },
+      "nodes": [
+        {
+          "id": "landing-page",
+          "transform": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "rotateX": 0,
+            "rotateY": 0,
+            "rotateZ": 0,
+            "scale": 1
+          }
+        }
+      ]
+    },
+    "motion": {
+      "durationMs": 7000,
+      "speed": 0.5,
+      "tracks": [
+        {
+          "target": {
+            "kind": "camera"
+          },
+          "property": "rotateY",
+          "keyframes": [
+            {
+              "timeMs": 0,
+              "value": -20,
+              "easing": "cinematic"
+            },
+            {
+              "timeMs": 3500,
+              "value": -8,
+              "easing": "cinematic"
+            },
+            {
+              "timeMs": 7000,
+              "value": -20,
+              "easing": "cinematic"
+            }
+          ]
+        },
+        {
+          "target": {
+            "kind": "camera"
+          },
+          "property": "rotateX",
+          "keyframes": [
+            {
+              "timeMs": 0,
+              "value": 12,
+              "easing": "cinematic"
+            },
+            {
+              "timeMs": 3500,
+              "value": 6,
+              "easing": "cinematic"
+            },
+            {
+              "timeMs": 7000,
+              "value": 12,
+              "easing": "cinematic"
+            }
+          ]
+        },
+        {
+          "target": {
+            "kind": "camera"
+          },
+          "property": "y",
+          "keyframes": [
+            {
+              "timeMs": 0,
+              "value": -40,
+              "easing": "cinematic"
+            },
+            {
+              "timeMs": 3500,
+              "value": 30,
+              "easing": "cinematic"
+            },
+            {
+              "timeMs": 7000,
+              "value": -40,
+              "easing": "cinematic"
+            }
+          ]
+        }
+      ]
+    },
+    "width": 1400,
+    "height": 920
+  }
+}
