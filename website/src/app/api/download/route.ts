@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -26,10 +26,10 @@ export async function GET(request: NextRequest) {
   void targetPlatform; // may be used for platform-specific routing in the future
 
   // Default to serving the Windows x64 NSIS setup executable
-  return NextResponse.redirect(new URL("/downloads/HushWrite_1.2.2_x64-setup.exe", origin), {
+  return NextResponse.redirect(new URL("/downloads/HushWrite_1.3.0_x64-setup.exe", origin), {
     status: 302,
     headers: {
-      "Content-Disposition": 'attachment; filename="HushWrite_1.2.2_x64-setup.exe"',
+      "Content-Disposition": 'attachment; filename="HushWrite_1.3.0_x64-setup.exe"',
     },
   });
 }

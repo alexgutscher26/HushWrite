@@ -20,11 +20,65 @@ export interface ReleaseNote {
 
 export const RELEASES: ReleaseNote[] = [
   {
+    version: "1.3.0",
+    anchor: "1-3-0",
+    title: "Rule Pipeline Sandbox, Whisper GGML Kernels & Text Normalization",
+    date: "September 21, 2026",
+    isLatest: true,
+    tagUrl: "https://github.com/alexgutscher26/HushWrite/releases/tag/v1.3.0",
+    downloadUrl:
+      "https://github.com/alexgutscher26/HushWrite/releases/download/v1.3.0/HushWrite_1.3.0_x64-setup.exe",
+    sha256: "33b5027ae9f3d203594c5294a290d7a7b99fe4662f8654d479a2ff578902255e",
+    summary:
+      "Interactive rule preview sandbox with word-level diffs, customizable drag-and-drop rule ordering, high-performance Whisper GGML decode kernels and benchraw harness, SQLite-backed persistent dictation drafts, and comprehensive text normalization suite.",
+    items: [
+      {
+        category: "Added",
+        title: "Rule Priority Ordering & Live Preview Sandbox",
+        details: [
+          "Drag-and-drop custom execution ordering for enhancement rules stored in registry (`enhance.rule_order`).",
+          "Interactive live preview sandbox in Settings (Output & Typing) with real-time character and word diffs running against production RuleEnhancer passes.",
+        ],
+      },
+      {
+        category: "Added",
+        title: "Whisper GGML Backend & Benchmarking Suite",
+        details: [
+          "Integrated Whisper GGML backend kernels for direct native acceleration and decode execution.",
+          "Standalone benchmarking harness (`benchraw`) for isolated latency profiling and memory throughput verification.",
+        ],
+      },
+      {
+        category: "Added",
+        title: "Persistent Dictation Drafts",
+        details: [
+          "Multi-session draft accumulation mode backed by SQLite persistence across application restarts.",
+        ],
+      },
+      {
+        category: "Added",
+        title: "Comprehensive Text Normalization Suite",
+        details: [
+          "Automated abbreviation expansion ('e.g.', 'i.e.', 'vs.') with user toggles.",
+          "Spoken number, ordinal, and currency formatting ('twenty dollars' ➔ '$20', '1000' ➔ '1,000').",
+          "Spoken URL and filepath canonicalization ('https colon slash slash github dot com' ➔ 'https://github.com').",
+          "Code identifier casing pipeline (PascalCase, camelCase, snake_case) and opt-in profanity filter.",
+        ],
+      },
+      {
+        category: "Performance",
+        title: "Rules Pipeline Caching",
+        details: [
+          "Pre-cached lookup tables and match-probe early-outs eliminating redundant regex recompilations.",
+        ],
+      },
+    ],
+  },
+  {
     version: "1.2.2",
     anchor: "1-2-2",
     title: "Audio Playback Review, Ring-Buffer Pre-Roll & Parallel VAD",
     date: "September 14, 2026",
-    isLatest: true,
     tagUrl: "https://github.com/alexgutscher26/HushWrite/releases/tag/v1.2.2",
     downloadUrl:
       "https://github.com/alexgutscher26/HushWrite/releases/download/v1.2.2/HushWrite-Setup-1.2.2.exe",

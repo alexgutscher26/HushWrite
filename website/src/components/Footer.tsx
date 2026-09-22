@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { Mark } from "./Mark";
@@ -43,7 +43,7 @@ const COMPARISONS_LINKS: FooterLink[] = [
 ];
 
 const RESOURCES_LINKS: FooterLink[] = [
-  { href: "/changelog", label: "Changelog & Releases", badge: "v1.2.2" },
+  { href: "/changelog", label: "Changelog & Releases", badge: "v1.3.0" },
   { href: "/blog", label: "Technical Blog" },
   {
     href: "/blog/how-to-dictate-github-issues-prs-cursor-prompts",
@@ -88,7 +88,7 @@ const ECOSYSTEM_LINKS: FooterLink[] = [
     href: "https://github.com/alexgutscher26/HushWrite/tags",
     label: "Official Releases & SHA256",
     external: true,
-    badge: "v1.2.2",
+    badge: "v1.3.0",
   },
   {
     href: "#download",
@@ -257,7 +257,7 @@ export function Footer() {
                   HushWrite
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 font-mono font-medium">
-                  v1.2.2
+                  v1.3.0
                 </span>
               </div>
             </div>

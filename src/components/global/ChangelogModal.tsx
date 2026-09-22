@@ -40,9 +40,35 @@ interface ReleaseEntry {
 
 const RELEASES: ReleaseEntry[] = [
   {
+    version: "v1.3.0",
+    date: "September 21, 2026",
+    badge: "Latest",
+    title: "HushWrite 1.3.0 — Rule Pipeline Sandbox & High-Speed Normalization",
+    highlights: [
+      {
+        icon: <Layers className="size-4 text-text-primary" />,
+        title: "Interactive Rule Preview Sandbox & Reordering",
+        description:
+          "Test enhancements in real time with live character/word diffs and configure exact execution order via drag-and-drop.",
+      },
+      {
+        icon: <Cpu className="size-4 text-text-primary" />,
+        title: "Whisper GGML Backend & Benchmarking Harness",
+        description:
+          "High-performance native GGML kernels and dedicated benchmarking suite for measuring raw transcription latency.",
+      },
+      {
+        icon: <Sparkles className="size-4 text-text-primary" />,
+        title: "Full Text Normalization Suite & Persistent Drafts",
+        description:
+          "Automated abbreviation expansion, currency/number formatting, spoken URLs, and SQLite-backed multi-session drafts.",
+      },
+    ],
+  },
+  {
     version: "v1.2.1",
     date: "September 14, 2026",
-    badge: "Latest",
+    badge: "Previous",
     title: "HushWrite 1.2.1 — Smart Inline Learning & Developer Accuracy",
     highlights: [
       {

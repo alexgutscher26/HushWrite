@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-09-21
+
+### Added
+
+- **Rule Priority Ordering & Rule Preview Sandbox**:
+  - Drag-and-drop rule execution ordering in Settings (`Output & Typing`) persisted in the app registry (`enhance.rule_order`).
+  - Interactive **Rule Preview Sandbox** with real-time word-level diff visualization running directly against production `RuleEnhancer` traces without session drift.
+- **Whisper GGML Backend & Benchmarking Harness**:
+  - Integrated Whisper GGML backend kernels for direct native decode execution.
+  - Standalone benchmark and timing harness (`benchraw`) for measuring raw Whisper decode latencies and memory throughput.
+- **Persistent Dictation Drafts & Multi-Session Mode**:
+  - Dedicated SQLite storage for draft dictations, ensuring accumulated text survives application restarts.
+- **Comprehensive Text Normalization Suite**:
+  - Spoken number and currency normalization ("twenty dollars" ➔ "$20", "forty two" ➔ "42", "third" ➔ "3rd").
+  - Spoken URL and filepath canonicalization ("https colon slash slash github dot com" ➔ "https://github.com").
+  - Abbreviation expansions ("eg" ➔ "e.g.", "ie" ➔ "i.e.", "vs" ➔ "vs.") with per-language toggles.
+  - Automatic code identifier casing (PascalCase, camelCase, snake_case) and opt-in profanity filter.
+
+### Performance & Reliability
+
+- **Rules Pipeline Caching**:
+  - Pre-cached token lookup tables and match-probe early-outs across filler words, commands, and dictionary replacers.
+- **Punctuation Collision Guards**:
+  - Cleaned trailing punctuation collisions between ASR model output and LLM post-processing.
+
 ## [1.2.2] - 2026-09-14
 
 ### Added

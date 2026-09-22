@@ -261,14 +261,14 @@ export function Hero() {
       {/* Two CTA Buttons */}
       <div className="relative flex flex-col sm:flex-row items-center gap-3.5 mb-14 z-10">
         <a
-          href="/downloads/HushWrite_1.2.2_x64-setup.exe"
-          download="HushWrite_1.2.2_x64-setup.exe"
-          onClick={() => trackDownload("HushWrite_1.2.2_x64-setup.exe")}
+          href="/downloads/HushWrite_1.3.0_x64-setup.exe"
+          download="HushWrite_1.3.0_x64-setup.exe"
+          onClick={() => trackDownload("HushWrite_1.3.0_x64-setup.exe")}
           rel="noopener"
           className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-[#141416] hover:bg-neutral-800 text-white text-sm font-semibold shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
         >
           <Download className="w-4 h-4 text-emerald-400" />
-          <span>Windows: Download Free (v1.2.2)</span>
+          <span>Windows: Download Free (v1.3.0)</span>
           <span className="text-xs text-neutral-400 font-normal hidden sm:inline">
             (Code Signed .exe)
           </span>
