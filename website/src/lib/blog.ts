@@ -130,7 +130,11 @@ export function getAllBlogPosts(): BlogPost[] {
       const files = fs.readdirSync(BLOG_CONTENT_DIR);
       for (const file of files) {
         if (file.endsWith(".mdx") || file.endsWith(".md")) {
-          const slug = file.replace(/\.mdx?$/, "");
+          const rawSlug = file.replace(/\.mdx?$/, "").toLowerCase();
+          if (!/^[a-z0-9-]+$/.test(rawSlug)) {
+            continue;
+          }
+          const slug = rawSlug;
           const filePath = path.join(BLOG_CONTENT_DIR, file);
           const raw = fs.readFileSync(filePath, "utf-8");
           const parsed = parseMdxFile(raw, slug);
