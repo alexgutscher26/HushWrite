@@ -2673,10 +2673,10 @@ void SQ4BitGemmM1Kernel_CompInt8_Impl(size_t            BlkLen,
     if constexpr (HasZeroPoint) {
         for (size_t n = 0; n < CountN; n += 16) {
             size_t      nblks         = (CountN - n) > 16 ? 16 : CountN - n;
-            std::byte * QuantBDataPtr = (std::byte *) QuantBData +           //
-                                        n * BlockCountK * BlkLen / 2 +       // b data
-                                        n * BlockCountK * sizeof(uint8_t) +  // zp
-                                        n * BlockCountK * sizeof(float);     // scale
+            std::byte * QuantBDataPtr = (std::byte *) QuantBData +       //
+                                        n * BlockCountK * BlkLen / 2 +   // b data
+                                        n * BlockCountK +                // zp
+                                        n * BlockCountK * sizeof(float); // scale
             float * CPtr = C + n;
             size_t  cnt  = BlockCountK;
             if (Bias != nullptr) {
