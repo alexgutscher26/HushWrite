@@ -65,22 +65,12 @@ export function DownloadSection() {
     {
       file: "HushWrite_1.3.0_x64-setup.exe",
       platform: "Windows 64-bit Installer (.exe) · Code Signed",
-      sha256: "c5f888eef0abd34b1d9876c098f93c30f4368aeb3f6fade8c5d19d5ff00137dc",
+      sha256: "2c901d8070ce2f18bcbd3308c9d7b017916e40a2041c42377acbfe2d1dc3217b",
     },
     {
       file: "HushWrite_1.3.0_x64_en-US.msi",
       platform: "Windows MSI Package · Code Signed",
-      sha256: "603af4d55b3d2f2aec8cfddc471df271d7ca96c70ad4e2e189563ff358d95d95",
-    },
-    {
-      file: "HushWrite_1.3.0_aarch64.dmg",
-      platform: "macOS Apple Silicon (M1/M2/M3/M4)",
-      sha256: "95d8c8e26b8e9fe8f5c2a6eb089cb1857d2053d70fe339c635391494016f60d5",
-    },
-    {
-      file: "HushWrite_1.3.0_x64.dmg",
-      platform: "macOS Intel 64-bit",
-      sha256: "95d8c8e26b8e9fe8f5c2a6eb089cb1857d2053d70fe339c635391494016f60d5",
+      sha256: "d685ead44235704d37df2314b69455cade771b33f62c8c11a43bc1931053edf1",
     },
   ];
 
@@ -217,25 +207,23 @@ export function DownloadSection() {
               {/* Separated macOS Buttons */}
               <div className="flex flex-col gap-2.5">
                 <a
-                  href="/downloads/HushWrite_1.3.0_aarch64.dmg"
-                  download="HushWrite_1.3.0_aarch64.dmg"
-                  onClick={() =>
-                    handleDownloadClick("HushWrite_1.3.0_aarch64.dmg", "macOS Apple Silicon")
-                  }
+                  href="https://github.com/alexgutscher26/HushWrite/releases/tag/v1.3.0"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-full text-center text-xs sm:text-sm font-semibold text-white bg-[#141416] hover:bg-neutral-800 py-3.5 px-4 rounded-xl transition-all shadow-md hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Download className="w-4 h-4 text-amber-400" />
-                  <span>macOS Apple Silicon: Download unsigned early-access beta</span>
+                  <ExternalLink className="w-4 h-4 text-amber-400" />
+                  <span>macOS Apple Silicon: View GitHub release assets</span>
                 </a>
 
                 <a
-                  href="/downloads/HushWrite_1.3.0_x64.dmg"
-                  download="HushWrite_1.3.0_x64.dmg"
-                  onClick={() => handleDownloadClick("HushWrite_1.3.0_x64.dmg", "macOS Intel")}
+                  href="https://github.com/alexgutscher26/HushWrite/releases/tag/v1.3.0"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-full text-center text-xs sm:text-sm font-semibold text-neutral-800 hover:bg-neutral-50 bg-white border border-neutral-200/90 py-3 px-4 rounded-xl transition-all shadow-xs hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Download className="w-4 h-4 text-neutral-500" />
-                  <span>macOS Intel: Download unsigned early-access beta</span>
+                  <ExternalLink className="w-4 h-4 text-neutral-500" />
+                  <span>macOS Intel: View GitHub release assets</span>
                 </a>
               </div>
 
@@ -337,7 +325,7 @@ export function DownloadSection() {
                   Current Version
                 </span>
                 <span className="font-mono text-xs font-bold text-neutral-950">
-                  v1.2.1 · Stable Release
+                  v1.3.0 · Stable Release
                 </span>
               </div>
               <a

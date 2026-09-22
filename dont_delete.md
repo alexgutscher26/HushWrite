@@ -3,10 +3,10 @@
 ## 1. Version Bump
 ```powershell
 # Preview changes:
-bun run version:bump 1.2.2 -DryRun
+bun run version:bump 1.3.0 -DryRun
 
 # Apply atomic version bump across codebase:
-bun run version:bump 1.2.2
+bun run version:bump 1.3.0
 ```
 
 ## 2. Build Tauri Installers
@@ -16,8 +16,8 @@ bun run tauri:build
 
 ## 3. Copy Built Installers to Website Downloads
 ```powershell
-Copy-Item "src-tauri\target\release\bundle\nsis\HushWrite_1.2.2_x64-setup.exe" "website\public\downloads\" -Force
-Copy-Item "src-tauri\target\release\bundle\msi\HushWrite_1.2.2_x64_en-US.msi" "website\public\downloads\" -Force
+Copy-Item "src-tauri\target\release\bundle\nsis\HushWrite_1.3.0_x64-setup.exe" "website\public\downloads\" -Force
+Copy-Item "src-tauri\target\release\bundle\msi\HushWrite_1.3.0_x64_en-US.msi" "website\public\downloads\" -Force
 ```
 
 ## 4. Azure Code Signing
