@@ -197,8 +197,8 @@ export function Footer() {
             key={i}
             className="motion-safe:animate-[HushWrite-wave_2.8s_ease-in-out_infinite] w-full max-w-[3px] rounded-full bg-gradient-to-t from-emerald-500/50 to-emerald-300/10 origin-bottom"
             style={{
-              height: `${h * 100}%`,
-              animationDelay: `${i * 0.035}s`,
+              height: `${Math.round(h * 10000) / 100}%`,
+              animationDelay: `${Math.round(i * 0.035 * 1000) / 1000}s`,
             }}
           />
         ))}
