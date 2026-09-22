@@ -1580,7 +1580,19 @@ static bool whisper_model_load(struct whisper_model_loader * loader, whisper_con
         read_safe(loader, filters.n_mel);
         read_safe(loader, filters.n_fft);
 
-        filters.data.resize(filters.n_mel * filters.n_fft);
+        if (filters.n_mel < 0 || filters.n_fft < 0) {
+            WHISPER_LOG_ERROR("%s: invalid model data (negative mel filter dimensions)\n", __func__);
+            return false;
+        }
+
+        const std::size_t n_mel = static_cast<std::size_t>(filters.n_mel);
+        const std::size_t n_fft = static_cast<std::size_t>(filters.n_fft);
+        if (n_fft != 0 && n_mel > SIZE_MAX / n_fft) {
+            WHISPER_LOG_ERROR("%s: invalid model data (mel filter size overflow)\n", __func__);
+            return false;
+        }
+
+        filters.data.resize(n_mel * n_fft);
         loader->read(loader->context, filters.data.data(), filters.data.size() * sizeof(float));
         BYTESWAP_FILTERS(filters);
     }
