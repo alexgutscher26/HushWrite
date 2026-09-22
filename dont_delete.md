@@ -34,7 +34,7 @@ $env:AZURE_TENANT_ID = "744bdc23-0b2e-4bfd-811e-c142a64b68fd"
   /td SHA256 `
   /dlib ".\dlib\bin\x64\Azure.CodeSigning.Dlib.dll" `
   /dmdf ".\metadata.json" `
-  "website\public\downloads\HushWrite_1.2.2_x64-setup.exe"
+  "website\public\downloads\HushWrite_1.3.0_x64-setup.exe"
 
 # Sign the MSI Package (.msi)
 & "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe" sign `
@@ -44,5 +44,5 @@ $env:AZURE_TENANT_ID = "744bdc23-0b2e-4bfd-811e-c142a64b68fd"
   /td SHA256 `
   /dlib ".\dlib\bin\x64\Azure.CodeSigning.Dlib.dll" `
   /dmdf ".\metadata.json" `
-  "website\public\downloads\HushWrite_1.2.2_x64_en-US.msi"
+  "website\public\downloads\HushWrite_1.3.0_x64_en-US.msi"
 ```
