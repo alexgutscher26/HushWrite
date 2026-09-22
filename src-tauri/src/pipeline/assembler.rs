@@ -3,13 +3,13 @@
  *   MAX_SEAM_WORDS, normalise_word
  * WHAT:  Joins the segments decoded from successive chunks into one transcript,
  *        removing the duplication the deliberate chunk overlap creates.
- * WHY:   The join has to be done on TEXT, not on timestamps, and that is a
- *        consequence of a decision made elsewhere: timestamp tokens are
- *        disabled for speed, so a chunk returns ONE segment spanning the whole
- *        chunk with no sub-chunk resolution. The spans are truthful but too
- *        coarse to locate a repeated word in, so anything that tried to
- *        de-duplicate by comparing times would find the segments merely
- *        adjacent and silently do nothing.
+ * WHY:   The join has to be done on TEXT, not on timestamps. Segment spans
+ *        are clamped to chunk boundaries upstream (adapters/whisper/engine.rs
+ *        absolute_ms), so the two decodes of the 200ms overlap carry adjacent
+ *        spans with no shared resolution — anything matching on time would
+ *        find the segments merely adjacent and silently do nothing. Matching
+ *        on words is also robust to the two decodes of the same audio
+ *        disagreeing about casing and punctuation, which they routinely do.
  *
  *        The overlap is ~200ms, which is at most a word or two. The search is
  *        bounded accordingly — a longer window would start "finding" overlaps

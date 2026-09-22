@@ -30,6 +30,7 @@ export {
   type CommandState,
 } from "./ipc";
 export { useTauriEvent, type TauriEventChannel } from "./use-event";
+export { wordDiff, type DiffToken } from "./word-diff";
 export {
   formatClock,
   formatCompactDuration,

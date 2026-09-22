@@ -53,6 +53,12 @@ pub struct SessionSettings {
     pub normalise_urls_and_paths: bool,
     pub code_mode: bool,
     pub code_casing_style: String,
+    /// Opt-in profanity masking; per app profile by way of load_for_app.
+    pub profanity_filter: bool,
+    /// "asterisks" or "bleeps", parsed by ProfanityStyle::parse_style.
+    pub profanity_style: String,
+    /// The user's stored enhancement-rule order (slugs), or None for canonical.
+    pub rule_order: Option<Vec<String>>,
     pub normalise_punctuation: bool,
     pub capitalise_sentences: bool,
     pub audio_feedback: bool,
@@ -165,6 +171,10 @@ impl SessionSettings {
             code_mode: read_bool(stored, keys::CODE_MODE).unwrap_or(false),
             code_casing_style: read_choice(stored, keys::CODE_CASING_STYLE)
                 .unwrap_or_else(|| "camel".into()),
+            profanity_filter: read_bool(stored, keys::PROFANITY_FILTER).unwrap_or(false),
+            profanity_style: read_choice(stored, keys::PROFANITY_STYLE)
+                .unwrap_or_else(|| "asterisks".into()),
+            rule_order: read_rule_order(stored, keys::RULE_ORDER),
             normalise_punctuation: read_bool(stored, keys::NORMALISE_PUNCTUATION).unwrap_or(true),
             capitalise_sentences: read_bool(stored, keys::CAPITALISE_SENTENCES).unwrap_or(true),
             audio_feedback: read_bool(stored, keys::AUDIO_FEEDBACK).unwrap_or(true),
@@ -242,6 +252,43 @@ fn read_choice(stored: &Stored, key: &str) -> Option<String> {
     match effective_setting(stored, key)? {
         SettingValue::Choice(value) | SettingValue::Text(value) => Some(value),
         _ => None,
+    }
+}
+
+/**
+ * SOURCE OF TRUTH KEYWORDS: read_rule_order
+ * WHAT:  Parses a stored rule-order value into a slug list, or None when
+ *        nothing was ever saved.
+ * WHY:   The setting is stored as TEXT, and every writer is expected to write a
+ *        JSON array of slugs — but this parser accepts the comma-separated
+ *        shape too, because a hand-edited database must not reset a user's
+ *        carefully tuned order to canonical. An unparsable value falls back to
+ *        None (canonical) rather than erroring, which is the same
+ *        corrupt-row-is-a-default policy every other reader here follows. The
+ *        key is a parameter rather than captured so the assignment line names
+ *        its own key, which is what the registry's reachability scan greps for.
+ * WHERE: SessionSettings::from_stored, once per session start.
+ */
+fn read_rule_order(stored: &Stored, key: &str) -> Option<Vec<String>> {
+    let raw = match effective_setting(stored, key)? {
+        SettingValue::Text(s) | SettingValue::Choice(s) => s,
+        _ => return None,
+    };
+    if raw.trim().is_empty() {
+        return None;
+    }
+    let list = if raw.trim().starts_with('[') {
+        serde_json::from_str::<Vec<String>>(&raw).ok()?
+    } else {
+        raw.split(',')
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect()
+    };
+    if list.is_empty() {
+        None
+    } else {
+        Some(list)
     }
 }
 
@@ -345,6 +392,76 @@ mod tests {
     #[test]
     fn an_unknown_key_has_no_default_and_no_value() {
         assert_eq!(read_bool(&empty(), "not.a.setting"), None);
+    }
+
+    #[test]
+    fn an_unsaved_rule_order_reads_as_none() {
+        assert_eq!(read_rule_order(&empty(), keys::RULE_ORDER), None);
+    }
+
+    /**
+     * SOURCE OF TRUTH KEYWORDS: profanity_filter_default_off
+     * WHAT:  The profanity filter defaults to OFF and honours a stored value.
+     * WHY:   A rule that can remove words the user actually said must never
+     *        ship dark-turned-on — the registry default is the single place
+     *        that is decided, and this pins the delivered behaviour, not just
+     *        the declaration. A per-profile override (Slack on, notes off)
+     *        rides load_for_app, so a stored Bool must load through cleanly.
+     */
+    #[test]
+    fn the_profanity_filter_defaults_to_off_and_honours_a_stored_value() {
+        let defaults = SessionSettings::from_stored(&empty());
+        assert!(!defaults.profanity_filter);
+        assert_eq!(defaults.profanity_style, "asterisks");
+
+        let mut stored = empty();
+        stored.insert(
+            keys::PROFANITY_FILTER.to_string(),
+            SettingValue::Bool(true),
+        );
+        stored.insert(
+            keys::PROFANITY_STYLE.to_string(),
+            SettingValue::Choice("bleeps".into()),
+        );
+        let tuned = SessionSettings::from_stored(&stored);
+        assert!(tuned.profanity_filter);
+        assert_eq!(tuned.profanity_style, "bleeps");
+    }
+
+    #[test]
+    fn a_stored_rule_order_round_trips_through_its_json_shape() {
+        let mut stored = empty();
+        stored.insert(
+            keys::RULE_ORDER.to_string(),
+            SettingValue::Text(
+                "[\"whitespace\",\"fillers\",\"punctuation\"]".into(),
+            ),
+        );
+        assert_eq!(
+            read_rule_order(&stored, keys::RULE_ORDER),
+            Some(vec![
+                "whitespace".to_string(),
+                "fillers".to_string(),
+                "punctuation".to_string()
+            ])
+        );
+    }
+
+    #[test]
+    fn a_comma_separated_rule_order_still_loads_rather_than_resetting_to_canonical() {
+        let mut stored = empty();
+        stored.insert(
+            keys::RULE_ORDER.to_string(),
+            SettingValue::Text("whitespace, fillers, punctuation".into()),
+        );
+        assert_eq!(
+            read_rule_order(&stored, keys::RULE_ORDER),
+            Some(vec![
+                "whitespace".to_string(),
+                "fillers".to_string(),
+                "punctuation".to_string()
+            ])
+        );
     }
 
     #[test]

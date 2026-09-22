@@ -12,7 +12,7 @@
  *        latency" — makes the app dramatically SLOWER. Chunking at 1s would be
  *        roughly ten times the total compute of chunking at 10s.
  *
- *        So chunks are LONG (8-15s) and closed at silence. They decode in the
+ *        So chunks are LONG (2.5-10s) and closed at silence. They decode in the
  *        background while the user keeps talking, so their individual latency
  *        is invisible. Only the trailing fragment is on the critical path, and
  *        that is the one the engine shrinks its encoder context for.
@@ -41,6 +41,42 @@ const MAX_CHUNK_MS: u64 = 10_000;
 const BOUNDARY_SILENCE_MS: u64 = 250;
 /// Carried into the next chunk so a word across the seam survives.
 const OVERLAP_MS: u64 = 200;
+
+/**
+ * SOURCE OF TRUTH KEYWORDS: TAIL_MIN_SPEECH_MS
+ * WHAT:  Voiced audio a TAIL chunk needs before it is worth decoding — looser
+ *        than the interior gate's MIN_SPEECH_MS (120ms).
+ * WHY:   The tail is the last words the user said and is actively waiting for.
+ *        The interior gate protects background throughput and can be strict;
+ *        on the tail the asymmetric error is reversed — a dropped trailing
+ *        word is words the user SAID that never appear (their exact report:
+ *        "it doesn't hear all my words"), while a stray decoded word from a
+ *        quiet tail is rare and is the model's own no-speech filter's job to
+ *        veto (adapters/whisper/hallucination.rs, plus the delivery-side
+ *        has_non_noise_words check). A single word typically carries 80-150ms
+ *        of voiced audio on this detector, so 40ms keeps short trailing words
+ *        while still rejecting pure silence and the beep case.
+ * WHERE: Chunker::close for ChunkKind::Tail only.
+ */
+const TAIL_MIN_SPEECH_MS: u64 = 40;
+
+/**
+ * SOURCE OF TRUTH KEYWORDS: min_speech_ms_for
+ * WHAT:  The voiced-audio gate for a chunk, by kind.
+ * WHY:   One pure function so the tail/interior split is unit-testable without
+ *        audio fixtures — which matter, because the real-speech tests
+ *        synthesise via macOS `say` and silently skip on every other host.
+ *        The inequality that protects the user's trailing words
+ *        (tail < interior) is asserted where it cannot be skipped.
+ * WHERE: Chunker::close.
+ */
+fn min_speech_ms_for(kind: ChunkKind) -> u64 {
+    if matches!(kind, ChunkKind::Tail) {
+        TAIL_MIN_SPEECH_MS
+    } else {
+        crate::pipeline::vad::MIN_SPEECH_MS
+    }
+}
 
 fn ms_to_samples(ms: u64) -> usize {
     (ms as usize * TARGET_SAMPLE_RATE as usize) / 1000
@@ -282,7 +318,14 @@ impl Chunker {
         // threshold while being perfectly audible, and trimming to the VAD's
         // idea of where speech starts is how you deliver a sentence with its
         // first word clipped off.
-        if !self.vad.carries_speech() {
+        //
+        // On a TAIL the gate runs at TAIL_MIN_SPEECH_MS rather than the
+        // interior threshold: the tail is the words the user just said and is
+        // waiting for, so a quiet trailing word is kept and given to the model
+        // (whose no-speech filter makes the final call) rather than silently
+        // dropped. See TAIL_MIN_SPEECH_MS above.
+        let min_speech_ms = min_speech_ms_for(kind);
+        if self.vad.speech_ms() < min_speech_ms {
             tracing::debug!(
                 duration_ms = samples_to_ms(self.buffer.len()),
                 speech_ms = self.vad.speech_ms(),
@@ -543,6 +586,60 @@ mod tests {
             chunker.close_tail().is_none(),
             "stopping during silence must not queue a decode"
         );
+    }
+
+    /**
+     * SOURCE OF TRUTH KEYWORDS: the_tail_gate_is_looser_than_the_interior_gate
+     * WHAT:  The tail's voiced-audio gate is strictly looser than the interior
+     *        one.
+     * WHY:   The interior gate protects background throughput and is allowed
+     *        to be strict. On the tail the error asymmetry REVERSES: the tail
+     *        is the words the user just said and is waiting for, so the gate
+     *        must admit everything the interior gate would hold back and let
+     *        the model's own no-speech filter (hallucination.rs) own the final
+     *        call. Asserted as a pure threshold relationship so it cannot be
+     *        skipped for an environmental reason — the real-speech fixture
+     *        tests synthesise via macOS `say` and do exactly that on Windows,
+     *        which is where this regression shipped.
+     */
+    #[test]
+    fn the_tail_gate_is_looser_than_the_interior_gate() {
+        let interior = min_speech_ms_for(ChunkKind::Interior);
+        let tail = min_speech_ms_for(ChunkKind::Tail);
+
+        assert!(
+            tail < interior,
+            "the tail gate ({tail}ms) must be strictly looser than the interior gate \
+             ({interior}ms) — tightening it back eats the user's trailing words"
+        );
+        // One 200ms beep measures ~64ms voiced on this detector: the interior
+        // gate must still reject it, and the tail gate is below it.
+        assert!(interior > 64, "interior gate must still hold the beep out");
+        assert!(tail <= 64, "tail gate must admit a short trailing word");
+    }
+
+    /**
+     * WHAT:  A short trailing utterance survives close_tail on real speech.
+     * WHY:   The end-to-end expression of the gate split above: a word spoken
+     *        right up to the stop press is decoded, not withheld. Skips when
+     *        `say` is unavailable (every non-macOS host), same as the other
+     *        speech-fixture tests in this suite.
+     */
+    #[test]
+    fn a_short_trailing_word_is_still_decoded_as_a_tail() {
+        let Some(word) = crate::testing::synthesise_speech("Yes.", "chunkertail") else {
+            eprintln!("skipped: `say` is unavailable on this host");
+            return;
+        };
+
+        let mut chunker = Chunker::new();
+        chunker.push(&quiet(1_500));
+        chunker.push(&word);
+
+        let tail = chunker
+            .close_tail()
+            .expect("a short trailing word must be decoded as the tail, not dropped");
+        assert_eq!(tail.kind, ChunkKind::Tail);
     }
 
     #[test]

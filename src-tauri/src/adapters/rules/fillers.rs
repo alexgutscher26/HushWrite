@@ -4,6 +4,9 @@
  * WHERE: Consumed by adapters/rules/mod.rs and text.rs.
  */
 
+use std::collections::HashMap;
+use std::sync::LazyLock;
+
 use super::dictionary::replace_whole_words;
 use super::whitespace::normalise_whitespace;
 use crate::types::LanguageCode;
@@ -172,6 +175,56 @@ pub fn fillers_for_language(language: Option<&LanguageCode>) -> Option<&'static 
     }
 }
 
+/**
+ * SOURCE OF TRUTH KEYWORDS: fillers_sorted_for_language, pipeline caching
+ * WHAT:  The language's filler list pre-sorted longest-first, built once per
+ *        process.
+ * WHY:   strip_fillers runs on every chunk and used to clone + sort its table
+ *        each call — work whose answer never changes for a static list. The
+ *        sorted Vecs are leaked at LazyLock init (a handful of pointers, one
+ *        time) so they are 'static and the lookup is a map hit.
+ * WHERE: strip_fillers; the language dispatch mirrors fillers_for_language
+ *        exactly, so the two can only drift if a language is added to one and
+ *        not the other — kept adjacent on purpose.
+ */
+fn fillers_sorted_for_language(
+    language: Option<&LanguageCode>,
+) -> Option<&'static [&'static str]> {
+    static SORTED: LazyLock<HashMap<&'static str, &'static [&'static str]>> = LazyLock::new(|| {
+        let tables: &[(&str, &[&str])] = &[
+            ("en", ENGLISH_FILLERS),
+            ("es", SPANISH_FILLERS),
+            ("fr", FRENCH_FILLERS),
+            ("de", GERMAN_FILLERS),
+            ("it", ITALIAN_FILLERS),
+            ("pt", PORTUGUESE_FILLERS),
+            ("ja", JAPANESE_FILLERS),
+            ("zh", CHINESE_FILLERS),
+            ("yue", CHINESE_FILLERS),
+            ("ru", RUSSIAN_FILLERS),
+            ("nl", DUTCH_FILLERS),
+            ("ko", KOREAN_FILLERS),
+            ("ar", ARABIC_FILLERS),
+            ("hi", HINDI_FILLERS),
+            ("pl", POLISH_FILLERS),
+            ("tr", TURKISH_FILLERS),
+            ("sv", SWEDISH_FILLERS),
+        ];
+        tables
+            .iter()
+            .map(|(code, table)| {
+                let mut sorted: Vec<&str> = table.to_vec();
+                sorted.sort_by_key(|f| std::cmp::Reverse(f.len()));
+                (*code, &*Box::leak(sorted.into()))
+            })
+            .collect()
+    });
+
+    let lang = language?.as_str();
+    let prefix = lang.split(['-', '_']).next().unwrap_or(lang);
+    SORTED.get(prefix).copied()
+}
+
 pub fn is_cjk(language: Option<&LanguageCode>) -> bool {
     language
         .map(|l| {
@@ -186,15 +239,13 @@ pub fn is_cjk(language: Option<&LanguageCode>) -> bool {
  * WHY:   Whole-word and case-insensitive. Off by default in settings.
  */
 pub fn strip_fillers(text: &str, language: Option<&LanguageCode>) -> String {
-    let Some(filler_list) = fillers_for_language(language) else {
+    // The sorted view, not the raw table: same order the per-call sort used
+    // to produce, minus the clone-and-sort on every chunk.
+    let Some(fillers) = fillers_sorted_for_language(language) else {
         return text.to_string();
     };
 
     let mut out = text.to_string();
-    let mut fillers: Vec<&&str> = filler_list.iter().collect();
-    // Longest first so "you know" is removed before "know" could be considered.
-    fillers.sort_by_key(|f| std::cmp::Reverse(f.len()));
-
     let cjk = is_cjk(language);
     for filler in fillers {
         if cjk {
@@ -204,4 +255,33 @@ pub fn strip_fillers(text: &str, language: Option<&LanguageCode>) -> String {
         }
     }
     normalise_whitespace(&out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /**
+     * WHAT:  The sorted cache is the raw table, longest first, for every
+     *        language both dispatchers know.
+     * WHY:   The cache mirrors fillers_for_language's match by hand, so a
+     *        language added to one and not the other — or a list edited
+     *        without the cache noticing — would change filler removal only
+     *        through the cached path. Sorting both sides the same way makes
+     *        the assertion exact.
+     */
+    #[test]
+    fn the_sorted_filler_table_is_the_raw_table_longest_first() {
+        for language in [
+            "en", "es", "fr", "de", "it", "pt", "ja", "zh", "yue", "ru", "nl", "ko", "ar",
+            "hi", "pl", "tr", "sv",
+        ] {
+            let code = LanguageCode(language.into());
+            let raw = fillers_for_language(Some(&code)).expect(language);
+            let sorted = fillers_sorted_for_language(Some(&code)).expect(language);
+            let mut expected: Vec<&str> = raw.to_vec();
+            expected.sort_by_key(|f| std::cmp::Reverse(f.len()));
+            assert_eq!(sorted.to_vec(), expected, "cache drifted for {language}");
+        }
+    }
 }

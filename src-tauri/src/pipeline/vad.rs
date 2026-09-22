@@ -70,8 +70,16 @@ const SPEECH_ONSET_FRAMES: usize = 3;
  *        the model instead, by no_speech_probability in the whisper adapter.
  *        Two gates that fail differently, rather than one tuned until it starts
  *        eating speech.
+ *
+ *        The TAIL chunk is measured against a looser threshold —
+ *        TAIL_MIN_SPEECH_MS in pipeline/chunker.rs — because the tail is the
+ *        words the user is waiting for and the asymmetry reverses there.
  */
-const MIN_SPEECH_MS: u64 = 120;
+/// Voiced milliseconds an INTERIOR chunk needs before it is worth decoding.
+/// pub(crate) because pipeline/chunker.rs gates the tail against its own
+/// looser TAIL_MIN_SPEECH_MS and reads this value for the interior side —
+/// one number, two gates, no drift.
+pub const MIN_SPEECH_MS: u64 = 120;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VadVerdict {

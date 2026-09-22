@@ -96,7 +96,11 @@ objc2-av-foundation = { version = "0.3.2", features = ["AVCaptureDevice", "AVMed
 objc2-foundation = "0.3.2"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-whisper-rs = { version = "0.16.0" }
+# openmp is load-bearing on Windows: without it the sys build hardcodes
+# GGML_OPENMP=OFF and ggml falls back to its custom threadpool, which
+# oversubscribes badly (16 threads measured SLOWER than 4). MSVC's /openmp
+# auto-links vcomp; no extra link configuration is needed on msvc.
+whisper-rs = { version = "0.16.0", features = ["openmp"] }
 windows = { version = "0.58.0", features = [
     "Win32_Foundation",
     "Win32_UI_WindowsAndMessaging",
@@ -126,3 +130,15 @@ tauri = { version = "2", features = ["test"] }
 opt-level = 3
 
 
+
+# Vendored from whisper-rs-sys 0.15.0 (unchanged except build.rs).
+# Root cause of Windows slowness: cmake-rs rewrites CMAKE_{C,CXX}_FLAGS_RELEASE
+# with cc-crate boilerplate that DROPS CMake's /O2 /Ob2 /DNDEBUG, so ggml was
+# compiled with no optimization at all (~10x slower decode; ~44 s vs ~3.3 s for
+# small-q5_1 on an 11 s sample, Ryzen 7 7700X). The vendored build.rs restores
+# the flags and bakes GGML_AVX2=ON / AVX512=OFF / NATIVE=OFF for MSVC x86_64
+# (GGML_NATIVE=ON makes MSVC emit /arch:AVX512, which underperforms on Zen 4 in
+# ggml's kernels and breaks pre-Zen4 CPUs). Revisit if upstream whisper-rs
+# pins/builds against a cmake-rs release that fixes the flag rewrite.
+[patch.crates-io]
+whisper-rs-sys = { path = "whisper-rs-sys" }

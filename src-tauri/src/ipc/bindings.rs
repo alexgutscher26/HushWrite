@@ -93,6 +93,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::models::delete_model,
             commands::models::get_hardware_profile,
             commands::models::test_voice_transform,
+            commands::models::preview_rule_pipeline,
             // System
             commands::system::get_api_version,
             commands::system::check_permissions,

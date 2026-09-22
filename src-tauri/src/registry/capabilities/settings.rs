@@ -138,7 +138,7 @@ pub fn settings_capability() -> Capability {
             toggle(
                 keys::CODE_MODE,
                 "Code mode identifier casing",
-                "Automatically detect compound words and format them into the active code casing style.",
+                "Automatically detect compound words and format them into the active code casing style. Reorder it in the rule preview sandbox below.",
                 SettingSection::Output,
                 false,
             ),
@@ -156,6 +156,32 @@ pub fn settings_capability() -> Capability {
                 ],
                 "camel",
             ),
+            toggle(
+                keys::PROFANITY_FILTER,
+                "Profanity filter",
+                "Mask profane words in the final text — “that was fucking great” → “that was f***ing great” — asterisks or a [bleep] marker. Opt-in, and settable per app profile, so it can be on for Slack and off everywhere else.",
+                SettingSection::Output,
+                false,
+            ),
+            choice(
+                keys::PROFANITY_STYLE,
+                "Profanity masking style",
+                "How masked words are written when the profanity filter is on.",
+                SettingSection::Output,
+                &[
+                    ("asterisks", "Asterisks", "Keep the first letter, asterisk the rest: “f***”."),
+                    ("bleeps", "Bleep marker", "Replace the whole word with a fixed marker: “[bleep]”."),
+                ],
+                "asterisks",
+            ),
+            advanced(string_setting(
+                keys::RULE_ORDER,
+                "Enhancement rule order",
+                "Drag-and-drop ordering of the deterministic enhancement rules, as a JSON array of rule slugs. Edited in the rule preview sandbox; whitespace stays pinned first.",
+                SettingSection::Output,
+                None,
+                "",
+            )),
             toggle(
                 keys::LLM_CLEANUP_ENABLED,
                 "On-device smart cleanup (LLM)",

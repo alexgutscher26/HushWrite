@@ -283,6 +283,7 @@ struct CliArgs {
     prompt: Option<String>,
     language: Option<String>,
     threads: Option<usize>,
+    kind: Option<String>,
     help: bool,
 }
 
@@ -324,6 +325,12 @@ fn parse_args(args: &[String]) -> CliArgs {
             "-t" | "--threads" => {
                 if i + 1 < args.len() {
                     cli.threads = args[i + 1].parse().ok();
+                    i += 1;
+                }
+            }
+            "-k" | "--kind" => {
+                if i + 1 < args.len() {
+                    cli.kind = Some(args[i + 1].clone());
                     i += 1;
                 }
             }
@@ -373,6 +380,8 @@ OPTIONS:
     -p, --prompt <TEXT>        Initial vocabulary / hotwords prompt
     -l, --language <CODE>      Target language code (e.g. "en", "auto")
     -t, --threads <N>          Number of threads to run inference on
+    -k, --kind <KIND>          Chunk kind: "tail" (snappy profile, default) or
+                               "background" (sustained-dictation profile)
     -h, --help                 Print this help information
 "#
     );
@@ -428,6 +437,19 @@ fn main() {
         samples.len()
     );
 
+    // The decode profile follows the chunk kind exactly as the live pipeline
+    // would (engine.rs::transcribe), so both the snappy tail latency and the
+    // sustained-dictation throughput are measurable from this CLI.
+    let kind = match cli.kind.as_deref().map(|k| k.to_ascii_lowercase()).as_deref() {
+        Some("background") | Some("bg") | Some("interior") => ChunkKind::Interior,
+        Some("tail") | None => ChunkKind::Tail,
+        Some(other) => {
+            eprintln!("Error: unknown --kind '{}'. Use 'tail' or 'background'.", other);
+            std::process::exit(1);
+        }
+    };
+    println!("Chunk Kind:      {:?} (decode profile follows this)", kind);
+
     // 2. Initialize Whisper Engine
     let _affinity = pin_to_performance_cores();
     let engine = WhisperEngine::new(model_path.clone());
@@ -445,7 +467,7 @@ fn main() {
         samples,
         start_ms: 0,
         end_ms: (audio_duration_sec * 1000.0) as u64,
-        kind: ChunkKind::Tail,
+        kind,
     };
 
     let language_hint = match cli.language {

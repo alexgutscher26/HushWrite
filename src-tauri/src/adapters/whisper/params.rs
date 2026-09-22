@@ -44,10 +44,8 @@ pub const NO_SPEECH_THOLD: f32 = 0.6;
  * SOURCE OF TRUTH KEYWORDS: BEAM_SIZE
  * WHAT:  Beam width used for background (non-tail) decodes.
  * WHY:   Beam search explores multiple decode paths simultaneously and picks the
- *        best-scoring one. beam_size=5 is the whisper.cpp default and the same
- *        value WrapScribe/OpenAI Whisper ship — it measurably lowers WER
- *        (especially on proper nouns, numbers, and ambiguous phoneme pairs)
- *        compared to greedy best_of=1.
+ *        best-scoring one, measurably lowering WER (especially on proper nouns,
+ *        numbers, and ambiguous phoneme pairs) compared to greedy best_of=1.
  *
  *        It is applied ONLY to background chunks, whose latency is invisible
  *        because the user is still talking while they decode. The tail chunk —
@@ -55,10 +53,20 @@ pub const NO_SPEECH_THOLD: f32 = 0.6;
  *        Greedy { best_of: 1 } to keep p50 latency under 300ms. That is the
  *        right trade: spend the extra CPU where the user cannot feel it.
  *
+ *        2, not whisper.cpp's default 5: on macOS with Metal the beam costs
+ *        almost nothing, but on a CPU-only Windows build the decoder runs on
+ *        the same cores the capture pipeline shares, and a 5-wide beam made
+ *        background decodes fall behind realtime. Falling behind is not a
+ *        graceful slowdown — the ASR queue fills and chunks are DROPPED
+ *        (see pipeline/worker.rs QUEUE_DEPTH), which is words the user said
+ *        that never appear. A 2-wide beam keeps most of the accuracy gain
+ *        while staying inside the realtime budget on 6-8 core Windows
+ *        machines, where decode_thread_count() leaves 2 threads for capture.
+ *
  *        patience=-1.0 is the whisper.cpp convention for "use the default"
  *        (the field is not yet implemented in whisper.cpp as of v1.8.3).
  */
-pub const BEAM_SIZE: i32 = 5;
+pub const BEAM_SIZE: i32 = 2;
 
 /**
  * SOURCE OF TRUTH KEYWORDS: ENTROPY_THOLD
@@ -255,10 +263,15 @@ pub fn build_full_params<'a>(
     // and together produce a paste of the same sentence two dozen times.
     // `single_segment` does not help: measured at 318 ms and still looping.
     //
-    // Keeping them also gives pipeline/assembler.rs real per-segment spans to
-    // de-duplicate the 200ms chunk overlap with, which it otherwise could not.
+    // Keeping them also gives pipeline/assembler.rs per-segment start times so
+    // chunks completed out of order still assemble in audio order.
     params.set_no_timestamps(false);
-    params.set_token_timestamps(true);
+    // Token timestamps are deliberately NOT enabled: `no_timestamps = false`
+    // already emits the segment-level start/end tokens the assembler aligns
+    // on, and whisper.cpp computes token-level DTW alignment ONLY when this is
+    // set — measurable extra encoder work per decode that nothing downstream
+    // reads. See pipeline/assembler.rs, which joins on TEXT at MAX_SEAM_WORDS
+    // resolution, not on token spans.
 
     // whisper.cpp writes to stdout on every call unless all four are off.
     params.set_print_progress(false);

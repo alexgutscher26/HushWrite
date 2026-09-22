@@ -9,6 +9,8 @@
  * WHERE: Consumed by adapters/rules/mod.rs and text.rs.
  */
 
+use std::sync::LazyLock;
+
 const COMMON_TLDS: &[&str] = &[
     "com", "org", "net", "io", "dev", "ai", "app", "co", "edu", "gov", "xyz", "info", "me", "tech",
     "site", "online", "cloud", "agency", "uk", "de", "ca", "fr", "jp", "au", "eu", "ch", "nl",
@@ -103,13 +105,20 @@ fn format_spoken_urls(text: &str) -> String {
     out = out.replace(":// ", "://");
     out = out.replace("www. ", "www.");
 
-    // TLDs: collapse preceding space for "dot com" and ".com"
-    for &tld in COMMON_TLDS {
-        let spaced = format!(" dot {tld}");
-        let replaced = format!(".{tld}");
-        out = out.replace(&spaced, &replaced);
-        let spaced_dot = format!(" .{tld}");
-        out = out.replace(&spaced_dot, &replaced);
+    // TLDs: collapse preceding space for "dot com" and ".com". The needle /
+    // replacement pairs are precomputed once — building two Strings per TLD
+    // per call (56 allocations) bought nothing on a static table.
+    static TLD_REPLACEMENTS: LazyLock<&'static [(String, String)]> = LazyLock::new(|| {
+        let pairs: Vec<(String, String)> = COMMON_TLDS
+            .iter()
+            .map(|tld| (format!(" dot {tld}"), format!(".{tld}")))
+            .collect();
+        Box::leak(pairs.into())
+    });
+    for (spaced, replaced) in TLD_REPLACEMENTS.iter() {
+        out = out.replace(spaced, replaced);
+        let spaced_dot = format!(" {replaced}");
+        out = out.replace(&spaced_dot, replaced);
     }
 
     // Connect slashes following URL protocols or domains: "https://github.com slash HushWrite" -> "https://github.com/HushWrite"

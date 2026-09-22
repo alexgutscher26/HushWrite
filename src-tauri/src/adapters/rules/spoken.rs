@@ -7,6 +7,8 @@
  * WHERE: Consumed by adapters/rules/mod.rs and text.rs.
  */
 
+use std::sync::LazyLock;
+
 use super::dictionary::replace_whole_words;
 use crate::types::LanguageCode;
 
@@ -55,11 +57,16 @@ pub fn expand_spoken_commands(text: &str, language: Option<&LanguageCode>) -> St
         return text.to_string();
     }
 
-    let mut commands: Vec<&(&str, &str)> = ENGLISH_SPOKEN_COMMANDS.iter().collect();
-    commands.sort_by_key(|(phrase, _)| std::cmp::Reverse(phrase.len()));
+    // Longest first so "open parenthesis" wins over "paren". Sorted once per
+    // process — see fillers_sorted_for_language for the same trick.
+    static SORTED: LazyLock<&'static [(&'static str, &'static str)]> = LazyLock::new(|| {
+        let mut sorted: Vec<(&str, &str)> = ENGLISH_SPOKEN_COMMANDS.to_vec();
+        sorted.sort_by_key(|(phrase, _)| std::cmp::Reverse(phrase.len()));
+        Box::leak(sorted.into())
+    });
 
     let mut out = text.to_string();
-    for (phrase, replacement) in commands {
+    for (phrase, replacement) in SORTED.iter() {
         out = replace_whole_words(&out, phrase, replacement, false, false);
     }
     out
@@ -1096,8 +1103,17 @@ pub const COMMON_NAMED_ENTITIES: &[(&str, &str)] = &[
 
 pub fn normalize_named_entities(text: &str) -> String {
     let mut out = text.to_string();
-    for (lower, canonical) in COMMON_NAMED_ENTITIES {
+    for (lower, canonical) in SORTED_NAMED_ENTITIES.iter() {
         out = replace_whole_words(&out, lower, canonical, false, false);
     }
     out
 }
+
+/// COMMON_NAMED_ENTITIES sorted longest-needle-first, built once — the table
+/// is static, so the order it wants never changes.
+static SORTED_NAMED_ENTITIES: LazyLock<&'static [(&'static str, &'static str)]> =
+    LazyLock::new(|| {
+        let mut sorted: Vec<(&str, &str)> = COMMON_NAMED_ENTITIES.to_vec();
+        sorted.sort_by_key(|(needle, _)| std::cmp::Reverse(needle.len()));
+        Box::leak(sorted.into())
+    });

@@ -9,6 +9,8 @@
  * WHERE: Consumed by adapters/rules/mod.rs and text.rs.
  */
 
+use std::sync::LazyLock;
+
 use crate::types::LanguageCode;
 
 fn is_english(language: Option<&LanguageCode>) -> bool {
@@ -294,10 +296,18 @@ const ORDINALS: &[(&str, &str)] = &[
 fn normalize_ordinals(text: &str) -> String {
     let mut out = text.to_string();
 
-    let mut sorted_ordinals = ORDINALS.to_vec();
-    sorted_ordinals.sort_by_key(|(spoken, _)| std::cmp::Reverse(spoken.len()));
+    // Longest first so "twenty-first" is matched before "first" could claim
+    // its tail. Built once — the table is static, so its sorted order never
+    // changes (same per-process cache as the filler and spoken-command
+    // tables).
+    static SORTED_ORDINALS: LazyLock<&'static [(&'static str, &'static str)]> =
+        LazyLock::new(|| {
+            let mut sorted: Vec<(&str, &str)> = ORDINALS.to_vec();
+            sorted.sort_by_key(|(spoken, _)| std::cmp::Reverse(spoken.len()));
+            Box::leak(sorted.into())
+        });
 
-    for (spoken, replacement) in sorted_ordinals {
+    for (spoken, replacement) in SORTED_ORDINALS.iter() {
         out = super::dictionary::replace_whole_words(&out, spoken, replacement, false, false);
     }
     out

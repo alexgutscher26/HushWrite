@@ -188,6 +188,11 @@ async fn deliver(ctx: &SessionContext, pending: PendingDelivery) {
         normalise_urls_and_paths: settings.normalise_urls_and_paths,
         code_mode: settings.code_mode,
         code_casing_style: settings.code_casing_style,
+        profanity_filter: settings.profanity_filter,
+        profanity_style: settings.profanity_style.clone(),
+        rule_order: settings.rule_order.clone(),
+        // The session path never needs the trace — see EnhanceContext.trace_rules.
+        trace_rules: false,
         llm_cleanup_enabled: settings.llm_cleanup_enabled,
         llm_model: settings.llm_model,
         llm_auto_quantization: settings.llm_auto_quantization,

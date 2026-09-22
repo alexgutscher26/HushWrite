@@ -89,6 +89,7 @@ export const commands = {
 	deleteModel: (input: ModelIdInput) => typedError<null, AppError>(__TAURI_INVOKE("delete_model", { input })),
 	getHardwareProfile: () => typedError<HardwareProfile, AppError>(__TAURI_INVOKE("get_hardware_profile")),
 	testVoiceTransform: (input: TestVoiceTransformInput) => typedError<string, AppError>(__TAURI_INVOKE("test_voice_transform", { input })),
+	previewRulePipeline: (input: RuleSandboxInput) => typedError<RuleSandboxReport, AppError>(__TAURI_INVOKE("preview_rule_pipeline", { input })),
 	getApiVersion: () => typedError<ApiVersionInfo, AppError>(__TAURI_INVOKE("get_api_version")),
 	checkPermissions: () => typedError<PermissionReport[], AppError>(__TAURI_INVOKE("check_permissions")),
 	requestPermission: (input: PermissionInput) => typedError<PermissionState, AppError>(__TAURI_INVOKE("request_permission", { input })),
@@ -886,6 +887,97 @@ export type RegistrySnapshot = {
 
 export type ResetSettingInput = {
 	key: string,
+};
+
+/**
+ *  SOURCE OF TRUTH KEYWORDS: RuleId
+ *  A stable identifier for one enhancement rule. Serialized as its snake_case
+ *  slug so the stored order reads as data, never as a Rust spelling.
+ */
+export type RuleId = "whitespace" | "urls_and_paths" | "spoken_commands" | "code_casing" | "fillers" | "corrections" | "dictionary" | "stutters" | "punctuation" | "numbers" | "casing" | "abbreviations" | "profanity" | "terminal_stop";
+
+/**
+ * 
+ *  * SOURCE OF TRUTH KEYWORDS: RulePreview
+ *  * WHAT:  One rule's effect on the preview text: what it received, what it
+ *  *        produced, and whether it ran at all.
+ *  * WHERE: Returned by the preview_rule_pipeline command; rendered as the
+ *  *        rule-by-rule diff view in Settings.
+ *  
+ */
+export type RulePreview = {
+	rule: RuleId,
+	label: string,
+	description: string,
+	/**
+	 *  Whether the rule ran at all. A disabled rule shows as skipped rather
+	 *  than as an unchanged step, which would read as "this rule did nothing"
+	 *  when the honest answer is "this rule was not asked to run".
+	 */
+	skipped: boolean,
+	/**  The text entering the rule. Empty when skipped. */
+	before: string,
+	/**  The text leaving the rule. Empty when skipped. */
+	after: string,
+};
+
+/**
+ * 
+ *  * SOURCE OF TRUTH KEYWORDS: RuleSandboxInput, RuleSandboxReport,
+ *  *   preview_rule_pipeline, rule_order_request
+ *  * WHAT:  Runs the DETERMINISTIC rule pipeline over pasted text and returns a
+ *  *        before/after pair per rule, in the order that would execute.
+ *  * WHY:   The preview sandbox is only useful if it runs the exact production
+ *  *        code under the user's exact stored toggles — a re-implemented preview
+ *  *        would drift the first time a rule changed. So this builds an
+ *  *        EnhanceContext from the live settings (honouring any app-profile
+ *  *        overrides, exactly as a session would), swaps in the REQUESTED order
+ *  *        and code-mode flag for what-if previews, and calls the traced pass
+ *  *        on the same port object delivery uses. The LLM enhancer is a
+ *  *        different port implementation that delegates to these rules when LLM
+ *  *        cleanup is off, but the sandbox is deliberately scoped to the
+ *  *        deterministic rules: an LLM pass is neither free nor deterministic,
+ *  *        and previewing it would make the diff a guess rather than a truth.
+ *  *        Skipped (disabled) rules are reported with their metadata so the UI
+ *  *        can say "off" instead of hiding the step.
+ *  * WHERE: Called by the rule preview sandbox in Settings > Output & Typing.
+ *  
+ */
+export type RuleSandboxInput = {
+	/**  The raw transcript text to run through the pipeline. */
+	text: string,
+	/**
+	 * 
+	 *      * The order to preview as snake_case RuleId slugs. None previews the
+	 *      * STORED order; an explicit list previews a what-if without saving it.
+	 *      
+	 */
+	order: string[] | null,
+	/**
+	 *  Overrides the code-mode toggle so the casing rule can be previewed
+	 *  without flipping the real setting on.
+	 */
+	code_mode_override: boolean | null,
+	/**
+	 *  Same what-if for the opt-in profanity filter — off by default, so
+	 *  without an override the sandbox would never show it acting.
+	 */
+	profanity_filter_override: boolean | null,
+};
+
+/**  The whole preview: the resolved order, every step, and the final text. */
+export type RuleSandboxReport = {
+	/**
+	 * 
+	 *      * The full rule sequence the pass resolved to, in execution order —
+	 *      * the stored order merged with the canonical one, including rules that
+	 *      * are currently toggled off. This is the list the drag list displays and
+	 *      * persists; `steps` carries the skipped flags.
+	 *      
+	 */
+	resolved_order: string[],
+	steps: RulePreview[],
+	final_text: string,
 };
 
 export type SaveDraftInput = {

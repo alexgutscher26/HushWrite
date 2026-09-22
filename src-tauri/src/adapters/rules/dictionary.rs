@@ -50,6 +50,35 @@ pub fn replace_whole_words(
         return haystack.to_string();
     }
 
+    /*
+     * SOURCE OF TRUTH KEYWORDS: pipeline caching, early_out
+     * WHAT:  The probe below: skip the whole replacement pass when the needle
+     *        cannot possibly match.
+     * WHY:   The pass allocates a lowercase copy of the haystack AND a full
+     *        subject→haystack byte-offset map before searching — work every
+     *        one of the ~160 named-entity needles paid for on every chunk,
+     *        even when the chunk mentioned none of them. A needle longer than
+     *        the haystack can never match; a case-sensitive needle absent as a
+     *        plain substring can never match; an ASCII case-insensitive needle
+     *        absent from the lowercased haystack can never match (full-string
+     *        and per-char lowercasing agree on every ASCII region, and differ
+     *        only on non-ASCII context folds like final sigma, which an ASCII
+     *        needle cannot overlap). Non-ASCII needles keep the old path.
+     * WHERE: The head of replace_whole_words, ahead of any allocation.
+     */
+    if needle.len() > haystack.len() {
+        return haystack.to_string();
+    }
+    if case_sensitive {
+        if !haystack.contains(needle) {
+            return haystack.to_string();
+        }
+    } else if needle.is_ascii()
+        && !haystack.to_lowercase().contains(&needle.to_lowercase())
+    {
+        return haystack.to_string();
+    }
+
     let subject = if case_sensitive {
         haystack.to_string()
     } else {
