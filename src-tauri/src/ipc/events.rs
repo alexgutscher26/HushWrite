@@ -46,6 +46,8 @@ pub struct SessionStateChanged {
 pub struct TranscriptDelivered {
     pub word_count: u32,
     pub delivery: DeliveryKind,
+    /// Final enhanced text, retained by the pill for its native Copy action.
+    pub text: String,
 }
 
 /**
@@ -94,6 +96,12 @@ pub struct PartialTranscript {
 #[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
 pub struct BacktrackOccurred {
     pub message: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]
+pub struct LanguageDetected {
+    /// Whisper's short language code, for example `es` or `fr`.
+    pub code: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, Event)]

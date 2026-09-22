@@ -622,6 +622,7 @@ impl SessionActor {
         {
             if let Some(language) = decode.segments.iter().find_map(|s| s.language.clone()) {
                 tracing::debug!(language = %language, "pinning language for this session");
+                self.ctx.ports.events.language_detected(language.as_str());
                 self.detected_language = Some(language);
             }
         }
@@ -860,6 +861,14 @@ impl SessionActor {
                 _ if was_capturing && !state.is_capturing() => play_feedback(FeedbackSound::Stop),
                 _ => {}
             }
+        }
+
+        // Haptic feedback is best-effort and independent of the audio setting:
+        // Windows devices without an actuator simply return no vibration device.
+        if matches!(state, SessionState::Recording { elapsed_ms: 0 })
+            || (was_capturing && !state.is_capturing())
+        {
+            crate::adapters::os::play_haptic_tap();
         }
 
         // Escape is ours only while there is something to cancel.

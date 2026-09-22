@@ -68,6 +68,7 @@ use objc2_foundation::NSString;
 const SOUND_START: &str = "Purr";
 const SOUND_STOP: &str = "Bottle";
 const SOUND_FAILED: &str = "Submarine";
+const SOUND_PASTE_CONFIRMATION: &str = "Tink";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum FeedbackSound {
@@ -108,8 +109,6 @@ impl FeedbackSound {
  * WHERE: The session actor, on Recording and on terminal states.
  */
 pub fn play_feedback(sound: FeedbackSound) {
-    // Safe bindings in objc2 0.6. Playback is asynchronous inside AppKit, so
-    // this returns immediately and never blocks the caller.
     let name = NSString::from_str(sound.system_name());
     match NSSound::soundNamed(&name) {
         Some(handle) => {
@@ -119,6 +118,21 @@ pub fn play_feedback(sound: FeedbackSound) {
             sound = sound.system_name(),
             "system sound not available on this machine"
         ),
+    }
+}
+
+/// No haptic actuator bridge is available on this Windows-specific feature.
+pub fn play_haptic_tap() {}
+
+/// Plays a distinct delivery chime and applies the user's 0–100% volume.
+pub fn play_paste_confirmation(volume_percent: f32) {
+    if volume_percent <= 0.0 {
+        return;
+    }
+    let name = NSString::from_str(SOUND_PASTE_CONFIRMATION);
+    if let Some(handle) = NSSound::soundNamed(&name) {
+        handle.setVolume((volume_percent / 100.0).clamp(0.0, 1.0));
+        handle.play();
     }
 }
 

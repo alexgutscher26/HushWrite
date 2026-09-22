@@ -138,6 +138,22 @@ pub fn dictation_capability() -> Capability {
                 SettingSection::Recording,
                 true,
             ),
+            advanced(toggle(
+                keys::PASTE_CONFIRMATION_SOUND,
+                "Paste confirmation sound",
+                "Play a short, distinct chime after text is successfully pasted.",
+                SettingSection::Recording,
+                true,
+            )),
+            advanced(number(
+                keys::PASTE_CONFIRMATION_VOLUME,
+                "Paste confirmation volume",
+                "Volume of the paste confirmation chime.",
+                SettingSection::Recording,
+                (0.0, 100.0, 5.0),
+                Some("%"),
+                35.0,
+            )),
             advanced(number(
                 keys::FINALIZE_TIMEOUT_MS,
                 "Finalize timeout",

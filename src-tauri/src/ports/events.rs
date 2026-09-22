@@ -38,6 +38,16 @@ pub trait EventSink: Send + Sync {
     /// A recording's text reached the user. See ipc::events::TranscriptDelivered.
     fn transcript_delivered(&self, word_count: u32, delivery: crate::types::DeliveryKind);
 
+    /// The completed transcript, for pill actions such as native Copy transcript.
+    fn transcript_delivered_with_text(
+        &self,
+        word_count: u32,
+        delivery: crate::types::DeliveryKind,
+        _text: &str,
+    ) {
+        self.transcript_delivered(word_count, delivery);
+    }
+
     fn set_pill_visible(&self, visible: bool);
 
     /// Model download progress, during onboarding and model switches.
@@ -48,6 +58,9 @@ pub trait EventSink: Send + Sync {
 
     /// Voice backtrack correction detected and scrubbed ("scratch that", "no wait", etc.).
     fn backtrack_occurred(&self, message: &str);
+
+    /// The recognizer identified the language for the active session.
+    fn language_detected(&self, _code: &str) {}
 
     /**
      * WHAT:  A model's state settled into something new.
@@ -101,6 +114,7 @@ impl EventSink for NullEventSink {
     fn download_progress(&self, _progress: DownloadProgress) {}
     fn partial_transcript(&self, _text: &str) {}
     fn backtrack_occurred(&self, _message: &str) {}
+    fn language_detected(&self, _code: &str) {}
     fn model_state_changed(&self, _model_id: ModelId, _state: ModelState) {}
     fn set_cancel_key_active(&self, _active: bool) {}
 }

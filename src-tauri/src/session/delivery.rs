@@ -239,6 +239,7 @@ async fn deliver(ctx: &SessionContext, pending: PendingDelivery) {
             })
     };
 
+    // The per-app `keys::PASTE_DELAY_MS` value is carried by this request.
     let outcome = {
         let _timer = latency.stage_timer(LatencyStage::Inject);
         ctx.ports.injector.deliver(&InjectionRequest {
@@ -247,6 +248,7 @@ async fn deliver(ctx: &SessionContext, pending: PendingDelivery) {
             restore_clipboard: settings.restore_clipboard,
             paste_delay_ms: settings.paste_delay_ms,
             clipboard_restore_delay_ms: settings.clipboard_restore_delay_ms,
+            suppress_clipboard_history: settings.suppress_clipboard_history,
         })
     };
 
@@ -276,7 +278,16 @@ async fn deliver(ctx: &SessionContext, pending: PendingDelivery) {
     }
 
     let word_count = final_text.split_whitespace().count() as u32;
-    ctx.ports.events.transcript_delivered(word_count, delivery);
+    ctx.ports
+        .events
+        .transcript_delivered_with_text(word_count, delivery, &final_text);
+
+    if settings.audio_feedback
+        && settings.paste_confirmation_sound
+        && delivery == DeliveryKind::Pasted
+    {
+        crate::adapters::os::play_paste_confirmation(settings.paste_confirmation_volume);
+    }
 
     if word_count > 0 {
         let duration_sec = match (started_at, finalize_started) {
@@ -300,11 +311,8 @@ async fn deliver(ctx: &SessionContext, pending: PendingDelivery) {
         ctx.ports.events.update_session_wpm(None);
     }
 
-    // NO SOUND HERE, deliberately. The stop chime plays the instant capture
-    // ends, in the actor's emit_state — see FeedbackSound::Stop. Delivery can
-    // land a second or two later, and a confirmation that arrives after the
-    // thing it confirms is not a confirmation. A second chime at paste time
-    // would be worse than the bug it replaced.
+    // The stop sound belongs to capture state transitions. The paste confirmation
+    // is intentionally emitted below, only after a real paste succeeds.
 
     persist(
         ctx,

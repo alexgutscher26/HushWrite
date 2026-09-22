@@ -71,6 +71,13 @@ pub fn settings_capability() -> Capability {
                 Some("ms"),
                 150.0,
             )),
+            advanced(toggle(
+                keys::SUPPRESS_CLIPBOARD_HISTORY,
+                "Suppress clipboard history",
+                "Keep HushWrite transcripts out of Windows clipboard history (Win+V). This does not prevent third-party clipboard managers from recording them.",
+                SettingSection::Output,
+                true,
+            )),
             toggle(
                 keys::CAPITALISE_SENTENCES,
                 "Capitalise sentences",

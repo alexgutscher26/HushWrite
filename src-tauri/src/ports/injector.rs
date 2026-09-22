@@ -70,6 +70,8 @@ pub struct InjectionRequest {
      */
     pub paste_delay_ms: u64,
     pub clipboard_restore_delay_ms: u64,
+    /// Exclude this transcript from Windows 10/11 clipboard history where supported.
+    pub suppress_clipboard_history: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -100,6 +102,12 @@ pub trait TextInjector: Send + Sync {
     fn can_inject(&self) -> bool;
 
     fn frontmost_app(&self) -> Option<FrontmostApp>;
+
+    /// Runs the onboarding paste calibration against the focused text control.
+    /// Platforms without an observable paste acknowledgement return None.
+    fn calibrate_paste_delay(&self) -> AppResult<Option<u64>> {
+        Ok(None)
+    }
 
     /// Write to the clipboard and, if permitted, paste. Never returns Err for a
     /// missing permission — that is a clipboard-only outcome.

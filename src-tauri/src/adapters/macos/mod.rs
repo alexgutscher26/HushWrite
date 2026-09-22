@@ -18,7 +18,7 @@ mod sound;
 pub use injector::{MacosInjector, PasteTiming};
 pub use modifier_tap::{watch_modifier_tap, ModifierTap, TAPS_REQUIRED};
 pub use permissions::MacosPermissions;
-pub use sound::{play_feedback, FeedbackSound};
+pub use sound::{play_feedback, play_haptic_tap, play_paste_confirmation, FeedbackSound};
 
 pub type OsInjector = MacosInjector<MacosPermissions>;
 pub type OsPermissions = MacosPermissions;

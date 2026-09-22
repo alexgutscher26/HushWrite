@@ -67,6 +67,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::settings::reset_setting,
             commands::settings::get_registry,
             commands::profiles::list_app_profiles,
+            commands::profiles::calibrate_paste_delay,
             commands::profiles::save_app_profile,
             commands::profiles::delete_app_profile,
             // Stats
@@ -113,6 +114,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             events::AudioLevelChanged,
             events::PartialTranscript,
             events::BacktrackOccurred,
+            events::LanguageDetected,
             events::ModelDownloadProgress,
             events::ModelStateChanged,
             events::OnboardingProgress,

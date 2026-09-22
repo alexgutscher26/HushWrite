@@ -1,18 +1,24 @@
 /**
- * SOURCE OF TRUTH KEYWORDS: PillWaveform, audioLevelChanged, 5-bar audio visualizer
+ * SOURCE OF TRUTH KEYWORDS: PillWaveform, audioLevelChanged, 5-bar audio visualizer,
+ *   waveform-30fps-batch
  * WHAT:  Subscribes to audio-level-changed and animates the 5-bar white audio visualizer
  *        directly on the DOM for zero React re-render overhead.
+ * WHY:   CaptureEvent::Level can arrive 60+ times per second. The latest level is
+ *        retained and painted at most once every 33ms, which keeps the pill's
+ *        visual response fluid without asking the compositor to process every
+ *        microphone sample.
  * WHERE: The pill's RECORDING / ARMING state.
  */
 
-import { useRef } from "react";
-import { events } from "@/lib/bindings";
+import { useEffect, useRef } from "react";
+import { events, type AudioLevel } from "@/lib/bindings";
 import { useTauriEvent } from "@/lib/use-event";
 import { getAccentConfig, type AccentColorId } from "@/lib/accent";
 import { cn } from "@/lib/utils";
 
 const BASE_HEIGHTS = [4, 11, 18, 11, 4];
 const MAX_HEIGHTS = [8, 18, 24, 18, 8];
+const FRAME_INTERVAL_MS = 33;
 
 export function PillWaveform({
   className,
@@ -27,10 +33,17 @@ export function PillWaveform({
 }) {
   const barsRef = useRef<(HTMLSpanElement | null)[]>([]);
   const gateLineRef = useRef<HTMLDivElement | null>(null);
+  const pendingLevelRef = useRef<AudioLevel | null>(null);
+  const flushTimerRef = useRef<number | null>(null);
   const accent = getAccentConfig(accentId as AccentColorId);
 
-  useTauriEvent(events.audioLevelChanged, (payload) => {
-    const rms = payload.level.rms ?? payload.level.peak ?? 0;
+  const flushLevel = () => {
+    flushTimerRef.current = null;
+    const level = pendingLevelRef.current;
+    pendingLevelRef.current = null;
+    if (!level) return;
+
+    const rms = level.rms ?? level.peak ?? 0;
     const ratio = Math.min(1, Math.max(0, rms / 0.28));
     const smoothed = Math.pow(ratio, 0.65);
 
@@ -43,11 +56,24 @@ export function PillWaveform({
       el.style.height = `${h.toFixed(1)}px`;
     }
 
-    if (gateLineRef.current && payload.level.gate_threshold != null && payload.level.gate_threshold > 0) {
-      const gateRatio = Math.min(1, Math.max(0, payload.level.gate_threshold / 0.28));
+    if (gateLineRef.current && level.gate_threshold != null && level.gate_threshold > 0) {
+      const gateRatio = Math.min(1, Math.max(0, level.gate_threshold / 0.28));
       const gateHeight = 4 + 16 * Math.pow(gateRatio, 0.65);
       gateLineRef.current.style.bottom = `${gateHeight.toFixed(1)}px`;
       gateLineRef.current.style.opacity = "0.45";
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (flushTimerRef.current !== null) window.clearTimeout(flushTimerRef.current);
+    };
+  }, []);
+
+  useTauriEvent(events.audioLevelChanged, (payload) => {
+    pendingLevelRef.current = payload.level;
+    if (flushTimerRef.current === null) {
+      flushTimerRef.current = window.setTimeout(flushLevel, FRAME_INTERVAL_MS);
     }
   });
 

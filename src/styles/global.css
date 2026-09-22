@@ -124,6 +124,29 @@
   }
 }
 
+@keyframes pill-transcript-ticker {
+  0%,
+  18% {
+    transform: translateX(0);
+  }
+  82%,
+  100% {
+    transform: translateX(calc(-100% + 100cqw));
+  }
+}
+
+.pill-transcript-ticker {
+  animation: pill-transcript-ticker 8s linear infinite alternate;
+  padding-right: var(--space-5);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill-transcript-ticker {
+    animation: none;
+  }
+}
+
 /**
  * WHAT:  Base resets. Transparent document, native type rendering, and the
  *        desktop-app selection and scroll behaviours.

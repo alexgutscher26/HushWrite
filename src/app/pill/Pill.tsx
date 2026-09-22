@@ -6,14 +6,18 @@
  * WHERE: Mounted by src/entries/pill.tsx into the NSPanel window.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { emitTo } from "@tauri-apps/api/event";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { commands, events, type SessionState } from "@/lib/bindings";
 import { isTransientFailure } from "@/lib/errors";
 import { useTauriEvent } from "@/lib/use-event";
 import { unwrapCommand, useCommand } from "@/lib/ipc";
 import { glyphsForBinding } from "@/lib/hotkey";
 import { readDurationMs } from "@/lib/motion";
+import { formatClock } from "@/lib/format";
 import { getAccentConfig, type AccentColorId, type OverlayStyleId } from "@/lib/accent";
+import { useElapsed } from "./use-elapsed";
 import { cn } from "@/lib/utils";
 import { RotateCcw } from "lucide-react";
 import { CountdownLine } from "@/components/global";
@@ -30,6 +34,9 @@ export function Pill() {
   const [live, setLive] = useState(false);
   const [refilling, setRefilling] = useState(false);
   const [partialText, setPartialText] = useState<string | null>(null);
+  const [languageCode, setLanguageCode] = useState<string | null>(null);
+  const [, setLastTranscript] = useState<string>("");
+  const lastTranscriptRef = useRef("");
   const [backtrackNotice, setBacktrackNotice] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const previousKind = useRef<VisibleState["kind"] | null>(null);
@@ -109,18 +116,65 @@ export function Pill() {
 
     if (state.kind === "ARMING" || state.kind === "IDLE") {
       setPartialText(null);
+      setLanguageCode(null);
       setBacktrackNotice(null);
     }
     if (state.kind !== "IDLE") setShown(state);
   });
 
+  useTauriEvent(events.languageDetected, ({ code }) => {
+    setLanguageCode(code.toLowerCase() === "en" || code.toLowerCase() === "auto" ? null : code);
+  });
+
   useTauriEvent(events.partialTranscript, ({ text }) => {
     if (text.trim().length > 0) {
       setPartialText(text);
+      lastTranscriptRef.current = text;
+      setLastTranscript(text);
     } else {
       setPartialText(null);
     }
   });
+
+  useTauriEvent(events.transcriptDelivered, ({ text }) => {
+    if (text.trim().length > 0) {
+      lastTranscriptRef.current = text;
+      setLastTranscript(text);
+    }
+  });
+
+  // The Windows subclass owns the native HMENU. Actions come back here so
+  // Copy uses the same guarded clipboard command as the dashboard, while the
+  // other entries can deep-link the dashboard without making the native layer
+  // know about frontend routes.
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    void getCurrentWebviewWindow()
+      .listen<string>("pill-context-action", (event) => {
+        switch (event.payload) {
+          case "copy_transcript": {
+            const text = lastTranscriptRef.current;
+            if (text) void unwrapCommand(() => commands.copyText({ text }));
+            break;
+          }
+          case "open_history":
+            void emitTo("dashboard", "nav-selected", { route: "history" });
+            void getCurrentWebviewWindow().hide();
+            break;
+          case "open_settings":
+            void emitTo("dashboard", "nav-selected", { route: "settings" });
+            void getCurrentWebviewWindow().hide();
+            break;
+          case "dismiss":
+            void getCurrentWebviewWindow().hide();
+            break;
+        }
+      })
+      .then((dispose) => {
+        unlisten = dispose;
+      });
+    return () => unlisten?.();
+  }, []);
 
   useTauriEvent(events.backtrackOccurred, ({ message }) => {
     setBacktrackNotice(message);
@@ -133,6 +187,14 @@ export function Pill() {
   });
 
   const kind = shown?.kind ?? null;
+  const elapsedState =
+    shown?.kind === "RECORDING" || shown?.kind === "CANCEL_PENDING" ? shown : null;
+  const elapsedMs = elapsedState?.elapsed_ms ?? null;
+  const recordingElapsedMs = useElapsed(elapsedMs);
+  const languageBadge = languageCode && languageCode.length > 0
+    ? languageCode.slice(0, 2).toUpperCase()
+    : null;
+
   useEffect(() => {
     const previous = previousKind.current;
     previousKind.current = kind;
@@ -148,6 +210,28 @@ export function Pill() {
   const handleKeepRecording = useCallback(() => {
     void unwrapCommand(commands.resumeRecording);
   }, []);
+
+  const handlePillKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLDivElement>) => {
+      if (event.target !== event.currentTarget) return;
+
+      if (event.key === " " || event.key === "Enter" || event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      if (event.key === " ") {
+        if (live) void unwrapCommand(commands.stopRecording);
+        else void unwrapCommand(() => commands.startRecording({ mode: "TOGGLE" }));
+      } else if (event.key === "Escape") {
+        if (live) void unwrapCommand(commands.cancelRecording);
+      } else if (event.key === "Enter" && live) {
+        // Enter confirms the current recording and sends it for delivery.
+        void unwrapCommand(commands.stopRecording);
+      }
+    },
+    [live],
+  );
 
   if (overlayStyle === "none" || !shown) return null;
 
@@ -169,10 +253,19 @@ export function Pill() {
       <div
         role="status"
         aria-live="polite"
+        data-tauri-drag-region
         style={{ opacity: pillOpacity }}
         className="relative flex h-full w-full select-none cursor-default items-center justify-center overflow-hidden rounded-b-lg bg-[#18181b]/95 dark:bg-[#161618]/95 border-b border-x shadow-md backdrop-blur-2xl px-2"
       >
         <span className="sr-only">{announcement}</span>
+        {languageBadge ? (
+          <span
+            title={`Detected language: ${languageCode}`}
+            className="absolute right-1.5 top-1 rounded bg-white/10 px-1 text-[9px] font-semibold tracking-wide text-white/75"
+          >
+            {languageBadge}
+          </span>
+        ) : null}
         <div
           className="h-[3px] w-full rounded-full transition-all duration-150 animate-pulse"
           style={{
@@ -211,8 +304,12 @@ export function Pill() {
 
   return (
     <div
-      role="status"
+      role="group"
+      aria-label="Dictation pill. Press Space to start or stop, Escape to cancel, or Enter to deliver."
       aria-live="polite"
+      tabIndex={0}
+      onKeyDown={handlePillKeyDown}
+      data-tauri-drag-region
       style={{
         opacity: pillOpacity,
         borderColor: accentColor !== "monochrome" ? accent.border : undefined,
@@ -231,6 +328,15 @@ export function Pill() {
         {announcement}
       </span>
 
+      {languageBadge ? (
+        <span
+          title={`Detected language: ${languageCode}`}
+          className="absolute right-1.5 top-0.5 z-10 rounded bg-white/10 px-1 text-[9px] font-semibold tracking-wide text-white/75"
+        >
+          {languageBadge}
+        </span>
+      ) : null}
+
       {/* Celebratory Confetti Burst */}
       <PillConfetti
         active={showConfetti}
@@ -240,6 +346,14 @@ export function Pill() {
 
       {/* Left side: Dynamic audio visualizer with accent color */}
       <PillWaveform accentId={accentColor} />
+      {elapsedState ? (
+        <span
+          aria-label={`Recording time ${formatClock(recordingElapsedMs)}`}
+          className="shrink-0 text-[11px] font-mono tabular-nums text-white/65"
+        >
+          {formatClock(recordingElapsedMs)}
+        </span>
+      ) : null}
 
       {/* Center: status, live speech snippet, or countdown */}
       {isCompactActive ? null : (
@@ -272,10 +386,46 @@ export function Pill() {
   );
 }
 
-function getTrailingSnippet(text: string, maxWords = 4): string {
-  const words = text.trim().split(/\s+/);
-  if (words.length <= maxWords) return text;
-  return `…${words.slice(-maxWords).join(" ")}`;
+function TranscriptTicker({
+  text,
+  accentPrimary,
+}: {
+  text: string;
+  accentPrimary?: string;
+}) {
+  const viewportRef = useRef<HTMLSpanElement>(null);
+  const contentRef = useRef<HTMLSpanElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
+
+  useEffect(() => {
+    const measure = () => {
+      const viewport = viewportRef.current;
+      const content = contentRef.current;
+      if (viewport && content) setOverflowing(content.scrollWidth > viewport.clientWidth + 1);
+    };
+    measure();
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    if (observer && viewportRef.current) observer.observe(viewportRef.current);
+    return () => observer?.disconnect();
+  }, [text]);
+
+  return (
+    <span
+      ref={viewportRef}
+      style={{ color: accentPrimary }}
+      className="min-w-0 flex-1 overflow-hidden whitespace-nowrap text-[13px] font-medium text-white/90 select-none animate-in fade-in duration-150 [container-type:inline-size]"
+    >
+      <span
+        ref={contentRef}
+        className={cn(
+          "inline-block whitespace-nowrap",
+          overflowing && "pill-transcript-ticker",
+        )}
+      >
+        {text}
+      </span>
+    </span>
+  );
 }
 
 function PillBody({
@@ -312,6 +462,7 @@ function PillBody({
         />
         <button
           type="button"
+          data-tauri-drag-region={false}
           onClick={onKeepRecording}
           aria-label="Keep recording"
           className="shrink-0 cursor-pointer rounded-full bg-white/10 hover:bg-white/20 px-2 py-0.5 text-[11px] font-medium text-white transition-colors"
@@ -336,9 +487,13 @@ function PillBody({
             </span>
             <span
               style={{ color: accentPrimary }}
-              className="min-w-0 flex-1 truncate text-[13px] font-medium text-white/90 select-none"
+              className="min-w-0 flex-1 overflow-hidden text-[13px] font-medium text-white/90 select-none"
             >
-              {partialText ? getTrailingSnippet(partialText) : "Listening…"}
+              {partialText ? (
+                <TranscriptTicker text={partialText} />
+              ) : (
+                "Listening…"
+              )}
             </span>
           </div>
         );
@@ -357,14 +512,7 @@ function PillBody({
         );
       }
       if (partialText) {
-        return (
-          <span
-            style={{ color: accentPrimary }}
-            className="min-w-0 flex-1 truncate text-[13px] font-medium text-white/90 select-none animate-in fade-in duration-150"
-          >
-            {getTrailingSnippet(partialText)}
-          </span>
-        );
+        return <TranscriptTicker text={partialText} accentPrimary={accentPrimary} />;
       }
       return (
         <span className="min-w-0 flex-1 truncate text-[13px] font-normal text-neutral-200 tracking-[-0.01em] whitespace-nowrap">

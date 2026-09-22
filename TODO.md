@@ -210,15 +210,15 @@
 - [x] [FEAT] Queue mode — A setting where transcription results are queued and delivered only when the user presses a separate "flush" hotkey, allowing multi-sentence dictation without interrupting typing.
 - [x] [FEAT] Draft mode — Instead of pasting immediately, accumulate multiple recording sessions into a draft buffer. Show a floating mini-window with the accumulated draft and a "Send" button.
 - [x] [UX] Paste delay calibration wizard — Detect the current system responsiveness and auto-suggest an optimal paste_delay_ms. Some apps (terminal emulators, Electron apps) need higher delays.
-- [ ] [FEAT] Smart paste delay — Measure how long the frontmost app takes to respond to Ctrl+V during the onboarding calibration wizard and record a per-app paste_delay_ms override in the app profiles table.
-- [ ] [FEAT] Delivery method: OLE Drag-and-Drop — As a fourth-tier fallback, simulate an OLE drag from a synthetic source into the focused element, which some sandboxed apps allow even when clipboard and SendInput are blocked.
-- [ ] [FEAT] Clipboard history suppression on Windows 11 — Prevent the transcript from appearing in the Windows 11 clipboard history panel (Win+V).
+- [x] [FEAT] Smart paste delay — Measure how long the frontmost app takes to respond to Ctrl+V during the onboarding calibration wizard and record a per-app paste_delay_ms override in the app profiles table.
+- [x] [FEAT] Delivery method: OLE Drag-and-Drop — As a fourth-tier fallback, simulate an OLE drag from a synthetic source into the focused element, which some sandboxed apps allow even when clipboard and SendInput are blocked.
+- [x] [FEAT] Clipboard history suppression on Windows 11 — Prevent the transcript from appearing in the Windows 11 clipboard history panel (Win+V).
   - Gate behind a "Suppress clipboard history" advanced setting (default: on)
   - Show a UI note explaining that this only prevents Windows clipboard history, not third-party managers
-- [ ] [FEAT] Paste confirmation sound — A short, pleasant chime when delivery succeeds, distinct from the recording start/stop sounds. Configurable volume and on/off toggle.
-- [ ] [FEAT] Auto-retry on delivery failure — If the UIA delivery confirmation step fails, automatically retry once with a 200ms delay before surfacing the error toast.
+- [x] [FEAT] Paste confirmation sound — A short, pleasant chime when delivery succeeds, distinct from the recording start/stop sounds. Configurable volume and on/off toggle.
+- [x] [FEAT] Auto-retry on delivery failure — If the UIA delivery confirmation step fails, automatically retry once with a 200ms delay before surfacing the error toast.
 - [x] [BUG] Draft mode does not persist across app restarts — The draft buffer lives only in memory. If the app crashes or is restarted, the accumulated draft is lost. Persist draft content to a dedicated `drafts` table in SQLite.
-- [ ] [PERF] Unicode SendInput batching — Current character-by-character SendInput fires one INPUT struct per character. Batch up to 32 characters per SendInput call to reduce syscall overhead.
+- [x] [PERF] Unicode SendInput batching — Current character-by-character SendInput fires one INPUT struct per character. Batch up to 32 characters per SendInput call to reduce syscall overhead.
 
 ---
 
@@ -233,14 +233,14 @@
 - [x] [UX] Pill size / compact mode — Offer a compact (icon-only) pill mode for minimal visual interruption.
 - [x] [UX] Multi-display awareness — Show the pill on the same display as the frontmost window, not always the primary display.
 - [x] [UX] Accessibility: screen reader announcements — Post a live region update via UIA when recording starts/stops so screen reader users get audio feedback.
-- [ ] [FEAT] Pill right-click context menu — Right-clicking the pill during or after recording should show: "Copy transcript", "Open history", "Settings", "Dismiss". Implement as a native HMENU on Windows.
-- [ ] [FEAT] Pill transcript scroll — When partial transcript text overflows the pill width, show a ticker-style horizontally scrolling text rather than truncation with ellipsis.
-- [ ] [FEAT] Pill language indicator — When the session detects a non-default language, show a two-letter language code badge (e.g. "ES", "FR") in the pill corner.
-- [ ] [FEAT] Pill recording timer — Show elapsed recording time in the pill so users can gauge how long they've been speaking.
-- [ ] [UX] Pill haptic feedback (Windows) — If the device has a haptic actuator (Surface, modern laptops), send a light tap via Windows.Devices.Haptics on recording start and stop.
-- [ ] [UX] Pill edge snapping — When dragged to within 20px of a screen edge, snap the pill to the edge and lock it there. Persist the edge preference alongside the position.
-- [ ] [UX] Pill keyboard navigation — The pill should be fully focusable and operable via keyboard: Tab to reach it, Space to toggle recording, Escape to cancel, Enter to confirm. Never trap focus.
-- [ ] [PERF] Pill render batching — The pill reacts to every CaptureEvent::Level event (60+ per second). Debounce redraws to 30fps to reduce GPU load on integrated graphics.
+- [x] [FEAT] Pill right-click context menu — Right-clicking the pill during or after recording should show: "Copy transcript", "Open history", "Settings", "Dismiss". Implement as a native HMENU on Windows.
+- [x] [FEAT] Pill transcript scroll — When partial transcript text overflows the pill width, show a ticker-style horizontally scrolling text rather than truncation with ellipsis.
+- [x] [FEAT] Pill language indicator — When the session detects a non-default language, show a two-letter language code badge (e.g. "ES", "FR") in the pill corner.
+- [x] [FEAT] Pill recording timer — Show elapsed recording time in the pill so users can gauge how long they've been speaking.
+- [x] [UX] Pill haptic feedback (Windows) — If the device has a haptic actuator (Surface, modern laptops), send a light tap via Windows.Devices.Haptics on recording start and stop.
+- [x] [UX] Pill edge snapping — When dragged to within 20px of a screen edge, snap the pill to the edge and lock it there. Persist the edge preference alongside the position.
+- [x] [UX] Pill keyboard navigation — The pill should be fully focusable and operable via keyboard: Tab to reach it, Space to toggle recording, Escape to cancel, Enter to confirm. Never trap focus.
+- [x] [PERF] Pill render batching — The pill reacts to every CaptureEvent::Level event (60+ per second). Debounce redraws to 30fps to reduce GPU load on integrated graphics.
 - [x] [BUG] Pill disappears behind fullscreen apps — The pill's always_on_top flag does not work against DirectX exclusive-fullscreen windows. Investigate using SetWindowPos with HWND_TOPMOST inside a WM_ACTIVATE handler to re-assert top-most status when fullscreen apps steal exclusive mode.
 
 ---
@@ -268,7 +268,6 @@
 - [ ] [FEAT] Quick re-dictate from history — A "Re-use" button on each history item that copies the final text back to the clipboard and pastes it into the current frontmost app.
 - [ ] [FEAT] Session detail word timeline — Clicking into a session shows each word on a horizontal timeline with its timestamp offset from session start, color-coded by confidence.
 - [ ] [FEAT] Keyboard-driven history navigation — Full arrow-key navigation in the history list, with Enter to expand a session and Delete/Backspace to delete the selected session, without mouse interaction.
-- [ ] [UX] Onboarding progress sidebar — Show a persistent sidebar checklist during multi-step setup so users always know how many steps remain and can jump back to a completed step.
 - [ ] [UX] Settings reset to defaults — A "Reset to defaults" button per section so users can undo a bad advanced settings change without wiping everything.
 - [ ] [UX] In-app update notification badge — When a new version is available, show a badge on the dashboard header update icon rather than a blocking modal. The modal appears only when the user clicks the badge.
 - [ ] [UX] Command palette (Cmd/Ctrl+K) — A fuzzy-searchable command palette accessible from anywhere in the dashboard for navigation, actions ("Export history", "Calibrate WPM", "Open model manager"), and settings jumps.

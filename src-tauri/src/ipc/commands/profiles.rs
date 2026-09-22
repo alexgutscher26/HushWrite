@@ -19,12 +19,51 @@ use crate::registry::{self, CapabilityKey};
 use crate::services::profiles::{self, AppProfile};
 
 const LIST: CommandSpec = CommandSpec::new("list_app_profiles", CapabilityKey::Settings);
+const CALIBRATE: CommandSpec =
+    CommandSpec::new("calibrate_paste_delay", CapabilityKey::Onboarding)
+        .reports()
+        .exclusive();
 
 #[tauri::command]
 #[specta::specta]
 pub async fn list_app_profiles(state: State<'_, AppState>) -> Result<Vec<AppProfile>, AppError> {
     execute(&state, LIST, (), |ctx, ()| async move {
         profiles::list_profiles(ctx.db())
+    })
+    .await
+}
+
+/// Measures Ctrl+V in the currently focused text control and stores the result
+/// on that application's profile. A missing UI Automation acknowledgement is
+/// reported as None so calibration never invents a delay.
+#[tauri::command]
+#[specta::specta]
+pub async fn calibrate_paste_delay(
+    state: State<'_, AppState>,
+) -> Result<Option<u32>, AppError> {
+    execute(&state, CALIBRATE, (), |ctx, ()| async move {
+        // The adapter gives the operator a short hand-off window before it
+        // samples focus, so the onboarding window is not mistaken for the app
+        // being calibrated.
+        let Some(delay_ms) = ctx.state.ports.injector.calibrate_paste_delay()? else {
+            return Ok(None);
+        };
+        let Some(app) = ctx.state.ports.injector.frontmost_app() else {
+            return Ok(None);
+        };
+
+        let profile = profiles::get_profile(ctx.db(), &app.bundle_id)?.unwrap_or(AppProfile {
+            bundle_id: app.bundle_id.clone(),
+            display_name: app.name.clone(),
+            overrides: std::collections::HashMap::new(),
+            paste_delay_ms: None,
+            enabled: true,
+        });
+        profiles::upsert_profile(ctx.db(), &AppProfile {
+            paste_delay_ms: Some(delay_ms.min(u32::MAX as u64) as u32),
+            ..profile
+        })?;
+        Ok(Some(delay_ms.min(u32::MAX as u64) as u32))
     })
     .await
 }

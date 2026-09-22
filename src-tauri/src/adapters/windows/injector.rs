@@ -19,13 +19,17 @@
 use std::time::{Duration, Instant};
 
 use arboard::Clipboard;
-use windows::core::{Interface, BSTR};
+use windows::core::{w, Interface, BSTR};
 use windows::Win32::Foundation::{CloseHandle, HANDLE, HWND};
 use windows::Win32::Security::{GetTokenInformation, TokenElevation, TOKEN_ELEVATION, TOKEN_QUERY};
 use windows::Win32::System::Com::{
     CoCreateInstance, CoInitializeEx, CLSCTX_INPROC_SERVER, COINIT_APARTMENTTHREADED,
 };
-use windows::Win32::System::DataExchange::GetClipboardSequenceNumber;
+use windows::Win32::System::DataExchange::{
+    CloseClipboard, GetClipboardSequenceNumber, OpenClipboard, RegisterClipboardFormatW,
+    SetClipboardData,
+};
+use windows::Win32::System::Memory::{GlobalAlloc, GlobalLock, GlobalUnlock, GMEM_MOVEABLE};
 use windows::Win32::System::Threading::{
     OpenProcess, OpenProcessToken, QueryFullProcessImageNameW, PROCESS_NAME_FORMAT,
     PROCESS_QUERY_LIMITED_INFORMATION,
@@ -159,50 +163,99 @@ impl<P: PermissionProvider> WindowsInjector<P> {
     }
 
     /**
-     * SOURCE OF TRUTH KEYWORDS: type_text_unicode
-     * WHAT:  Direct character-by-character keyboard simulation via SendInput KEYEVENTF_UNICODE.
-     * WHY:   Works in apps that disable clipboard paste (e.g. game launchers, terminal emulators, security prompts).
+     * SOURCE OF TRUTH KEYWORDS: type_text_unicode, UNICODE_INPUT_BATCH_SIZE
+     * WHAT:  Direct Unicode keyboard simulation, submitted in batches of at most
+     *        32 user-visible characters.
+     * WHY:   One large SendInput call makes long transcripts expensive to copy
+     *        into the kernel and can be rejected by protected targets. Batching
+     *        bounds each syscall while preserving the exact character order;
+     *        UTF-16 surrogate pairs stay together because batching is by Rust
+     *        `char`, not by encoded code unit.
      */
     pub fn type_text_unicode(text: &str) -> AppResult<()> {
-        let mut inputs = Vec::with_capacity(text.len() * 2);
-        for ch in text.encode_utf16() {
-            inputs.push(INPUT {
-                r#type: INPUT_KEYBOARD,
-                Anonymous: INPUT_0 {
-                    ki: KEYBDINPUT {
-                        wVk: windows::Win32::UI::Input::KeyboardAndMouse::VIRTUAL_KEY(0),
-                        wScan: ch,
-                        dwFlags: windows::Win32::UI::Input::KeyboardAndMouse::KEYEVENTF_UNICODE,
-                        time: 0,
-                        dwExtraInfo: 0,
-                    },
-                },
-            });
-            inputs.push(INPUT {
-                r#type: INPUT_KEYBOARD,
-                Anonymous: INPUT_0 {
-                    ki: KEYBDINPUT {
-                        wVk: windows::Win32::UI::Input::KeyboardAndMouse::VIRTUAL_KEY(0),
-                        wScan: ch,
-                        dwFlags: windows::Win32::UI::Input::KeyboardAndMouse::KEYEVENTF_UNICODE
-                            | KEYEVENTF_KEYUP,
-                        time: 0,
-                        dwExtraInfo: 0,
-                    },
-                },
-            });
-        }
+        const UNICODE_INPUT_BATCH_SIZE: usize = 32;
+        let characters: Vec<char> = text.chars().collect();
 
-        let sent = unsafe { SendInput(&inputs, std::mem::size_of::<INPUT>() as i32) };
+        for batch in characters.chunks(UNICODE_INPUT_BATCH_SIZE) {
+            let mut inputs = Vec::with_capacity(batch.len() * 2);
+            for &character in batch {
+                let mut code_units = [0u16; 2];
+                for &code_unit in character.encode_utf16(&mut code_units).iter() {
+                    inputs.push(INPUT {
+                        r#type: INPUT_KEYBOARD,
+                        Anonymous: INPUT_0 {
+                            ki: KEYBDINPUT {
+                                wVk: windows::Win32::UI::Input::KeyboardAndMouse::VIRTUAL_KEY(0),
+                                wScan: code_unit,
+                                dwFlags: windows::Win32::UI::Input::KeyboardAndMouse::KEYEVENTF_UNICODE,
+                                time: 0,
+                                dwExtraInfo: 0,
+                            },
+                        },
+                    });
+                    inputs.push(INPUT {
+                        r#type: INPUT_KEYBOARD,
+                        Anonymous: INPUT_0 {
+                            ki: KEYBDINPUT {
+                                wVk: windows::Win32::UI::Input::KeyboardAndMouse::VIRTUAL_KEY(0),
+                                wScan: code_unit,
+                                dwFlags: windows::Win32::UI::Input::KeyboardAndMouse::KEYEVENTF_UNICODE
+                                    | KEYEVENTF_KEYUP,
+                                time: 0,
+                                dwExtraInfo: 0,
+                            },
+                        },
+                    });
+                }
+            }
 
-        if sent != inputs.len() as u32 {
-            return Err(AppError::new(
-                ErrorCode::InjectionFailed,
-                "HushWrite could not simulate direct unicode keyboard input.",
-            ));
+            let sent = unsafe { SendInput(&inputs, std::mem::size_of::<INPUT>() as i32) };
+            if sent != inputs.len() as u32 {
+                return Err(AppError::new(
+                    ErrorCode::InjectionFailed,
+                    "HushWrite could not simulate direct unicode keyboard input.",
+                ));
+            }
         }
 
         Ok(())
+    }
+
+    /// Marks the current clipboard payload as ineligible for Windows clipboard
+    /// history and cloud sync. This is a cooperative Windows convention; third-
+    /// party clipboard managers are outside the OS contract and may still copy it.
+    fn suppress_clipboard_history() {
+        unsafe {
+            let format = RegisterClipboardFormatW(w!("CanIncludeInClipboardHistory"));
+            if format == 0 || OpenClipboard(None).is_err() {
+                return;
+            }
+
+            let memory = match GlobalAlloc(GMEM_MOVEABLE, std::mem::size_of::<u32>()) {
+                Ok(memory) => memory,
+                Err(_) => {
+                    let _ = CloseClipboard();
+                    return;
+                }
+            };
+            let pointer = GlobalLock(memory);
+            if pointer.is_null() {
+                let _ = CloseClipboard();
+                return;
+            }
+            *(pointer as *mut u32) = 0;
+            let _ = GlobalUnlock(memory);
+
+            // Ownership transfers to the clipboard on success. Do not free it.
+            let clipboard_memory = HANDLE(memory.0);
+            if SetClipboardData(format, clipboard_memory).is_err() {
+                // The clipboard did not take ownership, so the allocation is
+                // intentionally leaked rather than risking a use-after-free in
+                // the OS. This path is rare and bounded to one DWORD per paste.
+                tracing::debug!("Windows rejected the clipboard-history suppression marker");
+            }
+            let _ = CloseClipboard();
+        }
     }
 
     fn clipboard() -> AppResult<Clipboard> {
@@ -310,6 +363,42 @@ impl<P: PermissionProvider> WindowsInjector<P> {
             value_pattern.SetValue(&bstr_text).is_ok()
         }
     }
+    /// Injects through UI Automation and confirms that the focused value now
+    /// contains the transcript. A single delayed retry covers controls that
+    /// accept SetValue asynchronously.
+    fn try_uia_inject_confirmed(text: &str) -> bool {
+        for attempt in 0..2 {
+            if attempt == 1 {
+                std::thread::sleep(Duration::from_millis(200));
+            }
+            if !Self::try_uia_inject(text) {
+                continue;
+            }
+
+            let deadline = Instant::now() + Duration::from_millis(200);
+            while Instant::now() < deadline {
+                if Self::focused_value()
+                    .map(|value| value.contains(text))
+                    .unwrap_or(false)
+                {
+                    return true;
+                }
+                std::thread::sleep(Duration::from_millis(10));
+            }
+        }
+        false
+    }
+
+    fn focused_value() -> Option<String> {
+        unsafe {
+            let _ = CoInitializeEx(None, COINIT_APARTMENTTHREADED);
+            let automation: IUIAutomation = CoCreateInstance(&CUIAutomation, None, CLSCTX_INPROC_SERVER).ok()?;
+            let element = automation.GetFocusedElement().ok()?;
+            let unknown = element.GetCurrentPattern(UIA_ValuePatternId).ok()?;
+            let pattern: IUIAutomationValuePattern = unknown.cast().ok()?;
+            pattern.CurrentValue().ok().map(|value| value.to_string())
+        }
+    }
 }
 
 impl<P: PermissionProvider> TextInjector for WindowsInjector<P> {
@@ -388,6 +477,35 @@ impl<P: PermissionProvider> TextInjector for WindowsInjector<P> {
         }
     }
 
+    fn calibrate_paste_delay(&self) -> AppResult<Option<u64>> {
+        // Let the operator switch from onboarding to the real target field.
+        std::thread::sleep(Duration::from_millis(900));
+        let mut cb = Self::clipboard()?;
+        let sentinel = format!("HushWrite calibration {}", uuid::Uuid::new_v4());
+        cb.set_text(&sentinel).map_err(|err| {
+            AppError::new(ErrorCode::ClipboardUnavailable, "Could not write the calibration text to the clipboard.")
+                .with_detail(err)
+        })?;
+
+        let started = Instant::now();
+        Self::post_paste()?;
+        // UI Automation exposes the value after the target application's paste
+        // handler has accepted it. Polling this acknowledgement measures the
+        // app's response, rather than merely measuring SendInput's return time.
+        let deadline = started + Duration::from_secs(2);
+        loop {
+            if let Some(value) = Self::focused_value() {
+                if value.contains(&sentinel) {
+                    return Ok(Some(started.elapsed().as_millis().min(u64::MAX as u128) as u64));
+                }
+            }
+            if Instant::now() >= deadline {
+                return Ok(None);
+            }
+            std::thread::sleep(Duration::from_millis(2));
+        }
+    }
+
     fn deliver(&self, request: &InjectionRequest) -> AppResult<InjectionOutcome> {
         let mut cb = Self::clipboard()?;
         let previous_text = if request.restore_clipboard {
@@ -404,6 +522,9 @@ impl<P: PermissionProvider> TextInjector for WindowsInjector<P> {
             )
             .with_detail(err)
         })?;
+        if request.suppress_clipboard_history {
+            Self::suppress_clipboard_history();
+        }
         let clipboard_write_ms = start_write.elapsed().as_secs_f64() * 1000.0;
 
         // Snapshot the clipboard sequence number immediately after our write.
@@ -442,7 +563,7 @@ impl<P: PermissionProvider> TextInjector for WindowsInjector<P> {
                  attempting UIA fallback or advising user to paste manually"
             );
 
-            if Self::try_uia_inject(&request.text) {
+            if Self::try_uia_inject_confirmed(&request.text) {
                 tracing::info!("text successfully delivered to elevated window via UI Automation");
                 return Ok(InjectionOutcome {
                     delivery: DeliveryKind::Pasted,
@@ -491,11 +612,14 @@ impl<P: PermissionProvider> TextInjector for WindowsInjector<P> {
             // worst the wrong text lands (or nothing), which is better than
             // silently dropping the entire delivery.
             let _ = cb.set_text(&request.text);
+            if request.suppress_clipboard_history {
+                Self::suppress_clipboard_history();
+            }
         }
 
         if let Err(err) = Self::post_paste() {
             // Secondary delivery pathway via Windows UI Automation (Accessibility API)
-            if Self::try_uia_inject(&request.text) {
+            if Self::try_uia_inject_confirmed(&request.text) {
                 tracing::info!("SendInput paste failed, but text was successfully injected via Windows UI Automation");
                 return Ok(InjectionOutcome {
                     delivery: DeliveryKind::Pasted,
@@ -507,6 +631,17 @@ impl<P: PermissionProvider> TextInjector for WindowsInjector<P> {
             // Tertiary delivery pathway via direct Unicode character simulation
             if Self::type_text_unicode(&request.text).is_ok() {
                 tracing::info!("SendInput paste failed, but text was successfully typed via direct Unicode input");
+                return Ok(InjectionOutcome {
+                    delivery: DeliveryKind::Pasted,
+                    reason: None,
+                    clipboard_write_ms,
+                });
+            }
+
+            // Fourth and final fallback: some sandboxed controls accept an OLE
+            // drop while rejecting clipboard reads and synthetic keystrokes.
+            if super::ole_drag::try_ole_drag(&request.text) {
+                tracing::info!("text delivered via OLE drag-and-drop fallback");
                 return Ok(InjectionOutcome {
                     delivery: DeliveryKind::Pasted,
                     reason: None,

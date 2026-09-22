@@ -31,13 +31,15 @@ pub struct AppProfile {
     pub display_name: String,
     /// Sparse: only the settings this profile changes.
     pub overrides: HashMap<String, SettingValue>,
+    /// Measured response time for Ctrl+V in this app; None follows the global delay.
+    pub paste_delay_ms: Option<u32>,
     pub enabled: bool,
 }
 
 pub fn list_profiles(db: &Database) -> AppResult<Vec<AppProfile>> {
     db.with_connection(|conn| {
         let mut stmt = conn.prepare(
-            "SELECT bundle_id, display_name, settings_json, enabled
+            "SELECT bundle_id, display_name, settings_json, paste_delay_ms, enabled
                FROM app_profiles ORDER BY display_name COLLATE NOCASE",
         )?;
         let rows = stmt.query_map([], row_to_profile)?;
@@ -81,7 +83,7 @@ pub fn get_profile(db: &Database, bundle_id: &str) -> AppResult<Option<AppProfil
 
     db.with_connection(|conn| {
         let mut stmt = conn.prepare(
-            "SELECT bundle_id, display_name, settings_json, enabled
+            "SELECT bundle_id, display_name, settings_json, paste_delay_ms, enabled
                FROM app_profiles WHERE enabled = 1",
         )?;
         let rows = stmt.query_map([], row_to_profile)?;
@@ -115,18 +117,31 @@ pub fn upsert_profile(db: &Database, profile: &AppProfile) -> AppResult<()> {
     let encoded = serde_json::to_string(&profile.overrides)?;
     db.with_connection(|conn| {
         conn.execute(
-            "INSERT INTO app_profiles (bundle_id, display_name, settings_json, enabled)
-             VALUES (?1, ?2, ?3, ?4)
+            "INSERT INTO app_profiles (bundle_id, display_name, settings_json, paste_delay_ms, enabled)
+             VALUES (?1, ?2, ?3, ?4, ?5)
              ON CONFLICT (bundle_id) DO UPDATE SET
                display_name = excluded.display_name,
                settings_json = excluded.settings_json,
+               paste_delay_ms = excluded.paste_delay_ms,
                enabled = excluded.enabled",
             params![
                 profile.bundle_id,
                 profile.display_name,
                 encoded,
+                profile.paste_delay_ms.map(|value| value as i64),
                 profile.enabled
             ],
+        )?;
+        Ok(())
+    })
+}
+
+/// Updates only the measured `output.paste_delay_ms` delay, preserving the profile's sparse settings.
+pub fn set_paste_delay(db: &Database, bundle_id: &str, delay_ms: u32) -> AppResult<()> {
+    db.with_connection(|conn| {
+        conn.execute(
+            "UPDATE app_profiles SET paste_delay_ms = ?2 WHERE bundle_id = ?1",
+            params![bundle_id, delay_ms as i64],
         )?;
         Ok(())
     })
@@ -152,7 +167,8 @@ fn row_to_profile(row: &Row<'_>) -> rusqlite::Result<AppProfile> {
         bundle_id: row.get(0)?,
         display_name: row.get(1)?,
         overrides,
-        enabled: row.get(3)?,
+        paste_delay_ms: row.get::<_, Option<i64>>(3)?.map(|value| value.clamp(0, u32::MAX as i64) as u32),
+        enabled: row.get(4)?,
     })
 }
 
@@ -168,6 +184,7 @@ mod tests {
                 .iter()
                 .map(|(k, v)| ((*k).to_string(), v.clone()))
                 .collect(),
+            paste_delay_ms: None,
             enabled: true,
         }
     }

@@ -67,6 +67,12 @@ export const commands = {
 	 */
 	getRegistry: () => typedError<RegistrySnapshot, AppError>(__TAURI_INVOKE("get_registry")),
 	listAppProfiles: () => typedError<AppProfile[], AppError>(__TAURI_INVOKE("list_app_profiles")),
+	/**
+	 *  Measures Ctrl+V in the currently focused text control and stores the result
+	 *  on that application's profile. A missing UI Automation acknowledgement is
+	 *  reported as None so calibration never invents a delay.
+	 */
+	calibratePasteDelay: () => typedError<number | null, AppError>(__TAURI_INVOKE("calibrate_paste_delay")),
 	saveAppProfile: (input: SaveProfileInput) => typedError<null, AppError>(__TAURI_INVOKE("save_app_profile", { input })),
 	deleteAppProfile: (input: DeleteProfileInput) => typedError<null, AppError>(__TAURI_INVOKE("delete_app_profile", { input })),
 	getStats: () => typedError<StatsSummary, AppError>(__TAURI_INVOKE("get_stats")),
@@ -105,6 +111,7 @@ export const commands = {
 export const events = {
 	audioLevelChanged: makeEvent<AudioLevelChanged>("audio-level-changed"),
 	backtrackOccurred: makeEvent<BacktrackOccurred>("backtrack-occurred"),
+	languageDetected: makeEvent<LanguageDetected>("language-detected"),
 	modelDownloadProgress: makeEvent<ModelDownloadProgress>("model-download-progress"),
 	modelStateChanged: makeEvent<ModelStateChanged>("model-state-changed"),
 	onboardingProgress: makeEvent<OnboardingProgress>("onboarding-progress"),
@@ -175,6 +182,8 @@ export type AppProfile = {
 	display_name: string,
 	/**  Sparse: only the settings this profile changes. */
 	overrides: { [key in string]: SettingValue },
+	/**  Measured response time for Ctrl+V in this app; None follows the global delay. */
+	paste_delay_ms: number | null,
 	enabled: boolean,
 };
 
@@ -543,6 +552,11 @@ export type LanguageCode = string;
 export type LanguageCount = {
 	language: string,
 	session_count: number,
+};
+
+export type LanguageDetected = {
+	/**  Whisper's short language code, for example `es` or `fr`. */
+	code: string,
 };
 
 /**
@@ -1249,6 +1263,8 @@ export type TestVoiceTransformInput = {
 export type TranscriptDelivered = {
 	word_count: number,
 	delivery: DeliveryKind,
+	/**  Final enhanced text, retained by the pill for its native Copy action. */
+	text: string,
 };
 
 export type UndoDictionaryChangeInput = {

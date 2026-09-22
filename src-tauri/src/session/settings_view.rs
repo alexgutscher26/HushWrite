@@ -44,6 +44,7 @@ pub struct SessionSettings {
     /// InjectionRequest rather than being held by the injector.
     pub paste_delay_ms: u64,
     pub clipboard_restore_delay_ms: u64,
+    pub suppress_clipboard_history: bool,
     pub strip_fillers: bool,
     pub spoken_commands: bool,
     pub apply_corrections: bool,
@@ -62,6 +63,8 @@ pub struct SessionSettings {
     pub normalise_punctuation: bool,
     pub capitalise_sentences: bool,
     pub audio_feedback: bool,
+    pub paste_confirmation_sound: bool,
+    pub paste_confirmation_volume: f32,
     pub auto_escalate: bool,
     pub escalate_model: String,
     pub confidence_threshold: f32,
@@ -112,6 +115,14 @@ impl SessionSettings {
                         "applying app profile"
                     );
                     stored.extend(profile.overrides);
+                    // Calibration stores this outside the sparse settings JSON so
+                    // it can be measured and updated without rewriting overrides.
+                    if let Some(delay_ms) = profile.paste_delay_ms {
+                        stored.insert(
+                            keys::PASTE_DELAY_MS.to_string(),
+                            SettingValue::Number(delay_ms as f64),
+                        );
+                    }
                 }
                 Ok(None) => {}
                 Err(err) => tracing::warn!(error = %err, bundle_id, "could not read app profile"),
@@ -160,6 +171,8 @@ impl SessionSettings {
             clipboard_restore_delay_ms: read_number(stored, keys::CLIPBOARD_RESTORE_DELAY_MS)
                 .unwrap_or(150.0)
                 .max(0.0) as u64,
+            suppress_clipboard_history: read_bool(stored, keys::SUPPRESS_CLIPBOARD_HISTORY)
+                .unwrap_or(true),
             strip_fillers: read_bool(stored, keys::STRIP_FILLERS).unwrap_or(false),
             spoken_commands: read_bool(stored, keys::SPOKEN_COMMANDS).unwrap_or(true),
             apply_corrections: read_bool(stored, keys::APPLY_CORRECTIONS).unwrap_or(false),
@@ -178,6 +191,11 @@ impl SessionSettings {
             normalise_punctuation: read_bool(stored, keys::NORMALISE_PUNCTUATION).unwrap_or(true),
             capitalise_sentences: read_bool(stored, keys::CAPITALISE_SENTENCES).unwrap_or(true),
             audio_feedback: read_bool(stored, keys::AUDIO_FEEDBACK).unwrap_or(true),
+            paste_confirmation_sound: read_bool(stored, keys::PASTE_CONFIRMATION_SOUND)
+                .unwrap_or(true),
+            paste_confirmation_volume: read_number(stored, keys::PASTE_CONFIRMATION_VOLUME)
+                .unwrap_or(35.0)
+                .clamp(0.0, 100.0) as f32,
             auto_escalate: read_bool(stored, keys::TRANSCRIPTION_AUTO_ESCALATE).unwrap_or(false),
             escalate_model: read_choice(stored, keys::TRANSCRIPTION_ESCALATE_MODEL)
                 .unwrap_or_else(|| "large-v3-turbo".to_string()),
@@ -360,6 +378,9 @@ mod tests {
         let defaults = SessionSettings::from_stored(&empty());
         assert_eq!(defaults.paste_delay_ms, 40);
         assert_eq!(defaults.clipboard_restore_delay_ms, 150);
+        assert!(defaults.suppress_clipboard_history);
+        assert!(defaults.paste_confirmation_sound);
+        assert_eq!(defaults.paste_confirmation_volume, 35.0);
 
         let mut stored = empty();
         stored.insert(

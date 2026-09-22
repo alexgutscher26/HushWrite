@@ -18,8 +18,8 @@ use tauri::AppHandle;
 use tauri_specta::Event;
 
 use crate::ipc::events::{
-    AudioLevelChanged, BacktrackOccurred, ModelDownloadProgress, ModelStateChanged,
-    SessionStateChanged, TranscriptDelivered,
+    AudioLevelChanged, BacktrackOccurred, LanguageDetected, ModelDownloadProgress,
+    ModelStateChanged, SessionStateChanged, TranscriptDelivered,
 };
 use crate::ports::events::EventSink;
 use crate::types::{AudioLevel, DownloadProgress, ModelId, ModelState, SessionState};
@@ -58,9 +58,19 @@ impl EventSink for TauriEventSink {
     }
 
     fn transcript_delivered(&self, word_count: u32, delivery: crate::types::DeliveryKind) {
+        self.transcript_delivered_with_text(word_count, delivery, "");
+    }
+
+    fn transcript_delivered_with_text(
+        &self,
+        word_count: u32,
+        delivery: crate::types::DeliveryKind,
+        text: &str,
+    ) {
         if let Err(err) = (TranscriptDelivered {
             word_count,
             delivery,
+            text: text.to_string(),
         })
         .emit(&self.app)
         {
@@ -78,6 +88,13 @@ impl EventSink for TauriEventSink {
     fn backtrack_occurred(&self, message: &str) {
         let _ = (BacktrackOccurred {
             message: message.to_string(),
+        })
+        .emit(&self.app);
+    }
+
+    fn language_detected(&self, code: &str) {
+        let _ = (LanguageDetected {
+            code: code.to_string(),
         })
         .emit(&self.app);
     }

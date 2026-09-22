@@ -109,6 +109,7 @@ export function AppProfiles({ defs, globals, dynamic, engine, permissions }: App
         bundle_id: trimmed,
         display_name: displayNameFor(trimmed),
         overrides: {},
+        paste_delay_ms: null,
         enabled: true,
       });
       setBundleId("");
@@ -117,7 +118,7 @@ export function AppProfiles({ defs, globals, dynamic, engine, permissions }: App
   );
 
   const addPreset = (preset: { bundle_id: string; name: string }) => {
-    save({ bundle_id: preset.bundle_id, display_name: preset.name, overrides: {}, enabled: true });
+    save({ bundle_id: preset.bundle_id, display_name: preset.name, overrides: {}, paste_delay_ms: null, enabled: true });
   };
 
   const existingBundleIds = new Set((profiles.data ?? []).map((p) => p.bundle_id));

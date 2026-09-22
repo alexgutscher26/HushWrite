@@ -41,6 +41,9 @@ pub const AUTO_PASTE: &str = "output.auto_paste";
 pub const RESTORE_CLIPBOARD: &str = "output.restore_clipboard";
 pub const PASTE_DELAY_MS: &str = "output.paste_delay_ms";
 pub const CLIPBOARD_RESTORE_DELAY_MS: &str = "output.clipboard_restore_delay_ms";
+pub const SUPPRESS_CLIPBOARD_HISTORY: &str = "output.suppress_clipboard_history";
+pub const PASTE_CONFIRMATION_SOUND: &str = "dictation.paste_confirmation_sound";
+pub const PASTE_CONFIRMATION_VOLUME: &str = "dictation.paste_confirmation_volume";
 
 // ── Enhancement ──────────────────────────────────────────────────────────
 pub const CAPITALISE_SENTENCES: &str = "enhance.capitalise_sentences";

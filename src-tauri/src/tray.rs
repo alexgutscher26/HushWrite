@@ -28,8 +28,97 @@ use crate::error::{AppError, AppResult};
 const MENU_DASHBOARD: &str = "dashboard";
 const MENU_QUIT: &str = "quit";
 
-pub fn record_pill_drag_position(_app: &AppHandle, _x: i32, _y: i32) {
-    // Pill position is permanently fixed to the bottom of the active monitor.
+/// Snaps a dragged pill to a monitor edge when it comes within 20 physical
+/// pixels, then persists the corresponding anchor so the next session starts
+/// at the same edge. Free-floating positions remain untouched until they reach
+/// an edge.
+pub fn record_pill_drag_position(app: &AppHandle, x: i32, y: i32) {
+    let Some(window) = app.get_webview_window(PILL_WINDOW) else {
+        return;
+    };
+    let Ok(size) = window.outer_size() else {
+        return;
+    };
+    let center_x = x + size.width as i32 / 2;
+    let center_y = y + size.height as i32 / 2;
+    let Ok(Some(monitor)) = app.monitor_from_point(center_x as f64, center_y as f64) else {
+        return;
+    };
+
+    let monitor_x = monitor.position().x;
+    let monitor_y = monitor.position().y;
+    let monitor_right = monitor_x + monitor.size().width as i32;
+    let monitor_bottom = monitor_y + monitor.size().height as i32;
+    let threshold = (20.0 * monitor.scale_factor()).round() as i32;
+
+    let snap_left = (x - monitor_x).abs() <= threshold;
+    let snap_right = (x + size.width as i32 - monitor_right).abs() <= threshold;
+    let snap_top = (y - monitor_y).abs() <= threshold;
+    let snap_bottom = (y + size.height as i32 - monitor_bottom).abs() <= threshold;
+
+    if !(snap_left || snap_right || snap_top || snap_bottom) {
+        return;
+    }
+
+    let snapped_x = if snap_left {
+        monitor_x
+    } else if snap_right {
+        monitor_right - size.width as i32
+    } else {
+        x
+    };
+    let snapped_y = if snap_top {
+        monitor_y
+    } else if snap_bottom {
+        monitor_bottom - size.height as i32
+    } else {
+        y
+    };
+
+    if snapped_x != x || snapped_y != y {
+        let _ = window.set_position(tauri::PhysicalPosition::new(snapped_x, snapped_y));
+    }
+
+    let horizontal = if snap_left {
+        "left"
+    } else if snap_right {
+        "right"
+    } else {
+        "center"
+    };
+    let vertical = if snap_top {
+        "top"
+    } else if snap_bottom {
+        "bottom"
+    } else {
+        "center"
+    };
+    let anchor = match (vertical, horizontal) {
+        ("top", "left") => "top_left",
+        ("top", "right") => "top_right",
+        ("bottom", "left") => "bottom_left",
+        ("bottom", "right") => "bottom_right",
+        ("top", _) => "top_center",
+        ("bottom", _) => "bottom_center",
+        (_, "left") => "center_left",
+        (_, "right") => "center_right",
+        _ => "center",
+    };
+
+    if let Some(state) = app.try_state::<crate::ipc::AppState>() {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|duration| duration.as_millis() as i64)
+            .unwrap_or_default();
+        if let Err(error) = crate::services::settings::set_setting(
+            &state.db,
+            crate::registry::keys::PILL_ANCHOR,
+            &crate::types::SettingValue::Choice(anchor.to_string()),
+            now,
+        ) {
+            tracing::debug!(error = %error, "could not persist pill edge anchor");
+        }
+    }
 }
 
 static LAST_SESSION_WPM: std::sync::Mutex<Option<f64>> = std::sync::Mutex::new(None);

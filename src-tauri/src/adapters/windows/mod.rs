@@ -10,6 +10,7 @@
 pub mod credentials;
 pub mod injector;
 pub mod modifier_tap;
+mod ole_drag;
 pub mod permissions;
 pub mod raw_input;
 pub mod sound;
@@ -20,7 +21,7 @@ pub use injector::WindowsInjector;
 pub use modifier_tap::{watch_modifier_tap, ModifierTap, TAPS_REQUIRED};
 pub use permissions::WindowsPermissions;
 pub use raw_input::{start_mouse_raw_input, MouseRawInputHandle, MouseTriggerButton};
-pub use sound::{play_feedback, FeedbackSound};
+pub use sound::{play_feedback, play_haptic_tap, play_paste_confirmation, FeedbackSound};
 pub use toast::WindowsToast;
 
 pub type OsInjector = WindowsInjector<WindowsPermissions>;

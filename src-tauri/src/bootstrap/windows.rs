@@ -53,8 +53,16 @@ pub fn keep_windows_alive(app: &AppHandle) {
     }
 }
 
-pub fn track_pill_drag(_app: &AppHandle) {
-    // Pill position is permanently fixed to the bottom of the active monitor.
+pub fn track_pill_drag(app: &AppHandle) {
+    let Some(pill) = app.get_webview_window(PILL_WINDOW) else {
+        return;
+    };
+    let handle = app.clone();
+    pill.on_window_event(move |event| {
+        if let tauri::WindowEvent::Moved(position) = event {
+            crate::tray::record_pill_drag_position(&handle, position.x, position.y);
+        }
+    });
 }
 
 /**
@@ -193,7 +201,7 @@ pub fn let_the_pill_float_over_everything(app: &AppHandle) {
     #[cfg(target_os = "windows")]
     {
         if let Some(pill) = app.get_webview_window(PILL_WINDOW) {
-            windows_pill::setup_windows_pill(&pill);
+            windows_pill::setup_windows_pill(app, &pill);
         }
     }
 
@@ -203,15 +211,53 @@ pub fn let_the_pill_float_over_everything(app: &AppHandle) {
 
 #[cfg(target_os = "windows")]
 mod windows_pill {
-    use std::sync::atomic::{AtomicIsize, Ordering};
+    use std::sync::OnceLock;
     use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
     use windows::Win32::UI::WindowsAndMessaging::{
-        CallWindowProcW, DefWindowProcW, IsWindowVisible, SetWindowLongPtrW, SetWindowPos,
-        GWLP_WNDPROC, HWND_TOPMOST, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, WM_ACTIVATE,
-        WM_ACTIVATEAPP, WNDPROC,
+        AppendMenuW, CallWindowProcW, CreatePopupMenu, DefWindowProcW, DestroyMenu,
+        IsWindowVisible, SetWindowLongPtrW, SetWindowPos, TrackPopupMenuEx, GWLP_WNDPROC,
+        HWND_TOPMOST, MF_SEPARATOR, MF_STRING, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
+        TPM_BOTTOMALIGN, TPM_LEFTALIGN, WM_ACTIVATE, WM_ACTIVATEAPP,
+        WM_COMMAND, WM_CONTEXTMENU, WNDPROC,
     };
+    use windows::core::w;
+    use tauri::{AppHandle, Emitter};
 
-    static PREV_WNDPROC: AtomicIsize = AtomicIsize::new(0);
+    static PREV_WNDPROC: OnceLock<AppHandle> = OnceLock::new();
+    static PREV_WNDPROC_PTR: std::sync::atomic::AtomicIsize = std::sync::atomic::AtomicIsize::new(0);
+
+    const MENU_COPY: usize = 1;
+    const MENU_HISTORY: usize = 2;
+    const MENU_SETTINGS: usize = 3;
+    const MENU_DISMISS: usize = 4;
+
+    fn emit_action(action: &'static str) {
+        if let Some(app) = PREV_WNDPROC.get() {
+            if let Err(error) = app.emit("pill-context-action", action) {
+                tracing::debug!(%error, "could not emit pill context action");
+            }
+        }
+    }
+
+    fn show_context_menu(hwnd: HWND, x: i32, y: i32) {
+        unsafe {
+            let Ok(menu) = CreatePopupMenu() else { return };
+            let _ = AppendMenuW(menu, MF_STRING, MENU_COPY, w!("Copy transcript"));
+            let _ = AppendMenuW(menu, MF_STRING, MENU_HISTORY, w!("Open history"));
+            let _ = AppendMenuW(menu, MF_STRING, MENU_SETTINGS, w!("Settings"));
+            let _ = AppendMenuW(menu, MF_SEPARATOR, 0, None);
+            let _ = AppendMenuW(menu, MF_STRING, MENU_DISMISS, w!("Dismiss"));
+            let _ = TrackPopupMenuEx(
+                menu,
+                (TPM_LEFTALIGN | TPM_BOTTOMALIGN).0,
+                x,
+                y,
+                hwnd,
+                None,
+            );
+            let _ = DestroyMenu(menu);
+        }
+    }
 
     /**
      * SOURCE OF TRUTH KEYWORDS: pill_subclass_wndproc, HWND_TOPMOST, WM_ACTIVATE
@@ -227,6 +273,27 @@ mod windows_pill {
         wparam: WPARAM,
         lparam: LPARAM,
     ) -> LRESULT {
+        if msg == WM_CONTEXTMENU {
+            let x = (lparam.0 & 0xffff) as i16 as i32;
+            let y = ((lparam.0 >> 16) & 0xffff) as i16 as i32;
+            show_context_menu(hwnd, x, y);
+            return LRESULT(0);
+        }
+
+        if msg == WM_COMMAND {
+            // The popup uses TPM_RETURNCMD, but swallow command notifications
+            // from the WebView so they cannot become browser menu commands.
+            let id = (wparam.0 & 0xffff) as usize;
+            match id {
+                MENU_COPY => emit_action("copy_transcript"),
+                MENU_HISTORY => emit_action("open_history"),
+                MENU_SETTINGS => emit_action("open_settings"),
+                MENU_DISMISS => emit_action("dismiss"),
+                _ => return DefWindowProcW(hwnd, msg, wparam, lparam),
+            }
+            return LRESULT(0);
+        }
+
         if (msg == WM_ACTIVATE || msg == WM_ACTIVATEAPP) && IsWindowVisible(hwnd).as_bool() {
             let _ = SetWindowPos(
                 hwnd,
@@ -239,7 +306,7 @@ mod windows_pill {
             );
         }
 
-        let prev = PREV_WNDPROC.load(Ordering::SeqCst);
+        let prev = PREV_WNDPROC_PTR.load(std::sync::atomic::Ordering::SeqCst);
         if prev != 0 {
             let prev_proc: WNDPROC = std::mem::transmute(prev);
             CallWindowProcW(prev_proc, hwnd, msg, wparam, lparam)
@@ -248,7 +315,8 @@ mod windows_pill {
         }
     }
 
-    pub fn setup_windows_pill(pill: &tauri::WebviewWindow) {
+    pub fn setup_windows_pill(app: &AppHandle, pill: &tauri::WebviewWindow) {
+        let _ = PREV_WNDPROC.set(app.clone());
         if let Ok(hwnd) = pill.hwnd() {
             unsafe {
                 let raw_hwnd = HWND(hwnd.0 as _);
@@ -257,7 +325,7 @@ mod windows_pill {
                     GWLP_WNDPROC,
                     pill_subclass_wndproc as *const () as usize as isize,
                 );
-                PREV_WNDPROC.store(prev, Ordering::SeqCst);
+                PREV_WNDPROC_PTR.store(prev, std::sync::atomic::Ordering::SeqCst);
                 let _ = SetWindowPos(
                     raw_hwnd,
                     HWND_TOPMOST,

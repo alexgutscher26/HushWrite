@@ -28,6 +28,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Timer } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
   commands,
@@ -50,6 +51,40 @@ import { TourStep } from "./_components/TourStep";
 import { InviteStep } from "./_components/InviteStep";
 import { TutorialStep } from "./_components/TutorialStep";
 import { OverlayStep } from "./_components/OverlayStep";
+
+function PasteCalibrationStep({ onDone }: { onDone: () => void }) {
+  const [running, setRunning] = useState(false);
+  const [delay, setDelay] = useState<number | null>(null);
+
+  const calibrate = async () => {
+    setRunning(true);
+    const result = await unwrapCommand(() => commands.calibratePasteDelay());
+    setRunning(false);
+    if (result.status === "ok") setDelay(result.data);
+  };
+
+  return (
+    <div className="flex flex-col gap-4 text-left">
+      <div className="rounded-input border border-border-subtle bg-surface-primary p-4">
+        <p className="text-body font-medium text-text-primary">Tune paste timing for this app</p>
+        <p className="mt-1 text-caption text-text-secondary">
+          Focus an editable field, then let HushWrite measure how quickly Ctrl+V is accepted.
+        </p>
+      </div>
+      {delay !== null ? (
+        <div className="flex items-center gap-2 rounded-input bg-emerald-50 p-3 text-caption text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">
+          <Timer className="size-4" /> Measured {delay} ms for the frontmost app.
+        </div>
+      ) : null}
+      <div className="flex justify-end gap-2">
+        <button type="button" onClick={onDone} className="rounded-input px-3 py-1.5 text-caption text-text-secondary hover:text-text-primary">Skip</button>
+        <button type="button" onClick={delay === null ? calibrate : onDone} disabled={running} className="rounded-input bg-text-primary px-4 py-1.5 text-body font-medium text-opaque-elevated disabled:opacity-50">
+          {running ? "Measuring…" : delay === null ? "Measure Ctrl+V" : "Continue"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 /** Declared by the Onboarding capability in the registry. Named here because
  *  "which setting means first run is over" is a contract between the two
@@ -85,6 +120,7 @@ export function Onboarding() {
   const [toured, setToured] = useState(false);
   const [overlayChosen, setOverlayChosen] = useState(false);
   const [tutorialDone, setTutorialDone] = useState(false);
+  const [pasteCalibrated, setPasteCalibrated] = useState(false);
   const [tested, setTested] = useState(false);
   const [invited, setInvited] = useState(false);
   const [finishError, setFinishError] = useState<AppError | null>(null);
@@ -101,6 +137,9 @@ export function Onboarding() {
       setTutorialDone(true);
     }
     if (savedStepIndex >= 6) {
+      setPasteCalibrated(true);
+    }
+    if (savedStepIndex >= 7) {
       setTested(true);
       setInvited(true);
     }
@@ -155,7 +194,7 @@ export function Onboarding() {
         setFinishError(result.error);
         return;
       }
-      persistStep(6);
+      persistStep(7);
       void getCurrentWindow().close();
     });
   }, [persistStep]);
@@ -230,6 +269,18 @@ export function Onboarding() {
             onSkip={handleTutorialDone}
           />
         </StepShell>
+      ) : !pasteCalibrated ? (
+        <StepShell
+          title="Tune paste timing"
+          description="One quick measurement helps each app receive your dictation at the right speed."
+        >
+          <PasteCalibrationStep
+            onDone={() => {
+              setPasteCalibrated(true);
+              persistStep(6);
+            }}
+          />
+        </StepShell>
       ) : (
         <StepShell
           title="Try it"
@@ -244,7 +295,7 @@ export function Onboarding() {
                 type="button"
                 onClick={() => {
                   setInvited(true);
-                  persistStep(6);
+                  persistStep(7);
                 }}
                 className="h-[var(--control-height)] rounded-input bg-text-primary px-4 text-body font-medium text-opaque-elevated transition-opacity hover:opacity-90"
               >
@@ -255,7 +306,7 @@ export function Onboarding() {
                 type="button"
                 onClick={() => {
                   setInvited(true);
-                  persistStep(6);
+                  persistStep(7);
                 }}
                 className="h-[var(--control-height)] rounded-input px-3 text-caption text-text-secondary transition-colors hover:text-text-primary cursor-pointer"
               >

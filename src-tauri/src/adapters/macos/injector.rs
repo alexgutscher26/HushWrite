@@ -471,6 +471,7 @@ mod tests {
             // defaults would add 190ms of sleep to each of them.
             paste_delay_ms: 0,
             clipboard_restore_delay_ms: 0,
+            suppress_clipboard_history: false,
         })?;
 
         assert_eq!(
@@ -515,6 +516,7 @@ mod tests {
             restore_clipboard: false,
             paste_delay_ms: 0,
             clipboard_restore_delay_ms: 0,
+            suppress_clipboard_history: false,
         })?;
 
         assert_eq!(outcome.delivery, DeliveryKind::ClipboardOnly);
@@ -606,6 +608,7 @@ mod tests {
             restore_clipboard: true,
             paste_delay_ms: 75,
             clipboard_restore_delay_ms: 320,
+            suppress_clipboard_history: false,
         };
 
         let timing = PasteTiming::from_request(&request);
@@ -638,6 +641,7 @@ mod tests {
             // defaults would add 190ms of sleep to each of them.
             paste_delay_ms: 0,
             clipboard_restore_delay_ms: 0,
+            suppress_clipboard_history: false,
         })?;
 
         // The crucial assertion: this is a SUCCESS with a different delivery,
@@ -662,6 +666,7 @@ mod tests {
             // defaults would add 190ms of sleep to each of them.
             paste_delay_ms: 0,
             clipboard_restore_delay_ms: 0,
+            suppress_clipboard_history: false,
         })?;
 
         let mut clipboard = MacosInjector::<FakePermissions>::clipboard()?;
