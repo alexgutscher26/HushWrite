@@ -73,7 +73,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEJBOTgyMjc1RjE3RUVENTgKUldSWTdYN3hkU0tZdWxuS1QxWDdvUHIvQzk3dVc3Vm1hNkRvZERWcUJ2NFhxeTBJNWdxWlp2RDgK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk1MEEwMjA0MzU4RDZBNUIKUldSYmFvMDFCQUlLbGFPRjdFeVl1Wkd4bmNjK0hoQlB3WlBFNmJXdm92UHNrNVAwUFhtTE5iQlgK",
       "endpoints": [
         "https://github.com/alexgutscher26/HushWrite/releases/latest/download/latest.json"
       ]
