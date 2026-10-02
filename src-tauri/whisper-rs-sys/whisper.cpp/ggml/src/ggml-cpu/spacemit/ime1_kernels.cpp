@@ -138,10 +138,10 @@ void quantize_a_4row_i8(size_t BlkLen, const float * A, size_t CountK, std::byte
     } else if (BlkLen == 128) {
         for (size_t row_index = 0; row_index < 4; ++row_index) {
             const float * SRC = A + row_index * CountK;
-            std::byte *   DST = QuantA + row_index * sizeof(float);
+            const size_t  stride = 4 * (sizeof(float) + BlkLen);
+            std::byte *   DST    = QuantA + row_index * stride;
 
             const size_t offset = (4 - row_index) * 4 + row_index * 8;
-            const size_t stride = 4 * (sizeof(float) + BlkLen);
             __asm__ volatile(
                 "vsetvli            t0, zero, e32, m8        \n\t"
                 "li                 t6, 32                   \n\t"
@@ -208,9 +208,9 @@ void quantize_a_4row_i8(size_t BlkLen, const float * A, size_t CountK, std::byte
     } else if (BlkLen == 256) {
         for (size_t row_index = 0; row_index < 4; ++row_index) {
             const float * SRC    = A + row_index * CountK;
-            std::byte *   DST    = QuantA + row_index * sizeof(float);
-            const size_t  offset = (4 - row_index) * 4 + row_index * 8;
             const size_t  stride = 4 * (sizeof(float) + BlkLen);
+            std::byte *   DST    = QuantA + row_index * stride;
+            const size_t  offset = (4 - row_index) * 4 + row_index * 8;
             __asm__ volatile(
                 "vsetvli            t0, zero, e32, m8        \n\t"
                 "li                 t6, 32                   \n\t"
